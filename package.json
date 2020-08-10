@@ -1,0 +1,40 @@
+{
+    "name": "cash-track",
+    "version": "1.0.0",
+    "main": "src/index.js",
+    "repository": "https://github.com/plim1025/CashTrack.git",
+    "author": "plim1025 <plim1025@gmail.com>",
+    "license": "MIT",
+    "devDependencies": {
+        "eslint": "^7.6.0",
+        "eslint-config-airbnb": "^18.2.0",
+        "eslint-config-node": "^4.1.0",
+        "eslint-config-prettier": "^6.11.0",
+        "eslint-plugin-import": "^2.22.0",
+        "eslint-plugin-jsx-a11y": "^6.3.1",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-prettier": "^3.1.4",
+        "eslint-plugin-react": "^7.20.5",
+        "eslint-plugin-react-hooks": "^4.0.8",
+        "nodemon": "^2.0.4",
+        "prettier": "^2.0.5"
+    },
+    "dependencies": {
+        "bcrypt": "^5.0.0",
+        "cors": "^2.8.5",
+        "dotenv": "^8.2.0",
+        "express": "^4.17.1",
+        "express-flash": "^0.0.2",
+        "express-session": "^1.17.1",
+        "helmet": "^4.0.0",
+        "mongoose": "^5.9.28",
+        "morgan": "^1.10.0",
+        "passport": "^0.4.1",
+        "passport-local": "^1.0.0"
+    },
+    "scripts": {
+        "start": "node src/index.js",
+        "dev": "nodemon src/index.js",
+        "lint": "eslint src/"
+    }
+}
