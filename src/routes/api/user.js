@@ -1,6 +1,5 @@
 const { Router } = require('express');
 const bcrypt = require('bcrypt');
-
 const User = require('../../models/User');
 
 const router = Router();
@@ -11,7 +10,7 @@ const validateEmail = email => {
     return re.test(email);
 };
 
-router.get('/', async (req, res, next) => {
+router.get('/', (req, res, next) => {
     try {
         if (req.user) {
             res.json({ user: req.user });

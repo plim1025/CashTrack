@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('./Transaction');
 
 const { Schema } = mongoose;
 
@@ -10,6 +11,11 @@ const UserSchema = new Schema({
     password: {
         type: String,
         required: true,
+    },
+    transactions: {
+        type: [mongoose.model('Transaction').schema],
+        required: true,
+        default: [],
     },
 });
 

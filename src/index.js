@@ -11,6 +11,7 @@ const session = require('express-session');
 const loginRoute = require('./routes/login');
 const logoutRoute = require('./routes/logout');
 const userRoute = require('./routes/api/user');
+const transactionRoute = require('./routes/api/transaction');
 
 require('dotenv').config();
 
@@ -42,15 +43,18 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('/', (req, res) => {
-    res.json({
-        message: req.user.email,
-    });
+app.get('/', (req, res, next) => {
+    try {
+        res.json({ message: req.user.email });
+    } catch (error) {
+        next();
+    }
 });
 
 app.use('/login', loginRoute);
 app.use('/logout', logoutRoute);
 app.use('/api/user', userRoute);
+app.use('/api/transaction', transactionRoute);
 
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static('client/build'));
