@@ -12,6 +12,7 @@ const loginRoute = require('./routes/login');
 const logoutRoute = require('./routes/logout');
 const userRoute = require('./routes/api/user');
 const transactionRoute = require('./routes/api/transaction');
+const plaidRoute = require('./routes/api/plaid');
 
 require('dotenv').config();
 
@@ -29,7 +30,12 @@ mongoose.connection
 
 middlewares.initializePassport(passport);
 app.use(express.json());
-app.use(cors());
+app.use(
+    cors({
+        origin: ['http://localhost:5000', 'http://localhost:5000'],
+        credentials: true,
+    })
+);
 app.use(flash());
 app.use(helmet());
 app.use(morgan('dev'));
@@ -45,6 +51,7 @@ app.use(passport.session());
 
 app.get('/', (req, res, next) => {
     try {
+        // res.sendFile(path.join(__dirname, '..', 'client', 'index.html'));
         res.json({ message: req.user.email });
     } catch (error) {
         next();
@@ -55,6 +62,7 @@ app.use('/login', loginRoute);
 app.use('/logout', logoutRoute);
 app.use('/api/user', userRoute);
 app.use('/api/transaction', transactionRoute);
+app.use('/api/plaid', plaidRoute);
 
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static('client/build'));
