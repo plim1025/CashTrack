@@ -6,8 +6,13 @@ const router = Router();
 
 router.get('/', async (req, res, next) => {
     try {
-        const user = await User.findById(req.user._id);
-        res.json(user.transactions);
+        if (req.user) {
+            const user = await User.findById(req.user._id);
+            res.json(user.transactions);
+        } else {
+            console.log('Error getting transaction, user not logged in.');
+            throw Error;
+        }
     } catch (error) {
         next(error);
     }
@@ -15,18 +20,22 @@ router.get('/', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
     try {
-        const { amount, category, date } = req.body;
-        const transaction = new Transaction({
-            amount: amount,
-            category: category,
-            date: date,
-        });
-        await transaction.save();
-        await User.updateOne(
-            { _id: req.user._id },
-            { $push: { transactions: transaction } }
-        );
-        res.sendStatus(200);
+        if (req.user) {
+            const { amount, category, date } = req.body;
+            const transaction = new Transaction({
+                amount: amount,
+                category: category,
+                date: date,
+            });
+            await transaction.save();
+            const query = { _id: req.user._id };
+            const update = { $push: { transactions: transaction } };
+            await User.updateOne(query, update);
+            res.sendStatus(200);
+        } else {
+            console.log('Error posting transaction, user not logged in.');
+            throw Error;
+        }
     } catch (error) {
         if (error.name === 'ValidationError') {
             res.status(422);

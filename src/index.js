@@ -30,10 +30,11 @@ mongoose.connection
 
 middlewares.initializePassport(passport);
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(
     cors({
-        origin: ['http://localhost:5000', 'http://localhost:5000'],
         credentials: true,
+        origin: process.env.FRONTEND_URI,
     })
 );
 app.use(flash());
@@ -43,7 +44,10 @@ app.use(
     session({
         secret: process.env.SESSION_SECRET,
         resave: false,
-        saveUninitialized: false,
+        saveUninitialized: true,
+        cookie: {
+            secure: false,
+        },
     })
 );
 app.use(passport.initialize());
@@ -52,7 +56,7 @@ app.use(passport.session());
 app.get('/', (req, res, next) => {
     try {
         // res.sendFile(path.join(__dirname, '..', 'client', 'index.html'));
-        res.json({ message: req.user.email });
+        res.json({ message: req.user });
     } catch (error) {
         next();
     }

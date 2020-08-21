@@ -10,21 +10,33 @@ const App = () => {
                 'http://localhost:3000/api/plaid/create_link_token',
                 {
                     method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     credentials: 'include',
                 }
             );
             const linkToken = await response.json();
-            console.log('link token: ', linkToken);
             setLinkToken(linkToken);
         };
         getLinkToken();
     }, []);
 
     const onSuccess = useCallback(async (token, metadata) => {
-        await fetch('/set_access_token', {
+        console.log(metadata);
+        await fetch('http://localhost:3000/api/plaid/set_account', {
             method: 'POST',
-            body: JSON.stringify({ publicToken: token }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                publicToken: token,
+                institution: metadata.institution.name,
+                accounts: metadata.accounts
+            }),
         });
+        // window.location = 'http://localhost:3000';
     }, []);
 
     const onEvent = useCallback((eventName, metadata) => {

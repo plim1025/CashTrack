@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const TransactionSchema = new Schema({
+    accountType: {
+        type: String,
+        required: true,
+    },
     amount: {
         type: Number,
         required: true,

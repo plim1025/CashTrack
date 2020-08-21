@@ -3,15 +3,17 @@ require('./Transaction');
 
 const { Schema } = mongoose;
 
+const requiredString = {
+    type: String,
+    required: true,
+};
+
 const UserSchema = new Schema({
-    email: {
-        type: String,
-        required: true,
-    },
-    password: {
-        type: String,
-        required: true,
-    },
+    email: requiredString,
+    password: requiredString,
+    accessToken: String,
+    itemID: String,
+    institution: String,
     transactions: {
         type: [mongoose.model('Transaction').schema],
         required: true,
