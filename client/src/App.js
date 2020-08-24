@@ -6,16 +6,13 @@ const App = () => {
 
     useEffect(() => {
         const getLinkToken = async () => {
-            const response = await fetch(
-                'http://localhost:3000/api/plaid/create_link_token',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                }
-            );
+            const response = await fetch('http://localhost:3000/api/plaid/create_link_token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
             const linkToken = await response.json();
             setLinkToken(linkToken);
         };
@@ -23,7 +20,6 @@ const App = () => {
     }, []);
 
     const onSuccess = useCallback(async (token, metadata) => {
-        console.log(metadata);
         await fetch('http://localhost:3000/api/plaid/set_account', {
             method: 'POST',
             headers: {
@@ -33,7 +29,8 @@ const App = () => {
             body: JSON.stringify({
                 publicToken: token,
                 institution: metadata.institution.name,
-                accounts: metadata.accounts
+                institutionID: metadata.institution.institution_id,
+                accounts: metadata.accounts,
             }),
         });
         // window.location = 'http://localhost:3000';

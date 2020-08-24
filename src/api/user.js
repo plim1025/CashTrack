@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const bcrypt = require('bcrypt');
-const User = require('../../models/User');
+const passport = require('passport');
+const User = require('../models/User');
 
 const router = Router();
 
@@ -65,6 +66,36 @@ router.delete('/all', async (req, res, next) => {
         res.sendStatus(200);
     } catch (error) {
         next(error);
+    }
+});
+
+router.get('/', (req, res, next) => {
+    try {
+        res.json({ error: req.session.flash.error.slice(-1)[0] });
+    } catch (error) {
+        next();
+    }
+});
+
+router.post(
+    '/login',
+    passport.authenticate('local', {
+        failureFlash: true,
+        failureRedirect: '/api/user/login',
+        successRedirect: '/',
+    })
+);
+
+router.post('/logout', (req, res, next) => {
+    try {
+        if (req.user) {
+            req.logOut();
+            res.sendStatus(200);
+        } else {
+            res.sendStatus(400);
+        }
+    } catch (error) {
+        next();
     }
 });
 

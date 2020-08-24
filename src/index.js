@@ -8,11 +8,9 @@ const path = require('path');
 const passport = require('passport');
 const session = require('express-session');
 
-const loginRoute = require('./routes/login');
-const logoutRoute = require('./routes/logout');
-const userRoute = require('./routes/api/user');
-const transactionRoute = require('./routes/api/transaction');
-const plaidRoute = require('./routes/api/plaid');
+const userRoute = require('./api/user');
+const transactionRoute = require('./api/transaction');
+const plaidRoute = require('./api/plaid');
 
 require('dotenv').config();
 
@@ -62,8 +60,6 @@ app.get('/', (req, res, next) => {
     }
 });
 
-app.use('/login', loginRoute);
-app.use('/logout', logoutRoute);
 app.use('/api/user', userRoute);
 app.use('/api/transaction', transactionRoute);
 app.use('/api/plaid', plaidRoute);

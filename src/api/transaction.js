@@ -1,6 +1,5 @@
 const { Router } = require('express');
-const User = require('../../models/User');
-const Transaction = require('../../models/Transaction');
+const User = require('../models/User');
 
 const router = Router();
 
@@ -22,14 +21,16 @@ router.post('/', async (req, res, next) => {
     try {
         if (req.user) {
             const { amount, category, date } = req.body;
-            const transaction = new Transaction({
-                amount: amount,
-                category: category,
-                date: date,
-            });
-            await transaction.save();
             const query = { _id: req.user._id };
-            const update = { $push: { transactions: transaction } };
+            const update = {
+                $push: {
+                    transactions: {
+                        amount: amount,
+                        category: category,
+                        date: date,
+                    },
+                },
+            };
             await User.updateOne(query, update);
             res.sendStatus(200);
         } else {

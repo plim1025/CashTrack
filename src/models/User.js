@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-require('./Transaction');
 
 const { Schema } = mongoose;
 
@@ -8,15 +7,36 @@ const requiredString = {
     required: true,
 };
 
+const requiredNumber = {
+    type: Number,
+    required: true,
+};
+
 const UserSchema = new Schema({
     email: requiredString,
     password: requiredString,
     accessToken: String,
     itemID: String,
-    institution: String,
+    accountIDs: {
+        type: [String],
+        default: [],
+    },
     transactions: {
-        type: [mongoose.model('Transaction').schema],
-        required: true,
+        type: [
+            {
+                accountID: requiredString,
+                amount: requiredNumber,
+                category: {
+                    type: String,
+                    required: true,
+                    default: '',
+                },
+                date: {
+                    type: Date,
+                    required: true,
+                },
+            },
+        ],
         default: [],
     },
 });
