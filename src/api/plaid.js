@@ -39,7 +39,7 @@ router.post('/create_link_token', async (req, res, next) => {
                 products: process.env.PLAID_PRODUCTS.split(' '),
                 country_codes: process.env.PLAID_COUNTRY_CODES.split(' '),
                 language: 'en',
-                // redirect_uri: '',
+                webhook: process.env.WEBHOOK_URI,
             });
             res.json(link_token);
         } else {
@@ -69,26 +69,6 @@ router.post('/set_account', async (req, res, next) => {
                 };
             });
 
-            let { transactions } = await plaidClient.getTransactions(
-                access_token,
-                '2000-01-01',
-                getPresentDayFormatted(),
-                {
-                    account_ids: accountIDs,
-                    count: 500,
-                }
-            );
-            transactions = transactions
-                .filter(transaction => !transaction.pending)
-                .map(transaction => {
-                    return {
-                        accountID: transaction.account_id,
-                        amount: transaction.amount,
-                        category: transaction.category[0],
-                        date: transaction.date,
-                    };
-                });
-
             const plaidAccounts = [];
             if (accounts.length) {
                 accounts.forEach(account => {
@@ -112,7 +92,6 @@ router.post('/set_account', async (req, res, next) => {
                 $set: { accessToken: access_token, itemID: item_id },
                 $push: {
                     accountIDs: { $each: accountIDs },
-                    transactions: { $each: transactions },
                 },
             };
             await User.updateOne(query, update);
@@ -155,12 +134,56 @@ router.post('/logout', async (req, res, next) => {
     }
 });
 
-// router.post('/test', async (req, res, next) => {
-//     if (req.user) {
-//         const { accessToken } = await User.findById(req.user.id);
-//         const items = await plaidClient.getBalance(accessToken);
-//         console.log(JSON.stringify());
-//     }
-// });
+router.post('/refresh', async (req, res, next) => {
+    try {
+        const { webhook_code, item_id, error, new_transactions, removed_transactions } = req.body;
+        if (error) {
+            throw error;
+        }
+        if (webhook_code === 'TRANSACTIONS_REMOVED') {
+            const update = {
+                $pull: { transactions: { transactionID: { $in: removed_transactions } } },
+            };
+            await User.updateMany({}, update);
+        } else if (
+            (webhook_code === 'INITIAL_UPDATE' ||
+                webhook_code === 'HISTORICAL_UPDATE' ||
+                webhook_code === 'DEFAULT_UPDATE') &&
+            new_transactions > 0
+        ) {
+            const query = { itemID: item_id };
+            const { accessToken, transactions } = await User.findOne(query);
+            const oldTransactionIDs = transactions.map(transaction => transaction.transactionID);
+            let { transactions: newTransactions } = await plaidClient.getTransactions(
+                accessToken,
+                '2000-01-01',
+                getPresentDayFormatted(),
+                {
+                    count: 500,
+                }
+            );
+            newTransactions = newTransactions
+                .filter(transaction => oldTransactionIDs.indexOf(transaction.transaction_id) === -1)
+                .filter(transaction => !transaction.pending)
+                .map(transaction => {
+                    return {
+                        transactionID: transaction.transaction_id,
+                        accountID: transaction.account_id,
+                        amount: transaction.amount,
+                        category: transaction.category[0],
+                        date: transaction.date,
+                    };
+                });
+            const update = { $push: { transactions: { $each: newTransactions } } };
+            await User.updateOne(query, update);
+        }
+        res.sendStatus(200);
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            res.status(422);
+        }
+        next(error);
+    }
+});
 
 module.exports = router;
