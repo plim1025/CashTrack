@@ -24,7 +24,7 @@ const plaidClient = new plaid.Client({
     env:
         process.env.NODE_ENV === 'production'
             ? plaid.environments.development
-            : plaid.environments.sandbox,
+            : plaid.environments.development,
     options: {
         version: '2019-05-29',
     },
@@ -55,12 +55,13 @@ router.post('/set_account', async (req, res, next) => {
     try {
         if (req.user) {
             const { publicToken, batchID, institution, accounts } = req.body;
+            const { accountIDs: oldAccountIDs } = await User.findById(req.user._id);
             const { access_token, item_id } = await plaidClient.exchangePublicToken(publicToken);
 
-            const accountIDs = accounts.map(account => account.id);
+            const newAccountIDs = accounts.map(account => account.id);
 
             let { accounts: balances } = await plaidClient.getBalance(access_token, {
-                account_ids: accountIDs,
+                account_ids: newAccountIDs,
             });
             balances = balances.map(account => {
                 return {
@@ -71,16 +72,28 @@ router.post('/set_account', async (req, res, next) => {
                 };
             });
 
+            let duplicateAccount = false;
+            let duplicateAccountID;
+            for (let i = 0; i < newAccountIDs.length; i++) {
+                if (oldAccountIDs.indexOf(newAccountIDs[i]) !== -1) {
+                    duplicateAccountID = newAccountIDs[i];
+                    duplicateAccount = true;
+                    newAccountIDs.pop(i);
+                    break;
+                }
+            }
+            const { batchID: oldBatchID } = await PlaidAccount.find({ id: duplicateAccountID });
+
             const plaidAccounts = [];
             if (accounts.length) {
                 accounts.forEach(account => {
-                    if (accountIDs.indexOf(account.id) === -1) {
+                    if (oldAccountIDs.indexOf(account.id) === -1) {
                         const accountBalance = balances.find(
                             balance => balance.accountID === account.id
                         );
                         const newAccount = new PlaidAccount({
                             id: account.id,
-                            batchID: batchID,
+                            batchID: duplicateAccount ? oldBatchID : batchID,
                             name: account.name,
                             institution: institution,
                             type: account.subtype,
@@ -99,7 +112,7 @@ router.post('/set_account', async (req, res, next) => {
             const update = {
                 $set: { accessToken: access_token, itemID: item_id },
                 $push: {
-                    accountIDs: { $each: accountIDs },
+                    accountIDs: { $each: newAccountIDs },
                 },
             };
             await User.updateOne(query, update);
@@ -168,12 +181,11 @@ router.post('/refresh', async (req, res, next) => {
             const { accessToken, transactions, removedTransactionIDs } = await User.findOne(query);
             const presentDay = getPresentDayFormatted();
             const oldTransactionIDs = transactions.map(transaction => transaction.transactionID);
-            const [newTransactions, newInvestmentTransactions] = await Promise.all([
-                plaidClient.getAllTransactions(accessToken, '2000-01-01', presentDay),
-                plaidClient.getInvestmentTransactions(accessToken, '2000-01-01', presentDay, {
-                    count: 500,
-                }),
-            ]);
+            const newTransactions = await plaidClient.getAllTransactions(
+                accessToken,
+                '2000-01-01',
+                presentDay
+            );
             const parsedTransactions = newTransactions.transactions
                 .filter(
                     transaction =>
@@ -188,25 +200,12 @@ router.post('/refresh', async (req, res, next) => {
                         category: transaction.category[0],
                         date: transaction.date,
                     };
-                });
-            const parsedInvestmentTransactions = newInvestmentTransactions.investment_transactions
+                })
                 .filter(
-                    transaction =>
-                        oldTransactionIDs.indexOf(transaction.investment_transaction_id) === -1
-                )
-                .map(transaction => {
-                    return {
-                        transactionID: transaction.investment_transaction_id,
-                        accountID: transaction.account_id,
-                        amount: transaction.amount,
-                        category: transaction.name,
-                        date: transaction.date,
-                    };
-                });
-            const allTransactions = [...parsedTransactions, ...parsedInvestmentTransactions].filter(
-                transaction => removedTransactionIDs.indexOf(transaction.transactionID) === -1
-            );
-            const update = { $push: { transactions: { $each: allTransactions } } };
+                    transaction => removedTransactionIDs.indexOf(transaction.transactionID) === -1
+                );
+
+            const update = { $push: { transactions: { $each: parsedTransactions } } };
             await User.updateOne(query, update);
         }
         res.sendStatus(200);

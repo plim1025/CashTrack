@@ -10,7 +10,9 @@
         "plugin:node/recommended",
         "plugin:import/recommended"
     ],
-    "plugins": ["prettier"],
+    "plugins": [
+        "prettier"
+    ],
     "parserOptions": {
         "ecmaVersion": 11
     },
@@ -23,6 +25,7 @@
         "object-shorthand": "off",
         "class-methods-use-this": "off",
         "no-underscore-dangle": 0,
-        "camelcase": "off"
+        "camelcase": "off",
+        "no-plusplus": "off"
     }
 }
