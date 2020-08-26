@@ -74,21 +74,23 @@ router.post('/set_account', async (req, res, next) => {
             const plaidAccounts = [];
             if (accounts.length) {
                 accounts.forEach(account => {
-                    const accountBalance = balances.find(
-                        balance => balance.accountID === account.id
-                    );
-                    const newAccount = new PlaidAccount({
-                        id: account.id,
-                        batchID: batchID,
-                        name: account.name,
-                        institution: institution,
-                        type: account.subtype,
-                        mask: account.mask,
-                        balance: accountBalance.balance,
-                        available: accountBalance.available,
-                        creditLimit: accountBalance.creditLimit,
-                    });
-                    plaidAccounts.push(newAccount);
+                    if (accountIDs.indexOf(account.id) === -1) {
+                        const accountBalance = balances.find(
+                            balance => balance.accountID === account.id
+                        );
+                        const newAccount = new PlaidAccount({
+                            id: account.id,
+                            batchID: batchID,
+                            name: account.name,
+                            institution: institution,
+                            type: account.subtype,
+                            mask: account.mask,
+                            balance: accountBalance.balance,
+                            available: accountBalance.available,
+                            creditLimit: accountBalance.creditLimit,
+                        });
+                        plaidAccounts.push(newAccount);
+                    }
                 });
                 await PlaidAccount.insertMany(plaidAccounts);
             }
