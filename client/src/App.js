@@ -28,8 +28,8 @@ const App = () => {
             credentials: 'include',
             body: JSON.stringify({
                 publicToken: token,
+                batchID: metadata.link_session_id,
                 institution: metadata.institution.name,
-                institutionID: metadata.institution.institution_id,
                 accounts: metadata.accounts,
             }),
         });

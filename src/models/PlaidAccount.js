@@ -9,9 +9,9 @@ const requiredString = {
 
 const PlaidAccountSchema = new Schema({
     id: requiredString,
+    batchID: requiredString,
     name: requiredString,
     institution: requiredString,
-    institutionID: requiredString,
     type: requiredString,
     mask: requiredString,
     balance: {

@@ -54,7 +54,7 @@ router.post('/create_link_token', async (req, res, next) => {
 router.post('/set_account', async (req, res, next) => {
     try {
         if (req.user) {
-            const { publicToken, institution, institutionID, accounts } = req.body;
+            const { publicToken, batchID, institution, accounts } = req.body;
             const { access_token, item_id } = await plaidClient.exchangePublicToken(publicToken);
 
             const accountIDs = accounts.map(account => account.id);
@@ -74,9 +74,9 @@ router.post('/set_account', async (req, res, next) => {
                 accounts.forEach(account => {
                     const newAccount = new PlaidAccount({
                         id: account.id,
+                        batchID: batchID,
                         name: account.name,
                         institution: institution,
-                        institutionID: institutionID,
                         type: account.subtype,
                         mask: account.mask,
                         balance: balances.filter(balance => balance.accountID === account.id)[0]
@@ -110,22 +110,27 @@ router.post('/set_account', async (req, res, next) => {
 
 router.post('/logout', async (req, res, next) => {
     try {
-        const { institutionID } = req.body;
+        if (req.user) {
+            const { batchID } = req.body;
 
-        const plaidAccountQuery = { institutionID: institutionID };
+            const plaidAccountQuery = { batchID: batchID };
 
-        const deletedPlaidAccounts = await PlaidAccount.find(plaidAccountQuery);
-        await PlaidAccount.deleteMany(plaidAccountQuery);
-        const deletedPlaidAccountIDs = deletedPlaidAccounts.map(account => account.id);
+            const deletedPlaidAccounts = await PlaidAccount.find(plaidAccountQuery);
+            await PlaidAccount.deleteMany(plaidAccountQuery);
+            const deletedPlaidAccountIDs = deletedPlaidAccounts.map(account => account.id);
 
-        const userUpdate = {
-            $pull: {
-                transactions: { accountID: { $in: deletedPlaidAccountIDs } },
-                accountIDs: { $in: deletedPlaidAccountIDs },
-            },
-        };
-        await User.updateMany({}, userUpdate);
-        res.sendStatus(200);
+            const userUpdate = {
+                $pull: {
+                    transactions: { accountID: { $in: deletedPlaidAccountIDs } },
+                    accountIDs: { $in: deletedPlaidAccountIDs },
+                },
+            };
+            await User.updateMany({}, userUpdate);
+            res.sendStatus(200);
+        } else {
+            console.log('Error setting account, user not logged in.');
+            throw Error;
+        }
     } catch (error) {
         if (error.name === 'ValidationError') {
             res.status(422);
