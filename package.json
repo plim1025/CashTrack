@@ -30,8 +30,7 @@
         "morgan": "^1.10.0",
         "passport": "^0.4.1",
         "passport-local": "^1.0.0",
-        "plaid": "^7.0.0",
-        "uuid": "^8.3.0"
+        "plaid": "^7.0.0"
     },
     "scripts": {
         "start": "cd client && yarn start",

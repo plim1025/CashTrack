@@ -77,7 +77,10 @@ router.delete('/:id', async (req, res, next) => {
         if (req.user) {
             const { id } = req.params;
             const query = { _id: req.user._id };
-            const update = { $pull: { transactions: { transactionID: id } } };
+            const update = {
+                $pull: { transactions: { transactionID: id } },
+                $push: { removedTransactionIDs: id },
+            };
             await User.updateOne(query, update);
             res.sendStatus(200);
         } else {

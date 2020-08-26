@@ -1,6 +1,5 @@
 const { Router } = require('express');
 const plaid = require('plaid');
-const { v4: uuidv4 } = require('uuid');
 const User = require('../models/User');
 const PlaidAccount = require('../models/PlaidAccount');
 require('dotenv').config();
@@ -67,12 +66,17 @@ router.post('/set_account', async (req, res, next) => {
                 return {
                     accountID: account.account_id,
                     balance: account.balances.current,
+                    available: account.balances.available,
+                    creditLimit: account.balances.limit,
                 };
             });
 
             const plaidAccounts = [];
             if (accounts.length) {
                 accounts.forEach(account => {
+                    const accountBalance = balances.find(
+                        balance => balance.accountID === account.id
+                    );
                     const newAccount = new PlaidAccount({
                         id: account.id,
                         batchID: batchID,
@@ -80,13 +84,14 @@ router.post('/set_account', async (req, res, next) => {
                         institution: institution,
                         type: account.subtype,
                         mask: account.mask,
-                        balance: balances.filter(balance => balance.accountID === account.id)[0]
-                            .balance,
+                        balance: accountBalance.balance,
+                        available: accountBalance.available,
+                        creditLimit: accountBalance.creditLimit,
                     });
                     plaidAccounts.push(newAccount);
                 });
+                await PlaidAccount.insertMany(plaidAccounts);
             }
-            await PlaidAccount.insertMany(plaidAccounts);
 
             const query = { _id: req.user._id };
             const update = {
@@ -158,17 +163,21 @@ router.post('/refresh', async (req, res, next) => {
             new_transactions > 0
         ) {
             const query = { itemID: item_id };
-            const { accessToken, transactions } = await User.findOne(query);
+            const { accessToken, transactions, removedTransactionIDs } = await User.findOne(query);
             const presentDay = getPresentDayFormatted();
             const oldTransactionIDs = transactions.map(transaction => transaction.transactionID);
-            const [newTransactions, newInvestmentTransactions, newLiabilities] = await Promise.all([
+            const [newTransactions, newInvestmentTransactions] = await Promise.all([
                 plaidClient.getAllTransactions(accessToken, '2000-01-01', presentDay),
-                plaidClient.getInvestmentTransactions(accessToken, '2000-01-01', presentDay),
-                plaidClient.getLiabilities(accessToken),
+                plaidClient.getInvestmentTransactions(accessToken, '2000-01-01', presentDay, {
+                    count: 500,
+                }),
             ]);
             const parsedTransactions = newTransactions.transactions
-                .filter(transaction => oldTransactionIDs.indexOf(transaction.transaction_id) === -1)
-                .filter(transaction => !transaction.pending)
+                .filter(
+                    transaction =>
+                        oldTransactionIDs.indexOf(transaction.transaction_id) === -1 &&
+                        !transaction.pending
+                )
                 .map(transaction => {
                     return {
                         transactionID: transaction.transaction_id,
@@ -179,7 +188,10 @@ router.post('/refresh', async (req, res, next) => {
                     };
                 });
             const parsedInvestmentTransactions = newInvestmentTransactions.investment_transactions
-                .filter(transaction => oldTransactionIDs.indexOf(transaction.transaction_id) === -1)
+                .filter(
+                    transaction =>
+                        oldTransactionIDs.indexOf(transaction.investment_transaction_id) === -1
+                )
                 .map(transaction => {
                     return {
                         transactionID: transaction.investment_transaction_id,
@@ -189,30 +201,9 @@ router.post('/refresh', async (req, res, next) => {
                         date: transaction.date,
                     };
                 });
-            const parsedLiabilities = [];
-            Object.keys(newLiabilities.liabilities).forEach(key => {
-                parsedLiabilities.push(
-                    ...newLiabilities.liabilities[key]
-                        .filter(
-                            transaction =>
-                                oldTransactionIDs.indexOf(transaction.transaction_id) === -1
-                        )
-                        .map(transaction => {
-                            return {
-                                transactionID: uuidv4(),
-                                accountID: transaction.account_id,
-                                amount: transaction.origination_principal_amount,
-                                category: transaction.loan_name,
-                                date: transaction.origination_date,
-                            };
-                        })
-                );
-            });
-            const allTransactions = [
-                ...parsedTransactions,
-                ...parsedInvestmentTransactions,
-                ...parsedLiabilities,
-            ];
+            const allTransactions = [...parsedTransactions, ...parsedInvestmentTransactions].filter(
+                transaction => removedTransactionIDs.indexOf(transaction.transactionID) === -1
+            );
             const update = { $push: { transactions: { $each: allTransactions } } };
             await User.updateOne(query, update);
         }

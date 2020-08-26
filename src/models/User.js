@@ -40,6 +40,10 @@ const UserSchema = new Schema({
         ],
         default: [],
     },
+    removedTransactionIDs: {
+        type: [String],
+        default: [],
+    },
 });
 
 const User = mongoose.model('User', UserSchema);

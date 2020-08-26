@@ -18,6 +18,9 @@ const PlaidAccountSchema = new Schema({
         type: Number,
         required: true,
     },
+    available: Number,
+    apy: Number,
+    creditLimit: Number,
 });
 
 const PlaidAccount = mongoose.model('PlaidAccount', PlaidAccountSchema);
