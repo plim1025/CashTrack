@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const plaid = require('plaid');
+const { v4: uuidv4 } = require('uuid');
 const User = require('../models/User');
 const PlaidAccount = require('../models/PlaidAccount');
 require('dotenv').config();
@@ -158,16 +159,14 @@ router.post('/refresh', async (req, res, next) => {
         ) {
             const query = { itemID: item_id };
             const { accessToken, transactions } = await User.findOne(query);
+            const presentDay = getPresentDayFormatted();
             const oldTransactionIDs = transactions.map(transaction => transaction.transactionID);
-            let { transactions: newTransactions } = await plaidClient.getTransactions(
-                accessToken,
-                '2000-01-01',
-                getPresentDayFormatted(),
-                {
-                    count: 500,
-                }
-            );
-            newTransactions = newTransactions
+            const [newTransactions, newInvestmentTransactions, newLiabilities] = await Promise.all([
+                plaidClient.getAllTransactions(accessToken, '2000-01-01', presentDay),
+                plaidClient.getInvestmentTransactions(accessToken, '2000-01-01', presentDay),
+                plaidClient.getLiabilities(accessToken),
+            ]);
+            const parsedTransactions = newTransactions.transactions
                 .filter(transaction => oldTransactionIDs.indexOf(transaction.transaction_id) === -1)
                 .filter(transaction => !transaction.pending)
                 .map(transaction => {
@@ -179,7 +178,42 @@ router.post('/refresh', async (req, res, next) => {
                         date: transaction.date,
                     };
                 });
-            const update = { $push: { transactions: { $each: newTransactions } } };
+            const parsedInvestmentTransactions = newInvestmentTransactions.investment_transactions
+                .filter(transaction => oldTransactionIDs.indexOf(transaction.transaction_id) === -1)
+                .map(transaction => {
+                    return {
+                        transactionID: transaction.investment_transaction_id,
+                        accountID: transaction.account_id,
+                        amount: transaction.amount,
+                        category: transaction.name,
+                        date: transaction.date,
+                    };
+                });
+            const parsedLiabilities = [];
+            Object.keys(newLiabilities.liabilities).forEach(key => {
+                parsedLiabilities.push(
+                    ...newLiabilities.liabilities[key]
+                        .filter(
+                            transaction =>
+                                oldTransactionIDs.indexOf(transaction.transaction_id) === -1
+                        )
+                        .map(transaction => {
+                            return {
+                                transactionID: uuidv4(),
+                                accountID: transaction.account_id,
+                                amount: transaction.origination_principal_amount,
+                                category: transaction.loan_name,
+                                date: transaction.origination_date,
+                            };
+                        })
+                );
+            });
+            const allTransactions = [
+                ...parsedTransactions,
+                ...parsedInvestmentTransactions,
+                ...parsedLiabilities,
+            ];
+            const update = { $push: { transactions: { $each: allTransactions } } };
             await User.updateOne(query, update);
         }
         res.sendStatus(200);
@@ -190,5 +224,15 @@ router.post('/refresh', async (req, res, next) => {
         next(error);
     }
 });
+
+// router.post('/test', async (req, res) => {
+//     const { transactions } = await User.findById({ _id: req.user._id });
+//     console.log(
+//         transactions.filter(
+//             transaction => transaction.accountID === 'Ajkj4wekEMin7wVEzRAyCmPaBzwQn4f1QRGaZ'
+//         )
+//     );
+//     res.sendStatus(200);
+// });
 
 module.exports = router;
