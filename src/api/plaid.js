@@ -24,7 +24,7 @@ const plaidClient = new plaid.Client({
     env:
         process.env.NODE_ENV === 'production'
             ? plaid.environments.development
-            : plaid.environments.development,
+            : plaid.environments.sandbox,
     options: {
         version: '2019-05-29',
     },
@@ -39,7 +39,7 @@ router.post('/create_link_token', async (req, res, next) => {
                 products: process.env.PLAID_PRODUCTS.split(' '),
                 country_codes: process.env.PLAID_COUNTRY_CODES.split(' '),
                 language: 'en',
-                webhook: process.env.WEBHOOK_URI,
+                webhook: process.env.PLAID_WEBHOOK_URI,
             });
             res.json(link_token);
         } else {
@@ -54,11 +54,13 @@ router.post('/create_link_token', async (req, res, next) => {
 router.post('/set_account', async (req, res, next) => {
     try {
         if (req.user) {
-            const { publicToken, batchID, institution, accounts } = req.body;
-            const { accountIDs: oldAccountIDs } = await User.findById(req.user._id);
+            const { publicToken, batchID, institution, accounts: newAccounts } = req.body;
             const { access_token, item_id } = await plaidClient.exchangePublicToken(publicToken);
+            let newAccountIDs = newAccounts.map(account => account.id);
 
-            const newAccountIDs = accounts.map(account => account.id);
+            const { accountIDs: oldAccountIDs } = await User.findById(req.user._id);
+            const plaidAccountQuery = { id: { $in: oldAccountIDs } };
+            const oldAccounts = await PlaidAccount.find(plaidAccountQuery);
 
             let { accounts: balances } = await plaidClient.getBalance(access_token, {
                 account_ids: newAccountIDs,
@@ -73,40 +75,44 @@ router.post('/set_account', async (req, res, next) => {
             });
 
             let duplicateAccount = false;
-            let duplicateAccountID;
-            for (let i = 0; i < newAccountIDs.length; i++) {
-                if (oldAccountIDs.indexOf(newAccountIDs[i]) !== -1) {
-                    duplicateAccountID = newAccountIDs[i];
-                    duplicateAccount = true;
-                    newAccountIDs.pop(i);
-                    break;
-                }
-            }
-            const { batchID: oldBatchID } = await PlaidAccount.find({ id: duplicateAccountID });
-
-            const plaidAccounts = [];
-            if (accounts.length) {
-                accounts.forEach(account => {
-                    if (oldAccountIDs.indexOf(account.id) === -1) {
-                        const accountBalance = balances.find(
-                            balance => balance.accountID === account.id
+            let oldBatchID;
+            newAccounts.forEach(newAccount => {
+                oldAccounts.forEach(oldAccount => {
+                    if (
+                        newAccount.name === oldAccount.name &&
+                        institution === oldAccount.institution &&
+                        newAccount.mask === oldAccount.mask
+                    ) {
+                        duplicateAccount = true;
+                        oldBatchID = oldAccount.batchID;
+                        newAccountIDs = newAccountIDs.filter(
+                            accountID => accountID !== newAccount.id
                         );
-                        const newAccount = new PlaidAccount({
-                            id: account.id,
-                            batchID: duplicateAccount ? oldBatchID : batchID,
-                            name: account.name,
-                            institution: institution,
-                            type: account.subtype,
-                            mask: account.mask,
-                            balance: accountBalance.balance,
-                            available: accountBalance.available,
-                            creditLimit: accountBalance.creditLimit,
-                        });
-                        plaidAccounts.push(newAccount);
                     }
                 });
-                await PlaidAccount.insertMany(plaidAccounts);
-            }
+            });
+
+            const plaidAccounts = [];
+            newAccounts.forEach(account => {
+                if (newAccountIDs.includes(account.id)) {
+                    const accountBalance = balances.find(
+                        balance => balance.accountID === account.id
+                    );
+                    const newPlaidAccount = new PlaidAccount({
+                        id: account.id,
+                        batchID: duplicateAccount ? oldBatchID : batchID,
+                        name: account.name,
+                        institution: institution,
+                        type: account.subtype,
+                        mask: account.mask,
+                        balance: accountBalance.balance,
+                        available: accountBalance.available,
+                        creditLimit: accountBalance.creditLimit,
+                    });
+                    plaidAccounts.push(newPlaidAccount);
+                }
+            });
+            await PlaidAccount.insertMany(plaidAccounts);
 
             const query = { _id: req.user._id };
             const update = {

@@ -33,6 +33,7 @@ const App = () => {
                 accounts: metadata.accounts,
             }),
         });
+        console.log(metadata);
         // window.location = 'http://localhost:3000';
     }, []);
 
