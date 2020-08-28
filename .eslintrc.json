@@ -18,7 +18,7 @@
     },
     "rules": {
         "prettier/prettier": "error",
-        "no-unused-vars": "error",
+        "no-unused-vars": "warn",
         "no-console": "off",
         "func-names": "off",
         "no-process-exit": "off",
@@ -26,6 +26,13 @@
         "class-methods-use-this": "off",
         "no-underscore-dangle": 0,
         "camelcase": "off",
-        "no-plusplus": "off"
+        "no-plusplus": "off",
+        "node/no-unpublished-require": "off",
+        "import/no-extraneous-dependencies": [
+            "error",
+            {
+                "devDependencies": true
+            }
+        ]
     }
 }
