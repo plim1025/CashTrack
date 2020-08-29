@@ -16,6 +16,8 @@
         "jsx": "react",
         "moduleResolution": "node",
         "rootDir": ".",
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
         "alwaysStrict": true,
         "noImplicitAny": true,
         "noImplicitThis": true,
