@@ -5,7 +5,7 @@
         "es2020": true
     },
     "extends": [
-        "airbnb",
+        "airbnb-base",
         "prettier",
         "plugin:node/recommended",
         "plugin:import/recommended"
@@ -27,7 +27,6 @@
         "no-underscore-dangle": 0,
         "camelcase": "off",
         "no-plusplus": "off",
-        "node/no-unpublished-require": "off",
         "import/no-extraneous-dependencies": [
             "error",
             {

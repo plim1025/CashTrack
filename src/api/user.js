@@ -14,7 +14,7 @@ const validateEmail = email => {
 router.get('/', (req, res, next) => {
     try {
         if (req.user) {
-            res.json({ user: req.user });
+            res.json({ user: req.user.email });
         } else {
             res.json({ message: 'User not logged in.' });
         }
@@ -50,7 +50,7 @@ router.post('/', async (req, res, next) => {
                 password: hashedPassword,
             });
             await user.save();
-            res.sendStatus(200);
+            res.json({ email: email });
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -81,9 +81,14 @@ router.post(
     '/login',
     passport.authenticate('local', {
         failureFlash: true,
-        failureRedirect: '/api/user/login',
-        successRedirect: '/',
-    })
+    }),
+    async (req, res) => {
+        if (req.user) {
+            res.json({ email: req.user.email });
+        } else {
+            res.sendStatus(401);
+        }
+    }
 );
 
 router.post('/logout', (req, res, next) => {

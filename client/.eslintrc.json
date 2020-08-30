@@ -36,6 +36,16 @@
         "@typescript-eslint/no-explicit-any": "off",
         "react/jsx-indent-props": "off",
         "react/jsx-indent": "off",
+        "react/prop-types": "off",
+        "import/order": "off",
+        "react/jsx-wrap-multilines": [
+            "error",
+            {
+                "declaration": false,
+                "assignment": false,
+                "return": false
+            }
+        ],
         "@typescript-eslint/no-unused-vars": "warn",
         "@typescript-eslint/explicit-module-boundary-types": [
             "warn",

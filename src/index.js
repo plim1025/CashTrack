@@ -51,14 +51,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('/', (req, res, next) => {
-    try {
-        // res.sendFile(path.join(__dirname, '..', 'client', 'index.html'));
-        res.json({ message: req.user });
-    } catch (error) {
-        next();
-    }
-});
+app.get('/', (req, res, next) => {});
 
 app.use('/api/user', userRoute);
 app.use('/api/transaction', transactionRoute);
