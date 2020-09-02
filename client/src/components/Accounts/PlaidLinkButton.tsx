@@ -5,6 +5,8 @@ import '../../assets/css/index.css';
 
 const PlaidLinkButton: React.FC = () => {
     const [linkToken, setLinkToken] = useState('');
+    const [accountsInfo, setAccountsInfo] = useState({ token: '', metadata: null });
+    const [accountsLoading, setAccountsLoading] = useState(false);
 
     useEffect(() => {
         const getLinkToken = async () => {
@@ -21,8 +23,8 @@ const PlaidLinkButton: React.FC = () => {
         getLinkToken();
     }, []);
 
-    const onSuccess = useCallback(async (token, metadata) => {
-        await fetch(`${process.env.BACKEND_URI}/api/plaid/set_account`, {
+    const setPlaidAccounts = async (token: string, metadata: any) => {
+        const response = await fetch(`${process.env.BACKEND_URI}/api/plaid/set_account`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -35,6 +37,15 @@ const PlaidLinkButton: React.FC = () => {
                 accounts: metadata.accounts,
             }),
         });
+        if (!response.ok) {
+            console.log('Error setting plaid account');
+        }
+        setAccountsLoading(false);
+    };
+
+    const onSuccess = useCallback(async (token, metadata) => {
+        setAccountsInfo({ token: token, metadata: metadata });
+        setAccountsLoading(true);
     }, []);
 
     const onEvent = useCallback((eventName, metadata) => {
@@ -54,6 +65,9 @@ const PlaidLinkButton: React.FC = () => {
 
     const { open, ready, error } = usePlaidLink(config);
 
+    if (accountsLoading) {
+        throw setPlaidAccounts(accountsInfo.token, accountsInfo.metadata);
+    }
     return (
         <Button
             // style={{ background: '#0a85ea', border: '#0a85ea' }}
