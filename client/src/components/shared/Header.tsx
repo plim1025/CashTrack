@@ -54,11 +54,12 @@ const Header: React.FC<Props> = props => {
         }
         if (stateEmail) {
             dispatch(loadEmail(''));
-        } else if (sessionStorage.getItem('email')) {
+        }
+        if (sessionStorage.getItem('email')) {
             sessionStorage.setItem('email', '');
         }
         dispatch(loadSubpage('home'));
-        props.history.push('/home');
+        props.history.push('/signin');
     };
 
     return (
