@@ -5,7 +5,7 @@ import reduxThunk from 'redux-thunk';
 import rootReducer from './Reducers';
 
 const localPersistConfig = {
-    key: 'CashTrackPerm',
+    key: 'CashTrack',
     storage: localStorage,
     whitelist: ['email'],
 };

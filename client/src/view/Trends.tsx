@@ -12,7 +12,7 @@ const Trends: React.FC = () => {
     const stateEmail = useSelector((state: RootState) => state.email);
 
     if (!stateEmail && !sessionStorage.getItem('email')) {
-        return <Redirect to='/login' />;
+        return <Redirect to='/signin' />;
     }
     return <></>;
 };

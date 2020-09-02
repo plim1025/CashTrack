@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
-import Button from 'react-bootstrap/Button';
+import { Button } from 'react-bootstrap';
 import '../../assets/css/index.css';
 
 const PlaidLinkButton: React.FC = () => {
@@ -56,7 +56,7 @@ const PlaidLinkButton: React.FC = () => {
 
     return (
         <Button
-            style={{ background: '#0a85ea', border: '#0a85ea' }}
+            // style={{ background: '#0a85ea', border: '#0a85ea' }}
             onClick={() => open()}
             disabled={!ready}
             variant='primary'

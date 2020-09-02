@@ -78,7 +78,7 @@ router.get('/', (req, res, next) => {
 });
 
 router.post(
-    '/login',
+    '/signin',
     passport.authenticate('local', {
         failureFlash: true,
     }),

@@ -14,7 +14,7 @@ import configureStore from './redux/Store';
 import './assets/css/index.css';
 
 // VIEWS //
-import Login from './view/Login';
+import Signin from './view/Signin';
 import Register from './view/Register';
 import App from './App';
 
@@ -25,7 +25,7 @@ ReactDOM.render(
         <PersistGate loading={null} persistor={persistor}>
             <BrowserRouter>
                 <Switch>
-                    <Route exact path='/login' component={Login} />
+                    <Route exact path='/signin' component={Signin} />
                     <Route exact path='/register' component={Register} />
                     <Redirect exact from='/' to='/home' />
                     <Route

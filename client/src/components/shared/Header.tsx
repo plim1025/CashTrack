@@ -1,6 +1,9 @@
 // REACT //
 import React from 'react';
 
+// ROUTER //
+import { withRouter } from 'react-router';
+
 // REDUX //
 import { useSelector, useDispatch } from 'react-redux';
 import { loadEmail, loadSubpage } from '../../redux/Actions';
@@ -26,7 +29,11 @@ const ss = StyleSheet.create({
     },
 });
 
-const Header: React.FC = () => {
+interface Props {
+    history: any;
+}
+
+const Header: React.FC<Props> = props => {
     const dispatch = useDispatch();
     const stateEmail = useSelector((state: RootState) => state.email);
     const stateSubpage = useSelector((state: RootState) => state.subpage);
@@ -51,6 +58,7 @@ const Header: React.FC = () => {
             sessionStorage.setItem('email', '');
         }
         dispatch(loadSubpage('home'));
+        props.history.push('/home');
     };
 
     return (
@@ -121,4 +129,4 @@ const Header: React.FC = () => {
     );
 };
 
-export default Header;
+export default withRouter(Header);

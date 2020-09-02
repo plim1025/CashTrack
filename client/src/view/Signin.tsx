@@ -1,5 +1,5 @@
 // REACT //
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // ROUTER //
 import { Redirect, withRouter } from 'react-router';
@@ -11,10 +11,7 @@ import { RootState } from '../redux/Store';
 
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import Alert from 'react-bootstrap/Alert';
-import Card from 'react-bootstrap/Card';
+import { Alert, Button, Card, Form } from 'react-bootstrap';
 
 // STYLES //
 const ss = StyleSheet.create({
@@ -33,15 +30,20 @@ const ss = StyleSheet.create({
     },
     logo: {
         position: 'absolute',
-        transform: 'translateY(-100%)',
-        fill: '#000',
-        height: 40,
-        width: 200,
+        transform: 'translateY(-150%)',
+        fill: '#343a40',
+        height: 70,
+        width: 350,
     },
     logoText: {
         fontSize: 200,
         fontFamily: 'Open Sans',
         fontWeight: 600,
+    },
+    register: {
+        display: 'flex',
+        alignItems: 'center',
+        marginBottom: '1rem',
     },
 });
 
@@ -49,49 +51,76 @@ interface Props {
     history: any;
 }
 
-const Login: React.FC<Props> = props => {
+const Signin: React.FC<Props> = props => {
+    let errorTimeout: ReturnType<typeof setTimeout>;
     const dispatch = useDispatch();
     const stateEmail = useSelector((state: RootState) => state.email);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [error, setError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
 
-    const login = async (e: any) => {
+    const signin = async (e: any) => {
         e.preventDefault();
         if (!email || !password) {
-            setError('All fields must be filled in.');
-            return;
-        }
-        try {
-            const loginInfo = JSON.stringify({ email: email, password: password });
-            const response = await fetch(`${process.env.BACKEND_URI}/api/user/login`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: loginInfo,
-            });
-            const parsedResponse = await response.json();
-            if (rememberMe) {
-                dispatch(loadEmail(parsedResponse.email));
-            } else {
-                sessionStorage.setItem('email', email);
+            if (error) {
+                setError(false);
             }
-            props.history.push('/home');
-        } catch {
-            setError('Email and password do not match.');
+            setError(true);
+            setErrorMessage('All fields must be filled in.');
+        } else {
+            try {
+                const signinInfo = JSON.stringify({ email: email, password: password });
+                const response = await fetch(`${process.env.BACKEND_URI}/api/user/signin`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: signinInfo,
+                });
+                const parsedResponse = await response.json();
+                if (rememberMe) {
+                    dispatch(loadEmail(parsedResponse.email));
+                } else {
+                    sessionStorage.setItem('email', email);
+                }
+                props.history.push('/home');
+            } catch {
+                if (error) {
+                    setError(false);
+                }
+                setError(true);
+                setErrorMessage('Email and password do not match.');
+            }
         }
+        errorTimeout = setTimeout(() => setError(false), 3000);
     };
+
+    useEffect(() => {
+        return () => {
+            clearTimeout(errorTimeout);
+        };
+    }, []);
 
     if (stateEmail || sessionStorage.getItem('email')) {
         return <Redirect to='/home' />;
     }
     return (
         <div className={css(ss.wrapper)}>
+            <Alert
+                style={{
+                    position: 'absolute',
+                    top: error ? 10 : -200,
+                    transition: 'all .2s ease-in-out',
+                }}
+                variant='danger'
+            >
+                {errorMessage}
+            </Alert>
             <Card className={css(ss.card)}>
-                {/* <svg
+                <svg
                     className={css(ss.logo)}
                     xmlns='http://www.w3.org/2000/svg'
                     viewBox='0 0 1698.4 493'
@@ -100,12 +129,11 @@ const Login: React.FC<Props> = props => {
                     <text className={css(ss.logoText)} transform='translate(665 297)'>
                         CashTrack
                     </text>
-                </svg> */}
+                </svg>
                 <Form>
-                    <h2>Login</h2>
-                    {error ? <Alert variant='danger'>{error}</Alert> : null}
+                    <h3>Sign In</h3>
                     <Form.Group>
-                        <Form.Label>Email address</Form.Label>
+                        <Form.Label>Email</Form.Label>
                         <Form.Control onChange={e => setEmail(e.target.value)} type='email' />
                     </Form.Group>
                     <Form.Group>
@@ -119,12 +147,14 @@ const Login: React.FC<Props> = props => {
                             label='Remember me'
                         />
                     </Form.Group>
-                    <Button onClick={login} variant='primary' type='submit'>
-                        Submit
-                    </Button>
-                    <span>New to CashTrack?</span>
-                    <Button onClick={() => props.history.push('/register')} variant='link'>
-                        Register here
+                    <div className={css(ss.register)}>
+                        <span>New to CashTrack?</span>
+                        <Button onClick={() => props.history.push('/register')} variant='link'>
+                            Register
+                        </Button>
+                    </div>
+                    <Button onClick={signin} variant='primary' type='submit' block>
+                        Sign In
                     </Button>
                 </Form>
             </Card>
@@ -132,4 +162,4 @@ const Login: React.FC<Props> = props => {
     );
 };
 
-export default withRouter(Login);
+export default withRouter(Signin);
