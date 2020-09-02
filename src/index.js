@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const path = require('path');
 const passport = require('passport');
 const session = require('express-session');
+// const MongoStore = require('connect-mongo')(session);
 
 const userRoute = require('./api/user');
 const transactionRoute = require('./api/transaction');
@@ -41,17 +42,18 @@ app.use(morgan('dev'));
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
+        // store: new MongoStore({ mongooseConnection: mongoose.connection }),
         resave: false,
-        saveUninitialized: true,
+        saveUninitialized: false,
         cookie: {
-            secure: false,
+            maxAge: 2592000000, // 30 days in ms
         },
     })
 );
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('/', (req, res, next) => {});
+// app.get('/', (req, res, next) => {});
 
 app.use('/api/user', userRoute);
 app.use('/api/transaction', transactionRoute);

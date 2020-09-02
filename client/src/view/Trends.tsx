@@ -1,8 +1,20 @@
 // REACT //
 import React from 'react';
 
+// ROUTER //
+import { Redirect } from 'react-router';
+
+// REDUX //
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/Store';
+
 const Trends: React.FC = () => {
-    return <div>Trends</div>;
+    const stateEmail = useSelector((state: RootState) => state.email);
+
+    if (!stateEmail && !sessionStorage.getItem('email')) {
+        return <Redirect to='/login' />;
+    }
+    return <></>;
 };
 
 export default Trends;

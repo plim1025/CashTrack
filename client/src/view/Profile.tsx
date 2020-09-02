@@ -8,20 +8,13 @@ import { Redirect } from 'react-router';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/Store';
 
-// COMPONENTS //
-import PlaidLinkButton from '../components/Accounts/PlaidLinkButton';
-
-const Accounts: React.FC = () => {
+const Profile: React.FC = () => {
     const stateEmail = useSelector((state: RootState) => state.email);
 
     if (!stateEmail && !sessionStorage.getItem('email')) {
         return <Redirect to='/login' />;
     }
-    return (
-        <>
-            <PlaidLinkButton />
-        </>
-    );
+    return <></>;
 };
 
-export default Accounts;
+export default Profile;

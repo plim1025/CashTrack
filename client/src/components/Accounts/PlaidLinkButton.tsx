@@ -8,7 +8,7 @@ const PlaidLinkButton: React.FC = () => {
 
     useEffect(() => {
         const getLinkToken = async () => {
-            const response = await fetch('http://localhost:3000/api/plaid/create_link_token', {
+            const response = await fetch(`${process.env.BACKEND_URI}/api/plaid/create_link_token`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -22,7 +22,7 @@ const PlaidLinkButton: React.FC = () => {
     }, []);
 
     const onSuccess = useCallback(async (token, metadata) => {
-        await fetch('http://localhost:3000/api/plaid/set_account', {
+        await fetch(`${process.env.BACKEND_URI}/api/plaid/set_account`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -35,7 +35,6 @@ const PlaidLinkButton: React.FC = () => {
                 accounts: metadata.accounts,
             }),
         });
-        // window.location = 'http://localhost:3000';
     }, []);
 
     const onEvent = useCallback((eventName, metadata) => {

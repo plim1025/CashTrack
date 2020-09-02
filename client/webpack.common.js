@@ -6,15 +6,17 @@ const Dotenv = require('dotenv-webpack');
 module.exports = {
     entry: './src/index.tsx',
     plugins: [
-        new HtmlWebpackPlugin({ template: './src/index.html' }),
-        // new BundleAnalyzerPlugin(),
+        new HtmlWebpackPlugin({
+            template: './src/index.html',
+            favicon: './src/assets/img/favicon.svg',
+        }),
         new Dotenv({ path: '../.env' }),
+        // new BundleAnalyzerPlugin(),
     ],
     output: {
         filename: '[name].bundle.js',
         chunkFilename: '[name].bundle.js',
         path: path.resolve(__dirname, 'dist'),
-        publicPath: '/',
     },
     module: {
         rules: [
@@ -26,6 +28,14 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader'],
+            },
+            {
+                test: /\.(png|jp(e*)g|svg|gif)$/,
+                use: [
+                    {
+                        loader: 'file-loader',
+                    },
+                ],
             },
         ],
     },

@@ -82,7 +82,7 @@ router.post(
     passport.authenticate('local', {
         failureFlash: true,
     }),
-    async (req, res) => {
+    (req, res) => {
         if (req.user) {
             res.json({ email: req.user.email });
         } else {

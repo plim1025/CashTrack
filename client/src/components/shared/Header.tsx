@@ -1,42 +1,23 @@
 // REACT //
-import React, { useState } from 'react';
-
-// ROUTER //
-import { Redirect, withRouter } from 'react-router';
+import React from 'react';
 
 // REDUX //
 import { useSelector, useDispatch } from 'react-redux';
-import { loadEmail } from '../redux/Actions';
-import { RootState } from '../redux/Store';
+import { loadEmail, loadSubpage } from '../../redux/Actions';
+import { RootState } from '../../redux/Store';
 
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import Alert from 'react-bootstrap/Alert';
-import Card from 'react-bootstrap/Card';
+import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 
 // STYLES //
 const ss = StyleSheet.create({
-    wrapper: {
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    card: {
-        position: 'relative',
-        marginTop: 'auto',
-        marginBottom: 'auto',
-        width: 400,
-        padding: 20,
-    },
     logo: {
-        position: 'absolute',
-        transform: 'translateY(-100%)',
-        fill: '#000',
+        cursor: 'pointer',
+        fill: '#0dfc94',
         height: 40,
         width: 200,
+        marginRight: 'auto',
     },
     logoText: {
         fontSize: 200,
@@ -45,53 +26,38 @@ const ss = StyleSheet.create({
     },
 });
 
-interface Props {
-    history: any;
-}
-
-const Login: React.FC<Props> = props => {
+const Header: React.FC = () => {
     const dispatch = useDispatch();
     const stateEmail = useSelector((state: RootState) => state.email);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
+    const stateSubpage = useSelector((state: RootState) => state.subpage);
 
-    const login = async (e: any) => {
-        e.preventDefault();
-        if (!email || !password) {
-            setError('All fields must be filled in.');
-            return;
-        }
-        try {
-            const loginInfo = JSON.stringify({ email: email, password: password });
-            const response = await fetch(`${process.env.BACKEND_URI}/api/user/login`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: loginInfo,
-            });
-            const parsedResponse = await response.json();
-            if (rememberMe) {
-                dispatch(loadEmail(parsedResponse.email));
-            } else {
-                sessionStorage.setItem('email', email);
-            }
-            props.history.push('/home');
-        } catch {
-            setError('Email and password do not match.');
-        }
+    const changeLink = (subpage: string) => {
+        dispatch(loadSubpage(subpage));
+        window.history.replaceState(null, '', `/${subpage}`);
     };
 
-    if (stateEmail || sessionStorage.getItem('email')) {
-        return <Redirect to='/home' />;
-    }
+    const logout = async () => {
+        try {
+            await fetch(`${process.env.BACKEND_URI}/api/user/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch {
+            console.log('Error logging out');
+        }
+        if (stateEmail) {
+            dispatch(loadEmail(''));
+        } else if (sessionStorage.getItem('email')) {
+            sessionStorage.setItem('email', '');
+        }
+        dispatch(loadSubpage('home'));
+    };
+
     return (
-        <div className={css(ss.wrapper)}>
-            <Card className={css(ss.card)}>
-                {/* <svg
+        <Navbar collapseOnSelect expand='lg' bg='dark' variant='dark'>
+            <Navbar.Brand>
+                <svg
+                    onClick={() => changeLink('home')}
                     className={css(ss.logo)}
                     xmlns='http://www.w3.org/2000/svg'
                     viewBox='0 0 1698.4 493'
@@ -100,36 +66,59 @@ const Login: React.FC<Props> = props => {
                     <text className={css(ss.logoText)} transform='translate(665 297)'>
                         CashTrack
                     </text>
-                </svg> */}
-                <Form>
-                    <h2>Login</h2>
-                    {error ? <Alert variant='danger'>{error}</Alert> : null}
-                    <Form.Group>
-                        <Form.Label>Email address</Form.Label>
-                        <Form.Control onChange={e => setEmail(e.target.value)} type='email' />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control onChange={e => setPassword(e.target.value)} type='password' />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Check
-                            onChange={(e: any) => setRememberMe(e.target.checked)}
-                            type='checkbox'
-                            label='Remember me'
-                        />
-                    </Form.Group>
-                    <Button onClick={login} variant='primary' type='submit'>
-                        Submit
-                    </Button>
-                    <span>New to CashTrack?</span>
-                    <Button onClick={() => props.history.push('/register')} variant='link'>
-                        Register here
-                    </Button>
-                </Form>
-            </Card>
-        </div>
+                </svg>
+            </Navbar.Brand>
+            <Navbar.Toggle />
+            <Navbar.Collapse>
+                <Nav>
+                    <Nav.Link
+                        style={{ color: stateSubpage === 'home' ? '#fff' : '' }}
+                        onClick={() => changeLink('home')}
+                    >
+                        Home
+                    </Nav.Link>
+                    <Nav.Link
+                        style={{ color: stateSubpage === 'transactions' ? '#fff' : '' }}
+                        onClick={() => changeLink('transactions')}
+                    >
+                        Transactions
+                    </Nav.Link>
+                    <Nav.Link
+                        style={{ color: stateSubpage === 'trends' ? '#fff' : '' }}
+                        onClick={() => changeLink('trends')}
+                    >
+                        Trends
+                    </Nav.Link>
+                    <Nav.Link
+                        style={{ color: stateSubpage === 'budgets' ? '#fff' : '' }}
+                        onClick={() => changeLink('budgets')}
+                    >
+                        Budgets
+                    </Nav.Link>
+                    <Nav.Link
+                        style={{ color: stateSubpage === 'accounts' ? '#fff' : '' }}
+                        onClick={() => changeLink('accounts')}
+                    >
+                        Accounts
+                    </Nav.Link>
+                </Nav>
+                <Nav style={{ marginLeft: 'auto' }}>
+                    <NavDropdown
+                        title={stateEmail || sessionStorage.getItem('email')}
+                        id='basic-nav-dropdown'
+                    >
+                        <NavDropdown.Item onClick={() => changeLink('profile')}>
+                            Profile
+                        </NavDropdown.Item>
+                        <NavDropdown.Item onClick={() => changeLink('settings')}>
+                            Settings
+                        </NavDropdown.Item>
+                    </NavDropdown>
+                    <Nav.Link onClick={logout}>Logout</Nav.Link>
+                </Nav>
+            </Navbar.Collapse>
+        </Navbar>
     );
 };
 
-export default withRouter(Login);
+export default Header;
