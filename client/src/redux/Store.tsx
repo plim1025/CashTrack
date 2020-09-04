@@ -8,6 +8,7 @@ const localPersistConfig = {
     key: 'CashTrack',
     storage: localStorage,
     whitelist: ['email'],
+    blacklist: ['transactions'],
 };
 
 const persistedReducer = persistReducer(localPersistConfig, rootReducer);

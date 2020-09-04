@@ -19,3 +19,9 @@ body {
     height: 100%;
     font-family: 'Open Sans';
 }
+
+.table td {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}

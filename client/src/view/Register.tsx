@@ -57,7 +57,7 @@ interface Props {
 
 const Register: React.FC<Props> = props => {
     let errorTimeout: ReturnType<typeof setTimeout>;
-    const stateEmail = useSelector((state: RootState) => state.email);
+    const globalEmail = useSelector((state: RootState) => state.email);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(false);
@@ -101,7 +101,7 @@ const Register: React.FC<Props> = props => {
         };
     }, []);
 
-    if (stateEmail || sessionStorage.getItem('email')) {
+    if (globalEmail || sessionStorage.getItem('email')) {
         return <Redirect to='/home' />;
     }
     return (

@@ -35,8 +35,8 @@ interface Props {
 
 const Header: React.FC<Props> = props => {
     const dispatch = useDispatch();
-    const stateEmail = useSelector((state: RootState) => state.email);
-    const stateSubpage = useSelector((state: RootState) => state.subpage);
+    const globalEmail = useSelector((state: RootState) => state.email);
+    const globalSubpage = useSelector((state: RootState) => state.subpage);
 
     const changeLink = (subpage: string) => {
         dispatch(loadSubpage(subpage));
@@ -52,7 +52,7 @@ const Header: React.FC<Props> = props => {
         } catch {
             console.log('Error logging out');
         }
-        if (stateEmail) {
+        if (globalEmail) {
             dispatch(loadEmail(''));
         }
         if (sessionStorage.getItem('email')) {
@@ -81,45 +81,39 @@ const Header: React.FC<Props> = props => {
             <Navbar.Collapse>
                 <Nav>
                     <Nav.Link
-                        style={{ color: stateSubpage === 'home' ? '#fff' : '' }}
+                        style={{ color: globalSubpage === 'home' ? '#fff' : '' }}
                         onClick={() => changeLink('home')}
                     >
                         Home
                     </Nav.Link>
                     <Nav.Link
-                        style={{ color: stateSubpage === 'transactions' ? '#fff' : '' }}
+                        style={{ color: globalSubpage === 'transactions' ? '#fff' : '' }}
                         onClick={() => changeLink('transactions')}
                     >
                         Transactions
                     </Nav.Link>
                     <Nav.Link
-                        style={{ color: stateSubpage === 'trends' ? '#fff' : '' }}
+                        style={{ color: globalSubpage === 'trends' ? '#fff' : '' }}
                         onClick={() => changeLink('trends')}
                     >
                         Trends
                     </Nav.Link>
                     <Nav.Link
-                        style={{ color: stateSubpage === 'budgets' ? '#fff' : '' }}
+                        style={{ color: globalSubpage === 'budgets' ? '#fff' : '' }}
                         onClick={() => changeLink('budgets')}
                     >
                         Budgets
                     </Nav.Link>
-                    <Nav.Link
-                        style={{ color: stateSubpage === 'accounts' ? '#fff' : '' }}
-                        onClick={() => changeLink('accounts')}
-                    >
-                        Accounts
-                    </Nav.Link>
                 </Nav>
                 <Nav style={{ marginLeft: 'auto' }}>
                     <NavDropdown
-                        title={stateEmail || sessionStorage.getItem('email')}
+                        title={globalEmail || sessionStorage.getItem('email')}
                         id='basic-nav-dropdown'
                     >
-                        <NavDropdown.Item onClick={() => changeLink('profile')}>
-                            Profile
+                        <NavDropdown.Item onClick={() => changeLink('accounts')}>
+                            Accounts
                         </NavDropdown.Item>
-                        <NavDropdown.Item onClick={() => changeLink('settings')}>
+                        <NavDropdown.Item onClick={() => changeLink('accounts')}>
                             Settings
                         </NavDropdown.Item>
                     </NavDropdown>

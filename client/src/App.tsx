@@ -7,7 +7,7 @@ import React, { Suspense, useEffect } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router';
 
 // REDUX //
-import { useSelector, useDispatch} from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { loadSubpage } from './redux/Actions';
 import { RootState } from './redux/Store';
 
@@ -20,7 +20,6 @@ const Transactions = React.lazy(() => import(/* webpackChunkName: 'Transactions'
 const Trends = React.lazy(() => import(/* webpackChunkName: 'Trends' */ './view/Trends'));
 const Accounts = React.lazy(() => import(/* webpackChunkName: 'Accounts' */ './view/Accounts'));
 const Budgets = React.lazy(() => import(/* webpackChunkName: 'Budgets' */ './view/Budgets'));
-const Profile = React.lazy(() => import(/* webpackChunkName: 'Profile' */ './view/Profile'));
 const Settings = React.lazy(() => import(/* webpackChunkName: 'Settings' */ './view/Settings'));
 
 interface Props {
@@ -30,11 +29,11 @@ interface Props {
 
 const App: React.FC<Props & RouteComponentProps> = props => {
     const dispatch = useDispatch();
-    const stateEmail = useSelector((state: RootState) => state.email);
-    const stateSubpage = useSelector((state: RootState) => state.subpage);
+    const globalEmail = useSelector((state: RootState) => state.email);
+    const globalSubpage = useSelector((state: RootState) => state.subpage);
 
     useEffect(() => {
-        if (!stateEmail && !sessionStorage.getItem('email')) {
+        if (!globalEmail && !sessionStorage.getItem('email')) {
             props.history.push('/signin');
         } else {
             dispatch(loadSubpage(props.subpage));
@@ -45,19 +44,17 @@ const App: React.FC<Props & RouteComponentProps> = props => {
         <>
             <Header />
             <Suspense fallback={<div>Loading...</div>}>
-                {stateSubpage === 'home' ? (
+                {globalSubpage === 'home' ? (
                     <Home />
-                ) : stateSubpage === 'transactions' ? (
+                ) : globalSubpage === 'transactions' ? (
                     <Transactions />
-                ) : stateSubpage === 'trends' ? (
+                ) : globalSubpage === 'trends' ? (
                     <Trends />
-                ) : stateSubpage === 'budgets' ? (
+                ) : globalSubpage === 'budgets' ? (
                     <Budgets />
-                ) : stateSubpage === 'accounts' ? (
+                ) : globalSubpage === 'accounts' ? (
                     <Accounts />
-                ) : stateSubpage === 'profile' ?  (
-                    <Profile />
-                ) : stateSubpage === 'settings' ? (
+                ) : globalSubpage === 'settings' ? (
                     <Settings /> 
                 ) : (
                     <div>404</div>

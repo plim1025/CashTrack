@@ -40,33 +40,25 @@ const PlaidLinkButton: React.FC = () => {
         if (!response.ok) {
             console.log('Error setting plaid account');
         }
-        setAccountsLoading(false);
     };
 
-    const onSuccess = useCallback(async (token, metadata) => {
+    const onSuccess = useCallback(async (token: string, metadata: any) => {
         setAccountsInfo({ token: token, metadata: metadata });
         setAccountsLoading(true);
-    }, []);
-
-    const onEvent = useCallback((eventName, metadata) => {
-        console.log('onEvent', eventName, metadata);
-    }, []);
-
-    const onExit = useCallback((err, metadata) => {
-        console.log('onExit', err, metadata);
     }, []);
 
     const config = {
         token: linkToken,
         onSuccess: onSuccess,
-        onEvent: onEvent,
-        onExit: onExit,
     };
 
     const { open, ready, error } = usePlaidLink(config);
 
     if (accountsLoading) {
-        throw setPlaidAccounts(accountsInfo.token, accountsInfo.metadata);
+        const promise = setPlaidAccounts(accountsInfo.token, accountsInfo.metadata).then(() =>
+            setAccountsLoading(false)
+        );
+        throw promise;
     }
     return (
         <Button
