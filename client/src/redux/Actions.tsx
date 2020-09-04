@@ -18,14 +18,37 @@ export const loadSubpage = (subpage: string): { type: string; subpage: string } 
     subpage: subpage,
 });
 
-export const createTransaction = (
+export const createTransactionDispatcher = (
     transaction: Transaction
 ): { type: string; transaction: Transaction } => ({
     type: CREATE_TRANSACTION,
     transaction: transaction,
 });
+export const createTransaction = (transaction: Transaction) => {
+    return async (dispatch: any): Promise<any> => {
+        try {
+            const transactionInfo = JSON.stringify({
+                description: transaction.description,
+                amount: transaction.amount,
+                category: transaction.category,
+                date: transaction.date,
+            });
+            await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: transactionInfo,
+            });
+            dispatch(createTransactionDispatcher(transaction));
+        } catch (error) {
+            console.log(`Error creating transaction: ${error}`);
+        }
+    };
+};
 
-export const updateTransaction = (
+export const updateTransactionDispatcher = (
     id: string,
     transaction: Transaction
 ): { type: string; id: string; transaction: Transaction } => ({
@@ -33,11 +56,50 @@ export const updateTransaction = (
     id: id,
     transaction: transaction,
 });
+export const updateTransaction = (id: string, transaction: Transaction) => {
+    return async (dispatch: any): Promise<any> => {
+        try {
+            const transactionInfo = JSON.stringify({
+                description: transaction.description,
+                amount: transaction.amount,
+                category: transaction.category,
+                date: transaction.date,
+            });
+            await fetch(`${process.env.BACKEND_URI}/api/transaction/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: transactionInfo,
+            });
+            dispatch(updateTransactionDispatcher(id, transaction));
+        } catch (error) {
+            console.log(`Error updating transaction: ${error}`);
+        }
+    };
+};
 
-export const deleteTransaction = (id: string): { type: string; id: string } => ({
+export const deleteTransactionDispatcher = (id: string): { type: string; id: string } => ({
     type: DELETE_TRANSACTION,
     id: id,
 });
+export const deleteTransaction = (id: string) => {
+    return async (dispatch: any): Promise<any> => {
+        try {
+            await fetch(`${process.env.BACKEND_URI}/api/transaction/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+            dispatch(deleteTransactionDispatcher(id));
+        } catch (error) {
+            console.log(`Error deleting transaction: ${error}`);
+        }
+    };
+};
 
 export const loadTransactions = (
     transactions: Transaction[]

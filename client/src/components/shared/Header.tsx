@@ -49,8 +49,8 @@ const Header: React.FC<Props> = props => {
                 method: 'POST',
                 credentials: 'include',
             });
-        } catch {
-            console.log('Error logging out');
+        } catch (error) {
+            console.log(`Error logging out: ${error}`);
         }
         if (globalEmail) {
             dispatch(loadEmail(''));

@@ -10,35 +10,43 @@ const PlaidLinkButton: React.FC = () => {
 
     useEffect(() => {
         const getLinkToken = async () => {
-            const response = await fetch(`${process.env.BACKEND_URI}/api/plaid/create_link_token`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            });
-            const newLinkToken = await response.json();
-            setLinkToken(newLinkToken);
+            try {
+                const response = await fetch(
+                    `${process.env.BACKEND_URI}/api/plaid/create_link_token`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                    }
+                );
+                const newLinkToken = await response.json();
+                setLinkToken(newLinkToken);
+            } catch (error) {
+                console.log(`Error getting link token: ${error}`);
+            }
         };
         getLinkToken();
     }, []);
 
     const setPlaidAccounts = async (token: string, metadata: any) => {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/plaid/set_account`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                publicToken: token,
-                batchID: metadata.link_session_id,
-                institution: metadata.institution.name,
-                accounts: metadata.accounts,
-            }),
-        });
-        if (!response.ok) {
-            console.log('Error setting plaid account');
+        try {
+            await fetch(`${process.env.BACKEND_URI}/api/plaid/set_account`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    publicToken: token,
+                    batchID: metadata.link_session_id,
+                    institution: metadata.institution.name,
+                    accounts: metadata.accounts,
+                }),
+            });
+        } catch (error) {
+            console.log(`Error setting plaid account: ${error}`);
         }
     };
 

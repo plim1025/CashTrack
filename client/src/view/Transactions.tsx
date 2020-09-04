@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 // REDUX //
 import { useSelector, useDispatch } from 'react-redux';
-import { loadTransactions } from '../redux/Actions';
+import { loadTransactions, updateTransaction } from '../redux/Actions';
 import { RootState } from '../redux/Store';
 
 // COMPONENTS //
@@ -66,8 +66,8 @@ const Transactions: React.FC = () => {
             dataField: 'amount',
             formatter: (cell: any) => {
                 const parsedCell = parseFloat(cell);
-                if (parsedCell < 0) return `-$${Math.abs(parsedCell)}`;
-                return `$${parsedCell}`;
+                if (parsedCell < 0) return `-$${Math.abs(parsedCell).toFixed(2)}`;
+                return `$${parsedCell.toFixed(2)}`;
             },
             sort: true,
             validator: (newValue: any) => {
@@ -90,25 +90,26 @@ const Transactions: React.FC = () => {
     const [transactions, setTransactions] = useState(null);
 
     const getTransactionData = async () => {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
-            credentials: 'include',
-        });
-        if (!response.ok) {
-            console.log('Error setting plaid transactions');
+        try {
+            const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+                credentials: 'include',
+            });
+            const parsedResponse = await response.json();
+            const typedResponse = parsedResponse.map((transaction: any) => {
+                const date = new Date(transaction.date);
+                date.setDate(date.getDate() + 1);
+                const dateString = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+                return {
+                    ...transaction,
+                    date: dateString,
+                    amount: transaction.amount.toFixed(2),
+                };
+            });
+            return typedResponse;
+        } catch (error) {
+            console.log(`Error setting plaid transactions: ${error}`);
             return [];
         }
-        const parsedResponse = await response.json();
-        const typedResponse = parsedResponse.map((transaction: any) => {
-            const date = new Date(transaction.date);
-            date.setDate(date.getDate() + 1);
-            const dateString = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-            return {
-                ...transaction,
-                date: dateString,
-                amount: transaction.amount.toFixed(2),
-            };
-        });
-        return typedResponse;
     };
 
     if (!transactions) {
@@ -152,8 +153,14 @@ const Transactions: React.FC = () => {
             })}
             cellEdit={cellEditFactory({
                 mode: 'click',
-                afterSaveCell: (oldValue: any, newValue: any, row: any, column: any) => {
-                    // console.log(oldValue, newValue, row, column);
+                afterSaveCell: (oldValue: any, newValue: any, item: any) => {
+                    const updatedTransaction = {
+                        description: item.description,
+                        amount: item.amount,
+                        category: item.category,
+                        date: item.date,
+                    };
+                    dispatch(updateTransaction(item.transactionID, updatedTransaction));
                 },
             })}
         />

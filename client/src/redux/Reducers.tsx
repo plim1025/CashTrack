@@ -35,7 +35,9 @@ const transactions = (
         case CREATE_TRANSACTION:
             return [...state, action.transaction];
         case UPDATE_TRANSACTION:
-            const filteredTransactions = state.filter(transaction => transaction._id === action.id);
+            const filteredTransactions = state.filter(
+                transaction => transaction.transactionID !== action.id
+            );
             const updatedTransactions = [...filteredTransactions, action.transaction];
             return updatedTransactions;
         case DELETE_TRANSACTION:
