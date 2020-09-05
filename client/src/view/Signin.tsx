@@ -11,7 +11,8 @@ import { RootState } from '../redux/Store';
 
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
-import { Alert, Button, Card, Form } from 'react-bootstrap';
+import { Button, Card, Form } from 'react-bootstrap';
+import Error from '../components/shared/Error';
 
 // STYLES //
 const ss = StyleSheet.create({
@@ -109,16 +110,7 @@ const Signin: React.FC<Props> = props => {
     }
     return (
         <div className={css(ss.wrapper)}>
-            <Alert
-                style={{
-                    position: 'absolute',
-                    top: error ? 10 : -200,
-                    transition: 'all .2s ease-in-out',
-                }}
-                variant='danger'
-            >
-                {errorMessage}
-            </Alert>
+            <Error error={error} errorMessage={errorMessage} />
             <Card className={css(ss.card)}>
                 <svg
                     className={css(ss.logo)}

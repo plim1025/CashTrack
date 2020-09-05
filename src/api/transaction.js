@@ -1,4 +1,5 @@
 const { Router } = require('express');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 
 const router = Router();
@@ -20,11 +21,14 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
     try {
         if (req.user) {
-            const { amount, category, date } = req.body;
+            const { description, amount, category, date } = req.body;
             const query = { _id: req.user._id };
+            const mongooseID = mongoose.Types.ObjectId();
             const update = {
                 $push: {
                     transactions: {
+                        _id: mongooseID,
+                        description: description,
                         amount: amount,
                         category: category,
                         date: date,
@@ -32,7 +36,7 @@ router.post('/', async (req, res, next) => {
                 },
             };
             await User.updateOne(query, update);
-            res.sendStatus(200);
+            res.json(mongooseID);
         } else {
             console.log('Error posting transaction, user not logged in.');
             throw Error;
@@ -49,10 +53,11 @@ router.put('/:id', async (req, res, next) => {
     try {
         if (req.user) {
             const { id } = req.params;
-            const { amount, category, date } = req.body;
-            const query = { _id: req.user._id, 'transactions.transactionID': id };
+            const { description, amount, category, date } = req.body;
+            const query = { _id: req.user._id, 'transactions._id': id };
             const update = {
                 $set: {
+                    'transactions.$.description': description,
                     'transactions.$.amount': amount,
                     'transactions.$.category': category,
                     'transactions.$.date': date,
@@ -72,15 +77,30 @@ router.put('/:id', async (req, res, next) => {
     }
 });
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/', async (req, res, next) => {
     try {
         if (req.user) {
-            const { id } = req.params;
+            const allTransactionIDs = req.body;
             const query = { _id: req.user._id };
-            const update = {
-                $pull: { transactions: { transactionID: id } },
-                $push: { removedTransactionIDs: id },
-            };
+            const { transactions } = await User.findOne(query);
+            const transactionIDs = transactions
+                .filter(
+                    transaction =>
+                        allTransactionIDs.indexOf(transaction._id.toString()) !== -1 &&
+                        transaction.transactionID
+                )
+                .map(transaction => transaction.transactionID);
+            let update;
+            if (transactionIDs.length) {
+                update = {
+                    $pull: { transactions: { _id: { $in: allTransactionIDs } } },
+                    $push: { removedTransactionIDs: { $each: transactionIDs } },
+                };
+            } else {
+                update = {
+                    $pull: { transactions: { _id: { $in: allTransactionIDs } } },
+                };
+            }
             await User.updateOne(query, update);
             res.sendStatus(200);
         } else {

@@ -3,7 +3,7 @@ import {
     LOAD_SUBPAGE,
     CREATE_TRANSACTION,
     UPDATE_TRANSACTION,
-    DELETE_TRANSACTION,
+    DELETE_TRANSACTIONS,
     LOAD_TRANSACTIONS,
 } from './Constants';
 import { Transaction } from '../types';
@@ -33,7 +33,7 @@ export const createTransaction = (transaction: Transaction) => {
                 category: transaction.category,
                 date: transaction.date,
             });
-            await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+            const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -41,7 +41,9 @@ export const createTransaction = (transaction: Transaction) => {
                 credentials: 'include',
                 body: transactionInfo,
             });
-            dispatch(createTransactionDispatcher(transaction));
+            const id = await response.json();
+            const transactionWithID = { ...transaction, _id: id };
+            dispatch(createTransactionDispatcher(transactionWithID));
         } catch (error) {
             console.log(`Error creating transaction: ${error}`);
         }
@@ -80,21 +82,25 @@ export const updateTransaction = (id: string, transaction: Transaction) => {
     };
 };
 
-export const deleteTransactionDispatcher = (id: string): { type: string; id: string } => ({
-    type: DELETE_TRANSACTION,
-    id: id,
+export const deleteTransactionsDispatcher = (
+    ids: string[]
+): { type: string; transactionIDs: string[] } => ({
+    type: DELETE_TRANSACTIONS,
+    transactionIDs: ids,
 });
-export const deleteTransaction = (id: string) => {
+export const deleteTransactions = (ids: string[]) => {
     return async (dispatch: any): Promise<any> => {
         try {
-            await fetch(`${process.env.BACKEND_URI}/api/transaction/`, {
+            const transactionInfo = JSON.stringify(ids);
+            await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
+                body: transactionInfo,
             });
-            dispatch(deleteTransactionDispatcher(id));
+            dispatch(deleteTransactionsDispatcher(ids));
         } catch (error) {
             console.log(`Error deleting transaction: ${error}`);
         }
@@ -107,3 +113,24 @@ export const loadTransactions = (
     type: LOAD_TRANSACTIONS,
     transactions: transactions,
 });
+
+export const logout = (history: any) => {
+    return async (dispatch: any, getState: any): Promise<any> => {
+        try {
+            await fetch(`${process.env.BACKEND_URI}/api/user/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch (error) {
+            console.log(`Error logging out: ${error}`);
+        }
+        if (getState().email) {
+            dispatch(loadEmail(''));
+        }
+        if (sessionStorage.getItem('email')) {
+            sessionStorage.setItem('email', '');
+        }
+        dispatch(loadSubpage('home'));
+        history.push('/signin');
+    };
+};

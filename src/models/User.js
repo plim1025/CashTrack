@@ -26,6 +26,7 @@ const UserSchema = new Schema({
             {
                 transactionID: requiredString,
                 accountID: requiredString,
+                description: requiredString,
                 amount: requiredNumber,
                 category: {
                     type: String,

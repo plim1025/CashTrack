@@ -202,6 +202,7 @@ router.post('/refresh', async (req, res, next) => {
                     return {
                         transactionID: transaction.transaction_id,
                         accountID: transaction.account_id,
+                        description: transaction.name,
                         amount: transaction.amount,
                         category: transaction.category[0],
                         date: transaction.date,

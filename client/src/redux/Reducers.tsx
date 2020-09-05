@@ -3,7 +3,7 @@ import {
     LOAD_SUBPAGE,
     CREATE_TRANSACTION,
     UPDATE_TRANSACTION,
-    DELETE_TRANSACTION,
+    DELETE_TRANSACTIONS,
     LOAD_TRANSACTIONS,
 } from './Constants';
 import { combineReducers } from 'redux';
@@ -28,8 +28,14 @@ const subpage = (state = 'home', action: { type: string; subpage?: string }): an
 };
 
 const transactions = (
-    state: Transaction[] = [],
-    action: { type: string; id?: string; transaction?: Transaction; transactions?: Transaction[] }
+    state: Transaction[] = null,
+    action: {
+        type: string;
+        id?: string;
+        transaction?: Transaction;
+        transactions?: Transaction[];
+        transactionIDs?: string[];
+    }
 ): any => {
     switch (action.type) {
         case CREATE_TRANSACTION:
@@ -40,8 +46,10 @@ const transactions = (
             );
             const updatedTransactions = [...filteredTransactions, action.transaction];
             return updatedTransactions;
-        case DELETE_TRANSACTION:
-            return state.filter(transaction => transaction._id === action.id);
+        case DELETE_TRANSACTIONS:
+            return state.filter(
+                transaction => action.transactionIDs.indexOf(transaction._id) === -1
+            );
         case LOAD_TRANSACTIONS:
             return action.transactions;
         default:

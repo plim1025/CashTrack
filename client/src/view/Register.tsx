@@ -10,7 +10,8 @@ import { RootState } from '../redux/Store';
 
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
-import { Alert, Button, Card, Form } from 'react-bootstrap';
+import { Button, Card, Form } from 'react-bootstrap';
+import Error from '../components/shared/Error';
 
 // STYLES //
 const ss = StyleSheet.create({
@@ -43,11 +44,6 @@ const ss = StyleSheet.create({
         display: 'flex',
         alignItems: 'center',
         marginBottom: '1rem',
-    },
-    alertLink: {
-        ':hover': {
-            textDecoration: 'underline',
-        },
     },
 });
 
@@ -106,26 +102,14 @@ const Register: React.FC<Props> = props => {
     }
     return (
         <div className={css(ss.wrapper)}>
-            {errorInfo.message ? (
-                <Alert
-                    style={{
-                        position: 'absolute',
-                        top: error ? 10 : -200,
-                        transition: 'all .2s ease-in-out',
-                    }}
-                    variant={errorInfo.type}
-                >
-                    {errorInfo.message}
-                    {errorInfo.type === 'success' ? (
-                        <Alert.Link
-                            onClick={() => props.history.push('/signin')}
-                            className={css(ss.alertLink)}
-                        >
-                            Sign In
-                        </Alert.Link>
-                    ) : null}
-                </Alert>
-            ) : null}
+            <Error
+                error={error}
+                type={errorInfo.type}
+                errorMessage={errorInfo.message}
+                link={errorInfo.type === 'success' ? '/signin' : null}
+                linkTitle={errorInfo.type === 'success' ? 'Sign In' : null}
+                history={props.history}
+            />
             <Card className={css(ss.card)}>
                 <svg
                     className={css(ss.logo)}

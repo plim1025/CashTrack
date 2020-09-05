@@ -6,7 +6,7 @@ import { withRouter } from 'react-router';
 
 // REDUX //
 import { useSelector, useDispatch } from 'react-redux';
-import { loadEmail, loadSubpage } from '../../redux/Actions';
+import { loadSubpage, logout } from '../../redux/Actions';
 import { RootState } from '../../redux/Store';
 
 // COMPONENTS //
@@ -41,25 +41,6 @@ const Header: React.FC<Props> = props => {
     const changeLink = (subpage: string) => {
         dispatch(loadSubpage(subpage));
         window.history.replaceState(null, '', `/${subpage}`);
-    };
-
-    const logout = async () => {
-        try {
-            await fetch(`${process.env.BACKEND_URI}/api/user/logout`, {
-                method: 'POST',
-                credentials: 'include',
-            });
-        } catch (error) {
-            console.log(`Error logging out: ${error}`);
-        }
-        if (globalEmail) {
-            dispatch(loadEmail(''));
-        }
-        if (sessionStorage.getItem('email')) {
-            sessionStorage.setItem('email', '');
-        }
-        dispatch(loadSubpage('home'));
-        props.history.push('/signin');
     };
 
     return (
@@ -107,7 +88,7 @@ const Header: React.FC<Props> = props => {
                 </Nav>
                 <Nav style={{ marginLeft: 'auto' }}>
                     <NavDropdown
-                        title={globalEmail || sessionStorage.getItem('email')}
+                        title={globalEmail || sessionStorage.getItem('email') || ''}
                         id='basic-nav-dropdown'
                     >
                         <NavDropdown.Item onClick={() => changeLink('accounts')}>
@@ -117,7 +98,7 @@ const Header: React.FC<Props> = props => {
                             Settings
                         </NavDropdown.Item>
                     </NavDropdown>
-                    <Nav.Link onClick={logout}>Logout</Nav.Link>
+                    <Nav.Link onClick={() => dispatch(logout(props.history))}>Logout</Nav.Link>
                 </Nav>
             </Navbar.Collapse>
         </Navbar>

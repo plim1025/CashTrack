@@ -7,7 +7,7 @@ const morgan = require('morgan');
 const path = require('path');
 const passport = require('passport');
 const session = require('express-session');
-// const MongoStore = require('connect-mongo')(session);
+const MongoStore = require('connect-mongo')(session);
 
 const userRoute = require('./api/user');
 const transactionRoute = require('./api/transaction');
@@ -42,7 +42,7 @@ app.use(morgan('dev'));
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
-        // store: new MongoStore({ mongooseConnection: mongoose.connection }),
+        store: new MongoStore({ mongooseConnection: mongoose.connection }),
         resave: false,
         saveUninitialized: false,
         cookie: {
