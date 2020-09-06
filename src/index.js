@@ -11,6 +11,7 @@ const MongoStore = require('connect-mongo')(session);
 
 const userRoute = require('./api/user');
 const transactionRoute = require('./api/transaction');
+const plaidAccountRoute = require('./api/plaidAccount');
 const plaidRoute = require('./api/plaid');
 
 require('dotenv').config();
@@ -57,6 +58,7 @@ app.use(passport.session());
 
 app.use('/api/user', userRoute);
 app.use('/api/transaction', transactionRoute);
+app.use('/api/plaidAccount', plaidAccountRoute);
 app.use('/api/plaid', plaidRoute);
 
 if (process.env.NODE_ENV === 'production') {

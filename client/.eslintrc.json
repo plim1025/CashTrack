@@ -36,6 +36,7 @@
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-throw-literal": "off",
         "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/no-use-before-define": "off",
         "no-restricted-globals": "off",
         "react/jsx-indent-props": "off",
         "react/jsx-indent": "off",

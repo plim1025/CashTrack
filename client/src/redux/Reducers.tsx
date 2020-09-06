@@ -5,9 +5,10 @@ import {
     UPDATE_TRANSACTION,
     DELETE_TRANSACTIONS,
     LOAD_TRANSACTIONS,
+    LOAD_ACCOUNTS,
 } from './Constants';
 import { combineReducers } from 'redux';
-import { Transaction } from '../types';
+import { Transaction, Account } from '../types';
 
 const email = (state = '', action: { type: string; email?: string }): any => {
     switch (action.type) {
@@ -57,8 +58,18 @@ const transactions = (
     }
 };
 
+const accounts = (state: Account[] = null, action: { type: string; accounts: Account[] }): any => {
+    switch (action.type) {
+        case LOAD_ACCOUNTS:
+            return action.accounts;
+        default:
+            return state;
+    }
+};
+
 export default combineReducers({
     email,
     subpage,
     transactions,
+    accounts,
 });

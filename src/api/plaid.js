@@ -224,14 +224,4 @@ router.post('/refresh', async (req, res, next) => {
     }
 });
 
-// router.post('/test', async (req, res) => {
-//     const { transactions } = await User.findById({ _id: req.user._id });
-//     console.log(
-//         transactions.filter(
-//             transaction => transaction.accountID === 'Ajkj4wekEMin7wVEzRAyCmPaBzwQn4f1QRGaZ'
-//         )
-//     );
-//     res.sendStatus(200);
-// });
-
 module.exports = router;

@@ -9,8 +9,6 @@ import { createTransaction } from '../../redux/Actions';
 import { Button, Form, Modal } from 'react-bootstrap';
 import Error from '../shared/Error';
 
-const ISODate = new Date().toISOString().slice(0, 10);
-
 interface Props {
     toggled: boolean;
     toggle: (toggle: boolean) => void;
@@ -18,6 +16,7 @@ interface Props {
 
 const ModalOverlay: React.FC<Props> = props => {
     let errorTimeout: ReturnType<typeof setTimeout>;
+    const ISODate = new Date().toISOString().slice(0, 10);
     const dispatch = useDispatch();
     const modalRef = useRef(null);
     const [transaction, setTransaction] = useState({
@@ -55,10 +54,10 @@ const ModalOverlay: React.FC<Props> = props => {
 
     return (
         <Modal
-            show={props.toggled}
+            centered
             onShow={() => modalRef.current.focus()}
             onHide={() => props.toggle(false)}
-            centered
+            show={props.toggled}
         >
             <Error error={error} errorMessage={errorMessage} />
             <Form>
@@ -66,22 +65,22 @@ const ModalOverlay: React.FC<Props> = props => {
                     <Form.Group>
                         <Form.Label>Date</Form.Label>
                         <Form.Control
-                            type='date'
-                            defaultValue={ISODate}
                             className='form-control editor edit-date'
+                            defaultValue={ISODate}
                             onChange={e => setTransaction({ ...transaction, date: e.target.value })}
+                            type='date'
                         />
                     </Form.Group>
                     <Form.Group>
                         <Form.Label>Description</Form.Label>
                         <Form.Control
-                            ref={modalRef}
                             onChange={e =>
                                 setTransaction({
                                     ...transaction,
                                     description: e.target.value,
                                 })
                             }
+                            ref={modalRef}
                         />
                     </Form.Group>
                     <Form.Group>
@@ -108,10 +107,10 @@ const ModalOverlay: React.FC<Props> = props => {
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={() => props.toggle(false)} variant='secondary' size='sm'>
+                    <Button onClick={() => props.toggle(false)} size='sm' variant='secondary'>
                         Cancel
                     </Button>
-                    <Button onClick={addTransaction} variant='primary' size='sm' type='submit'>
+                    <Button onClick={addTransaction} size='sm' type='submit' variant='primary'>
                         Submit
                     </Button>
                 </Modal.Footer>

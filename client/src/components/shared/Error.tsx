@@ -2,6 +2,7 @@
 import React from 'react';
 
 // COMPONENTS //
+import { css, StyleSheet } from 'aphrodite/no-important';
 import { Alert } from 'react-bootstrap';
 
 interface Props {
@@ -16,27 +17,34 @@ interface Props {
 const Error: React.FC<Props> = props => {
     return (
         <Alert
-            style={{
-                position: 'absolute',
-                top: props.error ? 10 : -200,
-                transition: 'all .2s ease-in-out',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                margin: 'auto 0',
-            }}
+            className={css(ss.wrapper)}
+            style={{ top: props.error ? 10 : -200 }}
             variant={props.type || 'danger'}
         >
             {props.errorMessage}
             {props.link ? (
-                <Alert.Link
-                    onClick={() => props.history.push(props.link)}
-                    style={{ ':hover': { textDecoration: 'underline' } }}
-                >
+                <Alert.Link className={css(ss.link)} onClick={() => props.history.push(props.link)}>
                     {props.linkTitle}
                 </Alert.Link>
             ) : null}
         </Alert>
     );
 };
+
+// STYLES //
+const ss = StyleSheet.create({
+    wrapper: {
+        position: 'absolute',
+        transition: 'all .2s ease-in-out',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        margin: 'auto 0',
+    },
+    link: {
+        ':hover': {
+            textDecoration: 'underline',
+        },
+    },
+});
 
 export default Error;

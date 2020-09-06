@@ -16,7 +16,8 @@ router.get('/', (req, res, next) => {
         if (req.user) {
             res.json({ user: req.user.email });
         } else {
-            res.json({ message: 'User not logged in.' });
+            console.log('Error setting account, user not logged in.');
+            throw Error;
         }
     } catch (error) {
         next(error);

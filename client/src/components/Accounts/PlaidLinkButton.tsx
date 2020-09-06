@@ -4,9 +4,9 @@ import { Button } from 'react-bootstrap';
 import '../../assets/css/index.css';
 
 const PlaidLinkButton: React.FC = () => {
-    const [linkToken, setLinkToken] = useState('');
     const [accountsInfo, setAccountsInfo] = useState({ token: '', metadata: null });
     const [accountsLoading, setAccountsLoading] = useState(false);
+    const [linkToken, setLinkToken] = useState('');
 
     useEffect(() => {
         const getLinkToken = async () => {
@@ -30,6 +30,13 @@ const PlaidLinkButton: React.FC = () => {
         getLinkToken();
     }, []);
 
+    const onSuccess = useCallback(async (token: string, metadata: any) => {
+        setAccountsInfo({ token: token, metadata: metadata });
+        setAccountsLoading(true);
+    }, []);
+
+    const { open, ready } = usePlaidLink({ token: linkToken, onSuccess: onSuccess });
+
     const setPlaidAccounts = async (token: string, metadata: any) => {
         try {
             await fetch(`${process.env.BACKEND_URI}/api/plaid/set_account`, {
@@ -50,18 +57,6 @@ const PlaidLinkButton: React.FC = () => {
         }
     };
 
-    const onSuccess = useCallback(async (token: string, metadata: any) => {
-        setAccountsInfo({ token: token, metadata: metadata });
-        setAccountsLoading(true);
-    }, []);
-
-    const config = {
-        token: linkToken,
-        onSuccess: onSuccess,
-    };
-
-    const { open, ready, error } = usePlaidLink(config);
-
     if (accountsLoading) {
         const promise = setPlaidAccounts(accountsInfo.token, accountsInfo.metadata).then(() =>
             setAccountsLoading(false)
@@ -69,13 +64,7 @@ const PlaidLinkButton: React.FC = () => {
         throw promise;
     }
     return (
-        <Button
-            // style={{ background: '#0a85ea', border: '#0a85ea' }}
-            onClick={() => open()}
-            disabled={!ready}
-            variant='primary'
-            size='sm'
-        >
+        <Button disabled={!ready} onClick={() => open()} size='sm' variant='primary'>
             Add Account
         </Button>
     );

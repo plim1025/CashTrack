@@ -5,8 +5,9 @@ import {
     UPDATE_TRANSACTION,
     DELETE_TRANSACTIONS,
     LOAD_TRANSACTIONS,
+    LOAD_ACCOUNTS,
 } from './Constants';
-import { Transaction } from '../types';
+import { Transaction, Account } from '../types';
 
 export const loadEmail = (email: string): { type: string; email: string } => ({
     type: LOAD_EMAIL,
@@ -112,6 +113,11 @@ export const loadTransactions = (
 ): { type: string; transactions: Transaction[] } => ({
     type: LOAD_TRANSACTIONS,
     transactions: transactions,
+});
+
+export const loadAccounts = (accounts: Account[]): { type: string; accounts: Account[] } => ({
+    type: LOAD_ACCOUNTS,
+    accounts: accounts,
 });
 
 export const logout = (history: any) => {

@@ -7,3 +7,15 @@ export interface Transaction {
     category: string;
     amount: string;
 }
+
+export interface Account {
+    id: string;
+    name: string;
+    institution: string;
+    type: string;
+    mask: string;
+    balance: number;
+    available?: number;
+    apy?: number;
+    creditLimit?: number;
+}

@@ -29,8 +29,8 @@ interface Props {
 
 const App: React.FC<Props & RouteComponentProps> = props => {
     const dispatch = useDispatch();
-    const globalEmail = useSelector((state: RootState) => state.email);
-    const globalSubpage = useSelector((state: RootState) => state.subpage);
+    const globalEmail = useSelector((redux: RootState) => redux.email);
+    const globalSubpage = useSelector((redux: RootState) => redux.subpage);
 
     useEffect(() => {
         if (!globalEmail && !sessionStorage.getItem('email')) {
