@@ -1,227 +1,169 @@
 // REACT //
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // ROUTER //
-import { withRouter } from 'react-router';
+import { withRouter, RouteComponentProps } from 'react-router';
 
 // REDUX //
-import { useSelector, useDispatch } from 'react-redux';
-import {
-    loadSubpage,
-    loadTransactions,
-    loadAccounts,
-    deleteTransactions,
-    logout,
-} from '../redux/Actions';
-import { RootState } from '../redux/Store';
+import { useDispatch } from 'react-redux';
+import { loadSubpage } from '../redux/Actions';
 
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
 import Table from '../components/Transactions/Table';
 import ModalOverlay from '../components/Transactions/ModalOverlay';
 import Sidebar from '../components/Transactions/Sidebar';
+import AccountInfo from '../components/Transactions/AccountInfo';
 import { Button } from 'react-bootstrap';
 
 interface Props {
     history: any;
+    resource: any;
+    refreshResources: () => void;
 }
 
-enum ACTIONS {
-    SET_ACCOUNTS = 'SET_ACCOUNTS',
-    SET_TRANSACTIONS = 'SET_TRANSACTIONS',
-    SET_TRANSACTION_IDS = 'SET_TRANSACTION_IDS',
-    DELETE_TRANSACTIONS = 'DELETE_TRANSACTIONS',
-    SET_LOADING = 'SET_LOADING',
-    SET_LOADED = 'SET_LOADED',
-    SHOW_MODAL = 'SHOW_MODAL',
-    HIDE_MODAL = 'HIDE_MODAL',
-    SET_SELECTED_ACCOUNT = 'SET_SELECTED_ACCOUNT',
-}
+const Transactions: React.FC<Props & RouteComponentProps> = props => {
+    const dispatch = useDispatch();
+    const [transactions, setTransactions] = useState(props.resource.transactions.read());
+    const [accounts, setAccounts] = useState(props.resource.accounts.read());
+    const [modal, setModal] = useState(false);
+    const [selectedAccountID, setselectedAccountID] = useState('All Accounts');
+    const [selectedTransactionIDs, setSelectedTransactionIDs] = useState([]);
 
-const reducer = (state: any, action: any) => {
-    switch (action.type) {
-        case ACTIONS.SET_ACCOUNTS:
-            return { ...state, accounts: action.accounts };
-        case ACTIONS.SET_TRANSACTIONS:
-            return { ...state, transactions: action.transactions };
-        case ACTIONS.SET_TRANSACTION_IDS:
-            return { ...state, selectedTransactionIDs: action.transactionIDs };
-        case ACTIONS.DELETE_TRANSACTIONS:
-            return {
-                ...state,
-                transactions: state.transactions.filter(
-                    (transaction: any) =>
-                        state.selectedTransactionIDs.indexOf(transaction._id) === -1
-                ),
-            };
-        case ACTIONS.SET_LOADING:
-            return { ...state, loading: true };
-        case ACTIONS.SET_LOADED:
-            return { ...state, loading: false };
-        case ACTIONS.SHOW_MODAL:
-            return { ...state, modal: true };
-        case ACTIONS.HIDE_MODAL:
-            return { ...state, modal: false };
-        case ACTIONS.SET_SELECTED_ACCOUNT:
-            return { ...state, selectedAccount: action.selectedAccount };
-        default:
-            return state;
-    }
-};
+    useEffect(() => {
+        if (transactions) {
+            setTransactions(
+                transactions.map((transaction: any) => {
+                    if (
+                        transaction.accountID === selectedAccountID ||
+                        selectedAccountID === 'All Accounts'
+                    ) {
+                        return { ...transaction, selected: true };
+                    }
+                    return { ...transaction, selected: false };
+                })
+            );
+        }
+    }, [selectedAccountID]);
 
-const Transactions: React.FC<Props> = props => {
-    const globalDispatch = useDispatch();
-    const [state, localDispatch] = useReducer(reducer, {
-        transactions: [],
-        selectedTransactionIDs: [],
-        accounts: [],
-        loaded: false,
-        modal: false,
-        selectedAccount: 'All Accounts',
-    });
-    const reduxTransactions = useSelector((redux: RootState) => redux.transactions);
-    const reduxAccounts = useSelector((redux: RootState) => redux.accounts);
+    useEffect(() => {
+        setTransactions(props.resource.transactions.read());
+        setAccounts(props.resource.accounts.read());
+    }, [props.resource]);
 
-    const getTransactionData = async () => {
+    const handleCreateTransaction = async (transaction: any) => {
         try {
+            const transactionInfo = JSON.stringify({
+                description: transaction.description,
+                amount: transaction.amount,
+                category: transaction.category,
+                date: transaction.date,
+            });
             const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 credentials: 'include',
+                body: transactionInfo,
             });
-            if (response.status === 500) {
-                globalDispatch(logout(props.history));
-            }
-            const parsedResponse = await response.json();
-            if (parsedResponse.length) {
-                const typedResponse = parsedResponse.map((transaction: any) => {
-                    const date = new Date(transaction.date);
-                    date.setDate(date.getDate() + 1);
-                    const dateString = `${
-                        date.getMonth() + 1
-                    }/${date.getDate()}/${date.getFullYear()}`;
-                    return {
-                        ...transaction,
-                        date: dateString,
-                        amount: transaction.amount.toFixed(2),
-                    };
-                });
-                return typedResponse;
-            }
-            return [];
-        } catch (error) {
-            console.log(`Error setting plaid transactions: ${error}`);
-            return [];
+            const id = await response.json();
+            setTransactions([...transactions, { ...transaction, _id: id, selected: true }]);
+        } catch (err) {
+            console.log(`Error creating transaction: ${err}`);
         }
     };
 
-    const getAccountData = async () => {
+    const handleDeleteTransaction = async () => {
+        setTransactions(
+            transactions.filter(
+                (transaction: any) => selectedTransactionIDs.indexOf(transaction._id) === -1
+            )
+        );
+        setSelectedTransactionIDs([]);
         try {
-            const response = await fetch(`${process.env.BACKEND_URI}/api/plaidAccount`, {
+            const transactionInfo = JSON.stringify(selectedTransactionIDs);
+            await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 credentials: 'include',
+                body: transactionInfo,
             });
-            if (response.status === 500) {
-                globalDispatch(logout(props.history));
-            }
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const parsedResponse = await response.json();
-            if (parsedResponse.length) {
-                const typedResponse = parsedResponse.map(({ batchID, ...account }: any) => account);
-                return typedResponse;
-            }
-            return [];
         } catch (error) {
-            console.log(`Error setting plaid accounts: ${error}`);
-            return [];
+            console.log(`Error deleting transaction: ${error}`);
         }
-    };
-
-    useEffect(() => {
-        localDispatch({ type: ACTIONS.SET_TRANSACTIONS, transactions: reduxTransactions });
-    }, [reduxTransactions]);
-
-    useEffect(() => {
-        localDispatch({ type: ACTIONS.SET_ACCOUNTS, accounts: reduxAccounts });
-    }, [reduxAccounts]);
-
-    const handleDeleteTransactions = () => {
-        localDispatch({ type: ACTIONS.DELETE_TRANSACTIONS });
-        globalDispatch(deleteTransactions(state.selectedTransactionIDs));
     };
 
     const navigateToAccountsPage = () => {
         props.history.push('/accounts');
-        globalDispatch(loadSubpage('accounts'));
+        dispatch(loadSubpage('accounts'));
     };
 
-    if (!state.transactions) {
-        if (reduxTransactions) {
-            localDispatch({ type: ACTIONS.SET_TRANSACTIONS, transactions: reduxTransactions });
-        } else if (reduxAccounts) {
-            localDispatch({ type: ACTIONS.SET_ACCOUNTS, accounts: reduxAccounts });
-        } else {
-            const promise = Promise.all([getTransactionData(), getAccountData()]).then(
-                ([transactionData, accountData]: any) => {
-                    localDispatch({
-                        type: ACTIONS.SET_TRANSACTIONS,
-                        transactions: transactionData,
-                    });
-                    localDispatch({ type: ACTIONS.SET_ACCOUNTS, accountData });
-                    globalDispatch(loadTransactions(transactionData));
-                    globalDispatch(loadAccounts(accountData));
-                }
-            );
-            throw promise;
-        }
-    }
     return (
         <div className={css(ss.wrapper)}>
             <Sidebar
-                accounts={state.accounts || []}
-                selectedAccount={state.selectedAccount}
-                setSelectedAccount={(selectedAccount: string) =>
-                    localDispatch({
-                        type: ACTIONS.SET_SELECTED_ACCOUNT,
-                        selectedAccount: selectedAccount,
-                    })
-                }
+                accounts={accounts}
+                selectedAccountID={selectedAccountID}
+                setSelectedAccountID={setselectedAccountID}
             />
             <div className={css(ss.subWrapper)}>
+                {accounts.length ? (
+                    <AccountInfo accounts={accounts} selectedAccountID={selectedAccountID} />
+                ) : null}
                 <div className={css(ss.buttons)}>
-                    <Button
-                        onClick={() => localDispatch({ type: ACTIONS.SHOW_MODAL })}
-                        className={css(ss.addButton)}
-                    >
-                        Add Transaction
+                    <Button onClick={() => setModal(true)} className={css(ss.button)}>
+                        + Add
                     </Button>
                     <Button
                         variant='danger'
-                        onClick={handleDeleteTransactions}
-                        className={css(ss.deleteButton)}
+                        onClick={handleDeleteTransaction}
+                        className={css(ss.button)}
                     >
-                        Delete Transactions
+                        <svg
+                            className={css(ss.icon, ss.deleteIcon)}
+                            height='407pt'
+                            viewBox='-48 0 407 407'
+                            width='407pt'
+                            xmlns='http://www.w3.org/2000/svg'
+                        >
+                            <path d='m89.199219 37c0-12.132812 9.46875-21 21.601562-21h88.800781c12.128907 0 21.597657 8.867188 21.597657 21v23h16v-23c0-20.953125-16.644531-37-37.597657-37h-88.800781c-20.953125 0-37.601562 16.046875-37.601562 37v23h16zm0 0' />
+                            <path d='m60.601562 407h189.199219c18.242188 0 32.398438-16.046875 32.398438-36v-247h-254v247c0 19.953125 14.15625 36 32.402343 36zm145.597657-244.800781c0-4.417969 3.582031-8 8-8s8 3.582031 8 8v189c0 4.417969-3.582031 8-8 8s-8-3.582031-8-8zm-59 0c0-4.417969 3.582031-8 8-8s8 3.582031 8 8v189c0 4.417969-3.582031 8-8 8s-8-3.582031-8-8zm-59 0c0-4.417969 3.582031-8 8-8s8 3.582031 8 8v189c0 4.417969-3.582031 8-8 8s-8-3.582031-8-8zm0 0' />
+                            <path d='m20 108h270.398438c11.046874 0 20-8.953125 20-20s-8.953126-20-20-20h-270.398438c-11.046875 0-20 8.953125-20 20s8.953125 20 20 20zm0 0' />
+                        </svg>
+                        Delete
+                    </Button>
+                    <Button
+                        variant='success'
+                        onClick={() => props.refreshResources()}
+                        className={css(ss.button)}
+                    >
+                        <svg className={css(ss.icon, ss.deleteIcon)} viewBox='0 0 512 512'>
+                            <path d='M493.815,70.629c-11.001-1.003-20.73,7.102-21.733,18.102l-2.65,29.069C424.473,47.194,346.429,0,256,0 C158.719,0,72.988,55.522,30.43,138.854c-5.024,9.837-1.122,21.884,8.715,26.908c9.839,5.024,21.884,1.123,26.908-8.715 C102.07,86.523,174.397,40,256,40c74.377,0,141.499,38.731,179.953,99.408l-28.517-20.367c-8.989-6.419-21.48-4.337-27.899,4.651 c-6.419,8.989-4.337,21.479,4.651,27.899l86.475,61.761c12.674,9.035,30.155,0.764,31.541-14.459l9.711-106.53 C512.919,81.362,504.815,71.632,493.815,70.629z' />
+                            <path d='M472.855,346.238c-9.838-5.023-21.884-1.122-26.908,8.715C409.93,425.477,337.603,472,256,472 c-74.377,0-141.499-38.731-179.953-99.408l28.517,20.367c8.989,6.419,21.479,4.337,27.899-4.651 c6.419-8.989,4.337-21.479-4.651-27.899l-86.475-61.761c-12.519-8.944-30.141-0.921-31.541,14.459l-9.711,106.53 c-1.003,11,7.102,20.73,18.101,21.733c11.014,1.001,20.731-7.112,21.733-18.102l2.65-29.069C87.527,464.806,165.571,512,256,512 c97.281,0,183.012-55.522,225.57-138.854C486.594,363.309,482.692,351.262,472.855,346.238z' />
+                        </svg>
+                        Refresh
                     </Button>
                 </div>
-                <Table
-                    transactions={state.transactions}
-                    selectedTransactionIDs={state.selectedTransactionIDs}
-                    setSelectedTransactionIDs={(transactionIDs: string[]) =>
-                        localDispatch({
-                            type: ACTIONS.SET_TRANSACTION_IDS,
-                            transactionIDs: transactionIDs,
-                        })
-                    }
-                />
-                <ModalOverlay
-                    toggled={state.modal}
-                    toggle={() => localDispatch({ type: ACTIONS.HIDE_MODAL })}
-                />
-                {state.transactions && !state.transactions.length ? (
+                {!accounts.length ? (
                     <div className={css(ss.noTransactionsText)}>
-                        <span>No transactions added.</span>
+                        <span>No accounts added.</span>
                         <Button variant='link' onClick={navigateToAccountsPage}>
                             Link an account.
                         </Button>
                     </div>
                 ) : null}
+                <Table
+                    transactions={transactions.filter((transaction: any) => transaction.selected)}
+                    selectedTransactionIDs={selectedTransactionIDs}
+                    setSelectedTransactionIDs={setSelectedTransactionIDs}
+                />
+                <ModalOverlay
+                    toggled={modal}
+                    toggle={() => setModal(false)}
+                    handleCreateTransaction={handleCreateTransaction}
+                />
             </div>
         </div>
     );
@@ -229,26 +171,35 @@ const Transactions: React.FC<Props> = props => {
 
 // STYLES //
 const ss = StyleSheet.create({
-    wrapper: {},
+    wrapper: {
+        display: 'flex',
+        margin: 'auto',
+        justifyContent: 'center',
+    },
     subWrapper: {
         width: '100%',
-        margin: 'auto',
         padding: 20,
-        maxWidth: 1000,
+        maxWidth: 800,
     },
     buttons: {
         display: 'flex',
     },
-    addButton: {
+    button: {
+        // @ts-ignore
+        display: 'flex !important',
+        justifyContent: 'center',
+        alignItems: 'center',
         flex: 1,
         margin: 20,
-        marginTop: 0,
+        lineHeight: '1 !important',
     },
-    deleteButton: {
-        flex: 1,
-        margin: 20,
-        marginTop: 0,
+    icon: {
+        fill: '#fff',
+        height: 20,
+        width: 20,
+        marginRight: 5,
     },
+    deleteIcon: {},
     noTransactionsText: {
         display: 'flex',
         justifyContent: 'center',

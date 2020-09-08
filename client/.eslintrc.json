@@ -50,6 +50,9 @@
         "no-nested-ternary": "off",
         "react-hooks/exhaustive-deps": "off",
         "radix": "off",
+        "jsx-a11y/click-events-have-key-events": "off",
+        "jsx-a11y/no-static-element-interactions": "off",
+        "consistent-return": "off",
         "react/jsx-wrap-multilines": [
             "error",
             {

@@ -6,6 +6,7 @@ export interface Transaction {
     description: string;
     category: string;
     amount: string;
+    selected?: boolean;
 }
 
 export interface Account {
@@ -16,6 +17,5 @@ export interface Account {
     mask: string;
     balance: number;
     available?: number;
-    apy?: number;
     creditLimit?: number;
 }

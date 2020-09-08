@@ -1,7 +1,5 @@
-/* eslint-disable prettier/prettier */
-
 // REACT //
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 
 // ROUTER //
 import { withRouter, RouteComponentProps } from 'react-router';
@@ -13,10 +11,13 @@ import { RootState } from './redux/Store';
 
 // COMPONENTS //
 import Header from './components/shared/Header';
+import createResources from './components/shared/Resources';
 
 // VIEWS //
 const Home = React.lazy(() => import(/* webpackChunkName: 'Home' */ './view/Home'));
-const Transactions = React.lazy(() => import(/* webpackChunkName: 'Transactions' */ './view/Transactions'));
+const Transactions = React.lazy(
+    () => import(/* webpackChunkName: 'Transactions' */ './view/Transactions')
+);
 const Trends = React.lazy(() => import(/* webpackChunkName: 'Trends' */ './view/Trends'));
 const Accounts = React.lazy(() => import(/* webpackChunkName: 'Accounts' */ './view/Accounts'));
 const Budgets = React.lazy(() => import(/* webpackChunkName: 'Budgets' */ './view/Budgets'));
@@ -28,6 +29,7 @@ interface Props {
 }
 
 const App: React.FC<Props & RouteComponentProps> = props => {
+    const [resources, setResources] = useState(() => createResources());
     const dispatch = useDispatch();
     const globalEmail = useSelector((redux: RootState) => redux.email);
     const globalSubpage = useSelector((redux: RootState) => redux.subpage);
@@ -47,21 +49,23 @@ const App: React.FC<Props & RouteComponentProps> = props => {
                 {globalSubpage === 'home' ? (
                     <Home />
                 ) : globalSubpage === 'transactions' ? (
-                    <Transactions />
+                    <Transactions
+                        resource={resources}
+                        refreshResources={() => setResources(() => createResources())}
+                    />
                 ) : globalSubpage === 'trends' ? (
                     <Trends />
                 ) : globalSubpage === 'budgets' ? (
                     <Budgets />
                 ) : globalSubpage === 'accounts' ? (
-                    <Accounts />
+                    <Accounts refreshResources={() => setResources(() => createResources())} />
                 ) : globalSubpage === 'settings' ? (
-                    <Settings /> 
+                    <Settings />
                 ) : (
                     <div>404</div>
                 )}
             </Suspense>
         </>
-
     );
 };
 

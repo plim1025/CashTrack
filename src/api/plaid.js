@@ -103,7 +103,7 @@ router.post('/set_account', async (req, res, next) => {
                         batchID: duplicateAccount ? oldBatchID : batchID,
                         name: account.name,
                         institution: institution,
-                        type: account.subtype,
+                        type: account.type,
                         mask: account.mask,
                         balance: accountBalance.balance,
                         available: accountBalance.available,

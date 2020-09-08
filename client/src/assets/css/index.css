@@ -21,7 +21,7 @@ body {
 }
 
 .table {
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .sortable,
@@ -41,9 +41,10 @@ body {
 }
 
 .react-bootstrap-table-editing-cell input {
+    padding: 0.25rem;
     background: #fff !important;
     cursor: auto !important;
-    font-size: 16px;
+    height: calc(1em + 0.75rem + 2px);
 }
 
 .react-bootstrap-table-editing-cell div {
@@ -79,9 +80,23 @@ body {
 }
 
 .sortable:nth-child(2) {
-    width: 106px;
+    width: 136px;
 }
 
 .sortable:nth-child(5) {
     width: 136px;
+}
+
+.editor {
+    font-size: 14px !important;
+    color: #212529 !important;
+}
+
+.form-group .editor {
+    font-size: 1rem !important;
+}
+
+.table-date .edit-date {
+    padding: 0 !important;
+    font-size: 12px !important;
 }

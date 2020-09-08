@@ -19,7 +19,6 @@ const PlaidAccountSchema = new Schema({
         required: true,
     },
     available: Number,
-    apy: Number,
     creditLimit: Number,
 });
 

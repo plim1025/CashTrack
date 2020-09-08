@@ -1,9 +1,16 @@
+// REACT //
 import React, { useState, useCallback, useEffect } from 'react';
+
+// COMPONENTS //
 import { usePlaidLink } from 'react-plaid-link';
 import { Button } from 'react-bootstrap';
 import '../../assets/css/index.css';
 
-const PlaidLinkButton: React.FC = () => {
+interface Props {
+    refreshResources: () => void;
+}
+
+const PlaidLinkButton: React.FC<Props> = props => {
     const [accountsInfo, setAccountsInfo] = useState({ token: '', metadata: null });
     const [accountsLoading, setAccountsLoading] = useState(false);
     const [linkToken, setLinkToken] = useState('');
@@ -32,6 +39,7 @@ const PlaidLinkButton: React.FC = () => {
 
     const onSuccess = useCallback(async (token: string, metadata: any) => {
         setAccountsInfo({ token: token, metadata: metadata });
+        props.refreshResources();
         setAccountsLoading(true);
     }, []);
 

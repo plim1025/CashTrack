@@ -1,10 +1,6 @@
 // REACT //
 import React, { useState, useEffect, useRef } from 'react';
 
-// REDUX //
-import { useDispatch } from 'react-redux';
-import { createTransaction } from '../../redux/Actions';
-
 // COMPONENTS //
 import { Button, Form, Modal } from 'react-bootstrap';
 import Error from '../shared/Error';
@@ -12,12 +8,12 @@ import Error from '../shared/Error';
 interface Props {
     toggled: boolean;
     toggle: (toggle: boolean) => void;
+    handleCreateTransaction: (transaction: any) => void;
 }
 
 const ModalOverlay: React.FC<Props> = props => {
     let errorTimeout: ReturnType<typeof setTimeout>;
     const ISODate = new Date().toISOString().slice(0, 10);
-    const dispatch = useDispatch();
     const modalRef = useRef(null);
     const [transaction, setTransaction] = useState({
         date: ISODate,
@@ -28,7 +24,7 @@ const ModalOverlay: React.FC<Props> = props => {
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    const addTransaction = (e: any) => {
+    const createTransaction = async (e: any) => {
         e.preventDefault();
         if (!transaction.date) {
             setError(true);
@@ -40,7 +36,7 @@ const ModalOverlay: React.FC<Props> = props => {
             setError(true);
             setErrorMessage('Maximum amount is $1,000,000,000');
         } else {
-            dispatch(createTransaction(transaction));
+            props.handleCreateTransaction(transaction);
             props.toggle(false);
         }
         errorTimeout = setTimeout(() => setError(false), 3000);
@@ -110,7 +106,7 @@ const ModalOverlay: React.FC<Props> = props => {
                     <Button onClick={() => props.toggle(false)} size='sm' variant='secondary'>
                         Cancel
                     </Button>
-                    <Button onClick={addTransaction} size='sm' type='submit' variant='primary'>
+                    <Button onClick={createTransaction} size='sm' type='submit' variant='primary'>
                         Submit
                     </Button>
                 </Modal.Footer>

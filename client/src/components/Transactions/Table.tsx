@@ -1,10 +1,6 @@
 // REACT //
 import React from 'react';
 
-// REDUX //
-import { useDispatch } from 'react-redux';
-import { updateTransaction } from '../../redux/Actions';
-
 // COMPONENTS //
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
@@ -25,7 +21,6 @@ interface Props {
 }
 
 const Table: React.FC<Props> = props => {
-    const dispatch = useDispatch();
     const tableColumns = [
         {
             text: 'Date',
@@ -33,6 +28,7 @@ const Table: React.FC<Props> = props => {
             editor: {
                 type: Type.DATE,
             },
+            editCellClasses: 'table-date',
             formatter: (cell: any) => {
                 const date = new Date(cell);
                 return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
@@ -151,14 +147,31 @@ const Table: React.FC<Props> = props => {
             })}
             cellEdit={cellEditFactory({
                 mode: 'click',
-                afterSaveCell: (oldValue: any, newValue: any, item: any) => {
-                    const updatedTransaction = {
+                afterSaveCell: async (oldValue: any, newValue: any, item: any) => {
+                    const transaction = {
                         description: item.description,
                         amount: item.amount,
                         category: item.category,
                         date: item.date,
                     };
-                    dispatch(updateTransaction(item.transactionID, updatedTransaction));
+                    try {
+                        const transactionInfo = JSON.stringify({
+                            description: transaction.description,
+                            amount: transaction.amount,
+                            category: transaction.category,
+                            date: transaction.date,
+                        });
+                        await fetch(`${process.env.BACKEND_URI}/api/transaction/${item._id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            credentials: 'include',
+                            body: transactionInfo,
+                        });
+                    } catch (error) {
+                        console.log(`Error updating transaction: ${error}`);
+                    }
                 },
             })}
         />
