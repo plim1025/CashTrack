@@ -2,22 +2,20 @@
 import React from 'react';
 
 // ROUTER //
-import { withRouter } from 'react-router';
+import { withRouter, RouteComponentProps } from 'react-router';
 
 // REDUX //
 import { useSelector, useDispatch } from 'react-redux';
 import { loadSubpage, logout } from '../../redux/Actions';
-import { RootState } from '../../redux/Store';
 
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
 import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 
-interface Props {
-    history: any;
-}
+// TYPES //
+import { RootState } from '../../types';
 
-const Header: React.FC<Props> = props => {
+const Header: React.FC<RouteComponentProps> = props => {
     const dispatch = useDispatch();
     const reduxEmail = useSelector((redux: RootState) => redux.email);
     const reduxSubpage = useSelector((redux: RootState) => redux.subpage);

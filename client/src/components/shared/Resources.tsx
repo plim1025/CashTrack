@@ -1,3 +1,6 @@
+// TYPES //
+import { Transaction, Account } from '../../types';
+
 const wrapPromise = (promise: any) => {
     let status = 'loading';
     let result: any;
@@ -30,9 +33,12 @@ const fetchTransactions = async () => {
         const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
             credentials: 'include',
         });
+        if (!response.ok) {
+            throw Error('Bad response from server');
+        }
         const parsedResponse = await response.json();
         if (parsedResponse.length) {
-            const typedResponse = parsedResponse.map((transaction: any) => {
+            const typedResponse = parsedResponse.map((transaction: Transaction) => {
                 const date = new Date(transaction.date);
                 date.setDate(date.getDate() + 1);
                 const dateString = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
@@ -47,8 +53,7 @@ const fetchTransactions = async () => {
         }
         return [];
     } catch (error) {
-        console.log(`Error setting plaid transactions: ${error}`);
-        return [];
+        throw Error(`Error fetching transactions: ${error}`);
     }
 };
 
@@ -57,20 +62,25 @@ const fetchAccounts = async () => {
         const response = await fetch(`${process.env.BACKEND_URI}/api/plaidAccount`, {
             credentials: 'include',
         });
+        if (!response.ok) {
+            throw Error('Bad response from server');
+        }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const parsedResponse = await response.json();
         if (parsedResponse.length) {
-            const typedResponse = parsedResponse.map(({ batchID, ...account }: any) => account);
+            const typedResponse = parsedResponse.map(({ batchID, ...account }: Account) => account);
             return typedResponse;
         }
         return [];
     } catch (error) {
-        console.log(`Error setting plaid accounts: ${error}`);
-        return [];
+        throw Error(`Error fetching accounts: ${error}`);
     }
 };
 
-const createResource = (): { transactions: any; accounts: any } => {
+const createResource = (): {
+    transactions: { read: () => Transaction[] };
+    accounts: { read: () => Account[] };
+} => {
     return {
         transactions: wrapPromise(fetchTransactions()),
         accounts: wrapPromise(fetchAccounts()),

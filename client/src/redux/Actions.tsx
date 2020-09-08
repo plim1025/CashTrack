@@ -1,4 +1,5 @@
 import { LOAD_EMAIL, LOAD_SUBPAGE } from './Constants';
+import { AppThunk } from '../types';
 
 export const loadEmail = (email: string): { type: string; email: string } => ({
     type: LOAD_EMAIL,
@@ -10,15 +11,18 @@ export const loadSubpage = (subpage: string): { type: string; subpage: string } 
     subpage: subpage,
 });
 
-export const logout = (history: any) => {
-    return async (dispatch: any, getState: any): Promise<any> => {
+export const logout = (history: any): AppThunk => {
+    return async (dispatch, getState): Promise<any> => {
         try {
-            await fetch(`${process.env.BACKEND_URI}/api/user/logout`, {
+            const response = await fetch(`${process.env.BACKEND_URI}/api/user/logout`, {
                 method: 'POST',
                 credentials: 'include',
             });
+            if (!response.ok) {
+                throw Error('Bad response from server');
+            }
         } catch (error) {
-            console.log(`Error logging out: ${error}`);
+            throw Error(`Error logging out: ${error}`);
         }
         if (getState().email) {
             dispatch(loadEmail(''));

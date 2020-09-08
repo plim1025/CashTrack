@@ -7,8 +7,11 @@ import React from 'react';
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
 
+// TYPES //
+import { Account } from '../../types';
+
 interface Props {
-    accounts: any;
+    accounts: Account[];
     selectedAccountID: string;
     setSelectedAccountID: (selectedAccount: string) => void;
 }
@@ -27,7 +30,7 @@ const Sidebar: React.FC<Props> = props => {
                 <div className={css(ss.accountTitle)}>All Accounts</div>
                 <div className={css(ss.accountSubtitle)}>{props.accounts.length} accounts</div>
             </div>
-            {props.accounts.map((account: any, index: number) => (
+            {props.accounts.map((account: Account, index: number) => (
                 <div
                     key={account.id}
                     onClick={() => props.setSelectedAccountID(account.id)}

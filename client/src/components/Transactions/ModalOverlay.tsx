@@ -5,10 +5,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import Error from '../shared/Error';
 
+// TYPES //
+import { Transaction } from '../../types';
+
 interface Props {
     toggled: boolean;
     toggle: (toggle: boolean) => void;
-    handleCreateTransaction: (transaction: any) => void;
+    handleCreateTransaction: (transaction: Transaction) => void;
 }
 
 const ModalOverlay: React.FC<Props> = props => {
@@ -19,20 +22,20 @@ const ModalOverlay: React.FC<Props> = props => {
         date: ISODate,
         description: '',
         category: '',
-        amount: '',
+        amount: 0,
     });
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    const createTransaction = async (e: any) => {
+    const createTransaction = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         if (!transaction.date) {
             setError(true);
             setErrorMessage('Invalid date');
-        } else if (isNaN(transaction.amount as any) || !transaction.amount) {
+        } else if (isNaN(transaction.amount) || !transaction.amount) {
             setError(true);
             setErrorMessage('Amount should be numeric');
-        } else if (parseInt(transaction.amount) > 1000000000) {
+        } else if (transaction.amount > 1000000000) {
             setError(true);
             setErrorMessage('Maximum amount is $1,000,000,000');
         } else {
@@ -96,7 +99,7 @@ const ModalOverlay: React.FC<Props> = props => {
                             onChange={e =>
                                 setTransaction({
                                     ...transaction,
-                                    amount: e.target.value,
+                                    amount: parseFloat(e.target.value),
                                 })
                             }
                         />

@@ -1,7 +1,7 @@
 import { LOAD_EMAIL, LOAD_SUBPAGE } from './Constants';
 import { combineReducers } from 'redux';
 
-const email = (state = '', action: { type: string; email?: string }): any => {
+const email = (state = '', action: { type: string; email?: string }): string => {
     switch (action.type) {
         case LOAD_EMAIL:
             return action.email;
@@ -10,7 +10,7 @@ const email = (state = '', action: { type: string; email?: string }): any => {
     }
 };
 
-const subpage = (state = 'home', action: { type: string; subpage?: string }): any => {
+const subpage = (state = 'home', action: { type: string; subpage?: string }): string => {
     switch (action.type) {
         case LOAD_SUBPAGE:
             return action.subpage;

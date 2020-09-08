@@ -5,16 +5,19 @@ import React, { useState, useEffect } from 'react';
 import { css, StyleSheet } from 'aphrodite/no-important';
 import { Card } from 'react-bootstrap';
 
+// TYPES //
+import { Account } from '../../types';
+
 interface Props {
-    accounts: any;
+    accounts: Account[];
     selectedAccountID: string;
 }
 
 const AccountInfo: React.FC<Props> = props => {
-    const [account, setAccount] = useState({
+    const [curAccount, setCurAccount] = useState({
         institution: '',
         name: '',
-        balance: 0,
+        balance: null,
         debt: null,
         available: null,
         creditLimit: null,
@@ -24,22 +27,22 @@ const AccountInfo: React.FC<Props> = props => {
     useEffect(() => {
         if (props.selectedAccountID === 'All Accounts') {
             const totalBalance = props.accounts
-                .map((item: any) =>
-                    item.type === 'investment' ||
-                    item.type === 'depository' ||
-                    item.type === 'other'
-                        ? item.balance
+                .map((account: Account) =>
+                    account.type === 'investment' ||
+                    account.type === 'depository' ||
+                    account.type === 'other'
+                        ? account.balance
                         : 0
                 )
-                .reduce((total: number, item: any) => total + item)
+                .reduce((total: number, balance: number) => total + balance)
                 .toFixed(2);
             const totalDebt = props.accounts
-                .map((item: any) =>
-                    item.type === 'credit' || item.type === 'loan' ? item.balance : 0
+                .map((account: Account) =>
+                    account.type === 'credit' || account.type === 'loan' ? account.balance : 0
                 )
-                .reduce((total: number, item: any) => total + item)
+                .reduce((total: number, debt: number) => total + debt)
                 .toFixed(2);
-            setAccount({
+            setCurAccount({
                 institution: 'All Accounts',
                 name: `${props.accounts.length} accounts`,
                 balance: totalBalance,
@@ -49,23 +52,23 @@ const AccountInfo: React.FC<Props> = props => {
                 type: null,
             });
         } else {
-            const curAccount = props.accounts.find(
-                (item: any) => item.id === props.selectedAccountID
+            const selectedAccount = props.accounts.find(
+                (account: Account) => account.id === props.selectedAccountID
             );
             let available = null;
-            if (curAccount.type === 'credit') {
-                available = (curAccount.creditLimit - curAccount.balance).toFixed(2);
-            } else if (curAccount.available) {
-                available = curAccount.available.toFixed(2);
+            if (selectedAccount.type === 'credit') {
+                available = (selectedAccount.creditLimit - selectedAccount.balance).toFixed(2);
+            } else if (selectedAccount.available) {
+                available = selectedAccount.available.toFixed(2);
             }
-            setAccount({
-                institution: curAccount.institution,
-                name: curAccount.name,
-                balance: curAccount.balance.toFixed(2),
+            setCurAccount({
+                institution: selectedAccount.institution,
+                name: selectedAccount.name,
+                balance: selectedAccount.balance.toFixed(2),
                 debt: null,
                 available: available,
-                creditLimit: curAccount.creditLimit || null,
-                type: curAccount.type,
+                creditLimit: selectedAccount.creditLimit || null,
+                type: selectedAccount.type,
             });
         }
     }, [props.selectedAccountID, props.accounts]);
@@ -82,42 +85,38 @@ const AccountInfo: React.FC<Props> = props => {
     return (
         <Card>
             <Card.Body>
-                <Card.Title>{account.institution}</Card.Title>
-                <Card.Subtitle className={css(ss.subtitle)}>{account.name}</Card.Subtitle>
+                <Card.Title>{curAccount.institution}</Card.Title>
+                <Card.Subtitle className={css(ss.subtitle)}>{curAccount.name}</Card.Subtitle>
             </Card.Body>
             <div className={css(ss.accountSummary)}>
-                <div className={css(ss.accountSummaryItem)}>
-                    <div className={css(ss.accountSummaryTitle)}>
-                        {props.selectedAccountID === 'All Accounts' ? 'Total Balance' : 'Balance'}
-                    </div>
-                    <div className={css(ss.accountSummaryAmount)}>
-                        {moneyFormat(account.balance)}
-                    </div>
-                </div>
-                {account.available ? (
+                {curAccount.balance ? (
                     <div className={css(ss.accountSummaryItem)}>
                         <div className={css(ss.accountSummaryTitle)}>
-                            {account.type === 'credit' ? 'Available Credit' : 'Available'}
+                            {props.selectedAccountID === 'All Accounts'
+                                ? 'Total Balance'
+                                : 'Balance'}
                         </div>
-                        <div className={css(ss.accountSummaryAmount)}>
-                            {moneyFormat(account.available)}
-                        </div>
+                        <div>{moneyFormat(curAccount.balance)}</div>
                     </div>
                 ) : null}
-                {account.debt ? (
+                {curAccount.available ? (
+                    <div className={css(ss.accountSummaryItem)}>
+                        <div className={css(ss.accountSummaryTitle)}>
+                            {curAccount.type === 'credit' ? 'Available Credit' : 'Available'}
+                        </div>
+                        <div>{moneyFormat(curAccount.available)}</div>
+                    </div>
+                ) : null}
+                {curAccount.debt ? (
                     <div className={css(ss.accountSummaryItem)}>
                         <div className={css(ss.accountSummaryTitle)}>Total Debt</div>
-                        <div className={css(ss.accountSummaryAmount)}>
-                            {moneyFormat(account.debt)}
-                        </div>
+                        <div>{moneyFormat(curAccount.debt)}</div>
                     </div>
                 ) : null}
-                {account.creditLimit ? (
+                {curAccount.creditLimit ? (
                     <div className={css(ss.accountSummaryItem)}>
                         <div className={css(ss.accountSummaryTitle)}>Credit Limit</div>
-                        <div className={css(ss.accountSummaryAmount)}>
-                            {moneyFormat(account.creditLimit)}
-                        </div>
+                        <div>{moneyFormat(curAccount.creditLimit)}</div>
                     </div>
                 ) : null}
             </div>
@@ -144,7 +143,6 @@ const ss = StyleSheet.create({
         fontSize: 14,
         opacity: 0.75,
     },
-    accountSummaryAmount: {},
 });
 
 export default AccountInfo;

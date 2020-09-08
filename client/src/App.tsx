@@ -7,11 +7,13 @@ import { withRouter, RouteComponentProps } from 'react-router';
 // REDUX //
 import { useSelector, useDispatch } from 'react-redux';
 import { loadSubpage } from './redux/Actions';
-import { RootState } from './redux/Store';
 
 // COMPONENTS //
 import Header from './components/shared/Header';
 import createResources from './components/shared/Resources';
+
+// TYPES //
+import { RootState } from './types';
 
 // VIEWS //
 const Home = React.lazy(() => import(/* webpackChunkName: 'Home' */ './view/Home'));
@@ -24,7 +26,6 @@ const Budgets = React.lazy(() => import(/* webpackChunkName: 'Budgets' */ './vie
 const Settings = React.lazy(() => import(/* webpackChunkName: 'Settings' */ './view/Settings'));
 
 interface Props {
-    history: any;
     subpage: string;
 }
 
@@ -50,7 +51,7 @@ const App: React.FC<Props & RouteComponentProps> = props => {
                     <Home />
                 ) : globalSubpage === 'transactions' ? (
                     <Transactions
-                        resource={resources}
+                        resources={resources}
                         refreshResources={() => setResources(() => createResources())}
                     />
                 ) : globalSubpage === 'trends' ? (

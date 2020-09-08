@@ -2,22 +2,20 @@
 import React, { useState, useEffect } from 'react';
 
 // ROUTER //
-import { Redirect } from 'react-router';
+import { Redirect, RouteComponentProps } from 'react-router';
 
 // REDUX //
 import { useSelector } from 'react-redux';
-import { RootState } from '../redux/Store';
 
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
 import { Button, Card, Form } from 'react-bootstrap';
 import Error from '../components/shared/Error';
 
-interface Props {
-    history: any;
-}
+// TYPES //
+import { RootState } from '../types';
 
-const Register: React.FC<Props> = props => {
+const Register: React.FC<RouteComponentProps> = props => {
     let errorTimeout: ReturnType<typeof setTimeout>;
     const globalEmail = useSelector((redux: RootState) => redux.email);
     const [email, setEmail] = useState('');

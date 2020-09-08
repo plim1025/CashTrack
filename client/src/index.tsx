@@ -2,7 +2,7 @@
 import ReactDOM from 'react-dom';
 
 // ROUTER //
-import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom';
+import { BrowserRouter, Route, Redirect, Switch, RouteComponentProps } from 'react-router-dom';
 
 // REDUX //
 import React from 'react';
@@ -20,6 +20,10 @@ import App from './App';
 
 const { store, persistor } = configureStore();
 
+interface TRouteParams {
+    subpage: string;
+}
+
 ReactDOM.render(
     <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
@@ -30,7 +34,9 @@ ReactDOM.render(
                     <Redirect exact from='/' to='/home' />
                     <Route
                         path='/:subpage'
-                        component={(route: any) => <App subpage={route.match.params.subpage} />}
+                        component={({ match }: RouteComponentProps<TRouteParams>) => (
+                            <App subpage={match.params.subpage} />
+                        )}
                     />
                 </Switch>
             </BrowserRouter>

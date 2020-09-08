@@ -15,8 +15,6 @@ const persistedReducer = persistReducer(localPersistConfig, rootReducer);
 const store = createStore(persistedReducer, applyMiddleware(reduxThunk));
 const persistor = persistStore(store);
 
-export type RootState = ReturnType<typeof rootReducer>;
-
 export default (): any => {
     return { persistor, store };
 };

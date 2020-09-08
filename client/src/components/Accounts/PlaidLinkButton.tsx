@@ -4,6 +4,8 @@ import React, { useState, useCallback, useEffect } from 'react';
 // COMPONENTS //
 import { usePlaidLink } from 'react-plaid-link';
 import { Button } from 'react-bootstrap';
+
+// CSS //
 import '../../assets/css/index.css';
 
 interface Props {
@@ -28,10 +30,13 @@ const PlaidLinkButton: React.FC<Props> = props => {
                         credentials: 'include',
                     }
                 );
+                if (!response.ok) {
+                    throw Error('Bad response from server');
+                }
                 const newLinkToken = await response.json();
                 setLinkToken(newLinkToken);
             } catch (error) {
-                console.log(`Error getting link token: ${error}`);
+                throw Error(`Error fetching link token: ${error}`);
             }
         };
         getLinkToken();
@@ -47,7 +52,7 @@ const PlaidLinkButton: React.FC<Props> = props => {
 
     const setPlaidAccounts = async (token: string, metadata: any) => {
         try {
-            await fetch(`${process.env.BACKEND_URI}/api/plaid/set_account`, {
+            const response = await fetch(`${process.env.BACKEND_URI}/api/plaid/set_account`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -60,8 +65,11 @@ const PlaidLinkButton: React.FC<Props> = props => {
                     accounts: metadata.accounts,
                 }),
             });
+            if (!response.ok) {
+                throw Error('Bad response from server');
+            }
         } catch (error) {
-            console.log(`Error setting plaid account: ${error}`);
+            throw Error(`Error setting plaid account: ${error}`);
         }
     };
 

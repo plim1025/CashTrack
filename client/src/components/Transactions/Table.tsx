@@ -29,7 +29,7 @@ const Table: React.FC<Props> = props => {
                 type: Type.DATE,
             },
             editCellClasses: 'table-date',
-            formatter: (cell: any) => {
+            formatter: (cell: Date) => {
                 const date = new Date(cell);
                 return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
             },
@@ -51,7 +51,7 @@ const Table: React.FC<Props> = props => {
         {
             text: 'Description',
             dataField: 'description',
-            formatter: (cell: any) => {
+            formatter: (cell: string) => {
                 if (cell.length > 30) return `${cell.substring(0, 30)}...`;
                 return cell;
             },
@@ -60,7 +60,7 @@ const Table: React.FC<Props> = props => {
         {
             text: 'Category',
             dataField: 'category',
-            formatter: (cell: any) => {
+            formatter: (cell: string) => {
                 if (cell.length > 30) return `${cell.substring(0, 30)}...`;
                 return cell;
             },
@@ -69,7 +69,7 @@ const Table: React.FC<Props> = props => {
         {
             text: 'Amount',
             dataField: 'amount',
-            formatter: (cell: any) => {
+            formatter: (cell: string) => {
                 const parsedCell = parseFloat(cell);
                 if (parsedCell < 0) return `-$${Math.abs(parsedCell).toFixed(2)}`;
                 return `$${parsedCell.toFixed(2)}`;
@@ -147,7 +147,7 @@ const Table: React.FC<Props> = props => {
             })}
             cellEdit={cellEditFactory({
                 mode: 'click',
-                afterSaveCell: async (oldValue: any, newValue: any, item: any) => {
+                afterSaveCell: async (oldValue: any, newValue: any, item: Transaction) => {
                     const transaction = {
                         description: item.description,
                         amount: item.amount,
@@ -161,16 +161,22 @@ const Table: React.FC<Props> = props => {
                             category: transaction.category,
                             date: transaction.date,
                         });
-                        await fetch(`${process.env.BACKEND_URI}/api/transaction/${item._id}`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            credentials: 'include',
-                            body: transactionInfo,
-                        });
+                        const response = await fetch(
+                            `${process.env.BACKEND_URI}/api/transaction/${item._id}`,
+                            {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                credentials: 'include',
+                                body: transactionInfo,
+                            }
+                        );
+                        if (!response.ok) {
+                            throw Error(`Bad response from server`);
+                        }
                     } catch (error) {
-                        console.log(`Error updating transaction: ${error}`);
+                        throw Error(`Error updating transaction: ${error}`);
                     }
                 },
             })}

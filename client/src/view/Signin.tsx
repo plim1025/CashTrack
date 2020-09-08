@@ -2,17 +2,19 @@
 import React, { useState, useEffect } from 'react';
 
 // ROUTER //
-import { Redirect, withRouter } from 'react-router';
+import { Redirect, withRouter, RouteComponentProps } from 'react-router';
 
 // REDUX //
 import { useSelector, useDispatch } from 'react-redux';
 import { loadEmail } from '../redux/Actions';
-import { RootState } from '../redux/Store';
 
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
 import { Button, Card, Form } from 'react-bootstrap';
 import Error from '../components/shared/Error';
+
+// TYPES //
+import { RootState } from '../types';
 
 // STYLES //
 const ss = StyleSheet.create({
@@ -48,11 +50,7 @@ const ss = StyleSheet.create({
     },
 });
 
-interface Props {
-    history: any;
-}
-
-const Signin: React.FC<Props> = props => {
+const Signin: React.FC<RouteComponentProps> = props => {
     let errorTimeout: ReturnType<typeof setTimeout>;
     const dispatch = useDispatch();
     const globalEmail = useSelector((redux: RootState) => redux.email);
