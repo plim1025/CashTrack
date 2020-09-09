@@ -18,13 +18,37 @@ const getPresentDayFormatted = () => {
     return [year, month, day].join('-');
 };
 
+const getTransactionCategory = categories => {
+    const firstCategory = categories[0];
+    const secondCategory = categories[1];
+    const thirdCategory = categories[2];
+    if (
+        firstCategory === 'Community' ||
+        firstCategory === 'Payment' ||
+        firstCategory === 'Service' ||
+        firstCategory === 'Shops' ||
+        firstCategory === 'Transfer'
+    ) {
+        if (secondCategory) {
+            if (
+                (secondCategory === 'Financial' || secondCategory === 'Third Party') &&
+                thirdCategory
+            ) {
+                return thirdCategory;
+            }
+            return secondCategory;
+        }
+    }
+    return firstCategory;
+};
+
 const plaidClient = new plaid.Client({
     clientID: process.env.PLAID_CLIENT_ID,
     secret: process.env.PLAID_SECRET,
-    env:
-        process.env.NODE_ENV === 'production'
-            ? plaid.environments.development
-            : plaid.environments.sandbox,
+    env: plaid.environments.development,
+    // process.env.NODE_ENV === 'production'
+    //     ? plaid.environments.development
+    //     : plaid.environments.sandbox,
     options: {
         version: '2019-05-29',
     },
@@ -202,16 +226,17 @@ router.post('/refresh', async (req, res, next) => {
                     return {
                         transactionID: transaction.transaction_id,
                         accountID: transaction.account_id,
+                        categoryID: transaction.category_id,
                         description: transaction.name,
                         amount: transaction.amount,
-                        category: transaction.category[0],
+                        category: getTransactionCategory(transaction.category),
+                        merchant: transaction.merchant_name,
                         date: transaction.date,
                     };
                 })
                 .filter(
                     transaction => removedTransactionIDs.indexOf(transaction.transactionID) === -1
                 );
-
             const update = { $push: { transactions: { $each: parsedTransactions } } };
             await User.updateOne(query, update);
         }

@@ -26,13 +26,11 @@ const UserSchema = new Schema({
             {
                 transactionID: requiredString,
                 accountID: requiredString,
+                categoryID: requiredString,
                 description: requiredString,
                 amount: requiredNumber,
-                category: {
-                    type: String,
-                    required: true,
-                    default: '',
-                },
+                category: String,
+                merchant: String,
                 date: {
                     type: Date,
                     required: true,

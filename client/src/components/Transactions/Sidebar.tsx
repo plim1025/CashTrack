@@ -53,9 +53,9 @@ const Sidebar: React.FC<Props> = props => {
 // STYLES //
 const ss = StyleSheet.create({
     wrapper: {
-        marginTop: 87,
+        marginTop: 100,
         background: '#f0f0f0',
-        minWidth: 200,
+        width: 220,
     },
     account: {
         borderTop: '1px solid #dee2e6',

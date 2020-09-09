@@ -45,7 +45,7 @@ const fetchTransactions = async () => {
                 return {
                     ...transaction,
                     date: dateString,
-                    amount: transaction.amount.toFixed(2),
+                    amount: (transaction.amount * -1).toFixed(2),
                     selected: true,
                 };
             });
