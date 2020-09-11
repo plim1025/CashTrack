@@ -20,14 +20,12 @@ const Register: React.FC<RouteComponentProps> = props => {
     const globalEmail = useSelector((redux: RootState) => redux.email);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState(false);
-    const [errorInfo, setErrorInfo] = useState({ type: '', message: '' });
+    const [error, setError] = useState({ show: false, type: '', message: '' });
 
     const register = async (e: any) => {
         e.preventDefault();
         if (!email || !password) {
-            setError(true);
-            setErrorInfo({ type: 'danger', message: 'All fields must be filled in.' });
+            setError({ show: true, type: 'danger', message: 'All fields must be filled in.' });
         } else {
             try {
                 const registrationInfo = JSON.stringify({ email: email, password: password });
@@ -40,19 +38,18 @@ const Register: React.FC<RouteComponentProps> = props => {
                 });
                 const parsedResponse = await response.json();
                 if (parsedResponse.error) {
-                    setError(true);
-                    setErrorInfo({ type: 'danger', message: parsedResponse.error });
+                    setError({ show: true, type: 'danger', message: parsedResponse.error });
                 } else {
-                    setError(true);
-                    setErrorInfo({ type: 'success', message: 'Account created. ' });
+                    setError({ show: true, type: 'success', message: 'Account created. ' });
                     return;
                 }
             } catch {
-                setError(true);
-                setErrorInfo({ type: 'danger', message: 'Error in creating account.' });
+                setError({ show: true, type: 'danger', message: 'Error in creating account.' });
             }
         }
-        errorTimeout = setTimeout(() => setError(false), 3000);
+        errorTimeout = setTimeout(() => {
+            setError(prevError => ({ ...prevError, show: false }));
+        }, 3000);
     };
 
     useEffect(() => {
@@ -67,11 +64,11 @@ const Register: React.FC<RouteComponentProps> = props => {
     return (
         <div className={css(ss.wrapper)}>
             <Error
-                error={error}
-                type={errorInfo.type}
-                errorMessage={errorInfo.message}
-                link={errorInfo.type === 'success' ? '/signin' : null}
-                linkTitle={errorInfo.type === 'success' ? 'Sign In' : null}
+                error={error.show}
+                type={error.type}
+                errorMessage={error.message}
+                link={error.type === 'success' ? '/signin' : null}
+                linkTitle={error.type === 'success' ? 'Sign In' : null}
                 history={props.history}
             />
             <Card className={css(ss.card)}>

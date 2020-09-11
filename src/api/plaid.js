@@ -2,45 +2,14 @@ const { Router } = require('express');
 const plaid = require('plaid');
 const User = require('../models/User');
 const PlaidAccount = require('../models/PlaidAccount');
+const {
+    getPresentDayFormatted,
+    getTransactionCategory,
+    getTransactionType,
+} = require('./plaidUtils');
 require('dotenv').config();
 
 const router = Router();
-
-const getPresentDayFormatted = () => {
-    const d = new Date();
-    let month = `${d.getMonth() + 1}`;
-    let day = `${d.getDate()}`;
-    const year = d.getFullYear();
-
-    if (month.length < 2) month = `0${month}`;
-    if (day.length < 2) day = `0${day}`;
-
-    return [year, month, day].join('-');
-};
-
-const getTransactionCategory = categories => {
-    const firstCategory = categories[0];
-    const secondCategory = categories[1];
-    const thirdCategory = categories[2];
-    if (
-        firstCategory === 'Community' ||
-        firstCategory === 'Payment' ||
-        firstCategory === 'Service' ||
-        firstCategory === 'Shops' ||
-        firstCategory === 'Transfer'
-    ) {
-        if (secondCategory) {
-            if (
-                (secondCategory === 'Financial' || secondCategory === 'Third Party') &&
-                thirdCategory
-            ) {
-                return thirdCategory;
-            }
-            return secondCategory;
-        }
-    }
-    return firstCategory;
-};
 
 const plaidClient = new plaid.Client({
     clientID: process.env.PLAID_CLIENT_ID,
@@ -231,6 +200,7 @@ router.post('/refresh', async (req, res, next) => {
                         amount: transaction.amount,
                         category: getTransactionCategory(transaction.category),
                         merchant: transaction.merchant_name,
+                        type: getTransactionType(transaction.category_id),
                         date: transaction.date,
                     };
                 })

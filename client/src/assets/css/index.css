@@ -35,7 +35,7 @@ body {
 }
 .table-cell tr :hover {
     cursor: pointer;
-    background: #b3d9ff;
+    background: rgba(0, 123, 255, 0.25);
 }
 .react-bootstrap-table-editing-cell input {
     padding: 0.25rem;

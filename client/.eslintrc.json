@@ -35,6 +35,8 @@
         "radix": "off",
         "no-nested-ternary": "off",
         "consistent-return": "off",
+        "array-callback-return": "off",
+        "no-lonely-if": "off",
         "import/order": "off",
         "import/newline-after-import": "off",
         "import/no-extraneous-dependencies": [

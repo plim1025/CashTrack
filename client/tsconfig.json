@@ -24,7 +24,7 @@
         "strict": true,
         "strictNullChecks": false,
         "forceConsistentCasingInFileNames": true,
-        "noImplicitReturns": true,
+        "noImplicitReturns": false,
         "allowSyntheticDefaultImports": true
     }
 }

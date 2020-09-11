@@ -11,26 +11,35 @@ import { loadSubpage } from '../redux/Actions';
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
 import Table from '../components/Transactions/Table';
-import ModalOverlay from '../components/Transactions/ModalOverlay';
+import AddModal from '../components/Transactions/AddModal';
 import Sidebar from '../components/Transactions/Sidebar';
 import AccountInfo from '../components/Transactions/AccountInfo';
+import Error from '../components/shared/Error';
 import { Button } from 'react-bootstrap';
+import {
+    createTransaction,
+    updateMultipleTransactions,
+    deleteTransactions,
+} from '../components/shared/TransactionUtil';
 
 // TYPES //
-import { Transaction, Resources } from '../types';
+import { Transaction, Account } from '../types';
 
 interface Props {
-    resources: Resources;
+    transactions: { read: () => Transaction[] };
+    accounts: { read: () => Account[] };
     refreshResources: () => void;
 }
 
 const Transactions: React.FC<Props & RouteComponentProps> = props => {
+    let errorTimeout: ReturnType<typeof setTimeout>;
     const dispatch = useDispatch();
-    const [transactions, setTransactions] = useState(props.resources.transactions.read());
-    const [accounts, setAccounts] = useState(props.resources.accounts.read());
-    const [modal, setModal] = useState(false);
+    const [transactions, setTransactions] = useState(props.transactions.read());
+    const [accounts, setAccounts] = useState(props.accounts.read());
+    const [modal, setModal] = useState({ show: false, mode: '' });
     const [selectedAccountID, setselectedAccountID] = useState('All Accounts');
-    const [selectedTransactionIDs, setSelectedTransactionIDs] = useState([]);
+    const [selectedTransactionIDs, setSelectedTransactionIDs] = useState<string[]>([]);
+    const [error, setError] = useState({ show: false, message: '' });
 
     useEffect(() => {
         if (transactions) {
@@ -49,58 +58,57 @@ const Transactions: React.FC<Props & RouteComponentProps> = props => {
     }, [selectedAccountID]);
 
     useEffect(() => {
-        setTransactions(props.resources.transactions.read());
-        setAccounts(props.resources.accounts.read());
-    }, [props.resources]);
+        setTransactions(props.transactions.read());
+        setAccounts(props.accounts.read());
+    }, [props.transactions, props.accounts]);
 
-    const handleCreateTransaction = async (transaction: Transaction) => {
-        try {
-            const transactionInfo = JSON.stringify({
-                description: transaction.description,
-                amount: transaction.amount,
-                category: transaction.category,
-                date: transaction.date,
-            });
-            const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: transactionInfo,
-            });
-            if (!response.ok) {
-                throw Error('Bad response from server');
-            }
-            const id = await response.json();
-            setTransactions([...transactions, { ...transaction, _id: id, selected: true }]);
-        } catch (error) {
-            throw Error(`Error creating transaction: ${error}`);
+    const handleCreateTransaction = async (newTransaction: Transaction) => {
+        const id = await createTransaction(newTransaction);
+        setTransactions([...transactions, { ...newTransaction, _id: id, selected: true }]);
+    };
+
+    const handleEditMultipleTransactions = async (newTransaction: Transaction) => {
+        await updateMultipleTransactions(selectedTransactionIDs, newTransaction);
+        setTransactions(
+            transactions.map((transaction: Transaction) => {
+                if (selectedTransactionIDs.indexOf(transaction._id) !== -1) {
+                    const oldTransactionInfo = transactions.find(
+                        oldTransaction => oldTransaction._id === transaction._id
+                    );
+                    return { ...oldTransactionInfo, ...newTransaction };
+                }
+                return transaction;
+            })
+        );
+        setSelectedTransactionIDs([]);
+    };
+
+    const handleDeleteMultipleTransactions = async () => {
+        if (!selectedTransactionIDs.length) {
+            setError({ show: true, message: 'No transactions selected to delete' });
+            errorTimeout = setTimeout(() => {
+                setError(prevError => ({ ...prevError, show: false }));
+            }, 3000);
+        } else {
+            setTransactions(
+                transactions.filter(
+                    (transaction: Transaction) =>
+                        selectedTransactionIDs.indexOf(transaction._id) === -1
+                )
+            );
+            setSelectedTransactionIDs([]);
+            await deleteTransactions(selectedTransactionIDs);
         }
     };
 
-    const handleDeleteTransaction = async () => {
-        setTransactions(
-            transactions.filter(
-                (transaction: Transaction) => selectedTransactionIDs.indexOf(transaction._id) === -1
-            )
-        );
-        setSelectedTransactionIDs([]);
-        try {
-            const transactionInfo = JSON.stringify(selectedTransactionIDs);
-            const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: transactionInfo,
-            });
-            if (!response.ok) {
-                throw Error('Bad response from server');
-            }
-        } catch (error) {
-            console.log(`Error deleting transaction: ${error}`);
+    const handleEditButton = () => {
+        if (!selectedTransactionIDs.length) {
+            setError({ show: true, message: 'No transactions selected to edit' });
+            errorTimeout = setTimeout(() => {
+                setError(prevError => ({ ...prevError, show: false }));
+            }, 3000);
+        } else {
+            setModal({ show: true, mode: 'edit' });
         }
     };
 
@@ -108,6 +116,12 @@ const Transactions: React.FC<Props & RouteComponentProps> = props => {
         props.history.push('/accounts');
         dispatch(loadSubpage('accounts'));
     };
+
+    useEffect(() => {
+        return () => {
+            clearTimeout(errorTimeout);
+        };
+    }, []);
 
     return (
         <div className={css(ss.wrapper)}>
@@ -121,12 +135,26 @@ const Transactions: React.FC<Props & RouteComponentProps> = props => {
                     <AccountInfo accounts={accounts} selectedAccountID={selectedAccountID} />
                 ) : null}
                 <div className={css(ss.buttons)}>
-                    <Button onClick={() => setModal(true)} className={css(ss.button)}>
+                    <Button
+                        onClick={() => setModal({ show: true, mode: 'add' })}
+                        className={css(ss.button)}
+                    >
                         + Add
                     </Button>
                     <Button
+                        variant='secondary'
+                        onClick={handleEditButton}
+                        className={css(ss.button)}
+                    >
+                        <svg className={css(ss.icon)} viewBox='0 0 512 512'>
+                            <path d='M493.815,70.629c-11.001-1.003-20.73,7.102-21.733,18.102l-2.65,29.069C424.473,47.194,346.429,0,256,0 C158.719,0,72.988,55.522,30.43,138.854c-5.024,9.837-1.122,21.884,8.715,26.908c9.839,5.024,21.884,1.123,26.908-8.715 C102.07,86.523,174.397,40,256,40c74.377,0,141.499,38.731,179.953,99.408l-28.517-20.367c-8.989-6.419-21.48-4.337-27.899,4.651 c-6.419,8.989-4.337,21.479,4.651,27.899l86.475,61.761c12.674,9.035,30.155,0.764,31.541-14.459l9.711-106.53 C512.919,81.362,504.815,71.632,493.815,70.629z' />
+                            <path d='M472.855,346.238c-9.838-5.023-21.884-1.122-26.908,8.715C409.93,425.477,337.603,472,256,472 c-74.377,0-141.499-38.731-179.953-99.408l28.517,20.367c8.989,6.419,21.479,4.337,27.899-4.651 c6.419-8.989,4.337-21.479-4.651-27.899l-86.475-61.761c-12.519-8.944-30.141-0.921-31.541,14.459l-9.711,106.53 c-1.003,11,7.102,20.73,18.101,21.733c11.014,1.001,20.731-7.112,21.733-18.102l2.65-29.069C87.527,464.806,165.571,512,256,512 c97.281,0,183.012-55.522,225.57-138.854C486.594,363.309,482.692,351.262,472.855,346.238z' />
+                        </svg>
+                        Edit
+                    </Button>
+                    <Button
                         variant='danger'
-                        onClick={handleDeleteTransaction}
+                        onClick={handleDeleteMultipleTransactions}
                         className={css(ss.button)}
                     >
                         <svg className={css(ss.icon)} viewBox='-48 0 407 407'>
@@ -163,12 +191,15 @@ const Transactions: React.FC<Props & RouteComponentProps> = props => {
                     selectedTransactionIDs={selectedTransactionIDs}
                     setSelectedTransactionIDs={setSelectedTransactionIDs}
                 />
-                <ModalOverlay
-                    toggled={modal}
-                    toggle={() => setModal(false)}
+                <AddModal
+                    toggled={modal.show}
+                    mode={modal.mode}
+                    toggle={() => setModal({ show: false, mode: '' })}
                     handleCreateTransaction={handleCreateTransaction}
+                    handleEditMultipleTransactions={handleEditMultipleTransactions}
                 />
             </div>
+            <Error error={error.show} errorMessage={error.message} />
         </div>
     );
 };
@@ -177,7 +208,6 @@ const Transactions: React.FC<Props & RouteComponentProps> = props => {
 const ss = StyleSheet.create({
     wrapper: {
         display: 'flex',
-        margin: 'auto',
         justifyContent: 'center',
     },
     subWrapper: {
@@ -191,17 +221,20 @@ const ss = StyleSheet.create({
     button: {
         // @ts-ignore
         display: 'flex !important',
+        // @ts-ignore
+        fontWeight: '700 !important',
         justifyContent: 'center',
         alignItems: 'center',
-        flex: 1,
+        width: '25%',
         margin: 20,
         lineHeight: '1 !important',
+        whiteSpace: 'nowrap',
     },
     icon: {
         fill: '#fff',
         height: 16,
         width: 16,
-        marginRight: 5,
+        marginRight: 8,
     },
     noTransactionsText: {
         display: 'flex',

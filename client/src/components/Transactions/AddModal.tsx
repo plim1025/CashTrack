@@ -9,40 +9,49 @@ import Error from '../shared/Error';
 import { Transaction } from '../../types';
 
 interface Props {
+    mode: string;
     toggled: boolean;
     toggle: (toggle: boolean) => void;
     handleCreateTransaction: (transaction: Transaction) => void;
+    handleEditMultipleTransactions: (transaction: Transaction) => void;
 }
 
-const ModalOverlay: React.FC<Props> = props => {
+const AddModal: React.FC<Props> = props => {
     let errorTimeout: ReturnType<typeof setTimeout>;
-    const ISODate = new Date().toISOString().slice(0, 10);
-    const modalRef = useRef(null);
+    const modalRef = useRef<HTMLInputElement>(null);
     const [transaction, setTransaction] = useState({
-        date: ISODate,
+        date: new Date().toISOString().slice(0, 10),
         description: '',
         category: '',
         amount: 0,
     });
-    const [error, setError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+    const [error, setError] = useState({ show: false, message: '' });
 
-    const createTransaction = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         if (!transaction.date) {
-            setError(true);
-            setErrorMessage('Invalid date');
+            setError({ show: true, message: 'Invalid date' });
         } else if (isNaN(transaction.amount) || !transaction.amount) {
-            setError(true);
-            setErrorMessage('Amount should be numeric');
+            setError({ show: true, message: 'Amount should be numeric' });
         } else if (transaction.amount > 1000000000) {
-            setError(true);
-            setErrorMessage('Maximum amount is $1,000,000,000');
+            setError({ show: true, message: 'Maximum amount is $1,000,000,000' });
         } else {
-            props.handleCreateTransaction(transaction);
+            setTransaction({
+                date: new Date().toISOString().slice(0, 10),
+                description: '',
+                category: '',
+                amount: 0,
+            });
+            if (props.mode === 'add') {
+                props.handleCreateTransaction(transaction);
+            } else {
+                props.handleEditMultipleTransactions(transaction);
+            }
             props.toggle(false);
         }
-        errorTimeout = setTimeout(() => setError(false), 3000);
+        errorTimeout = setTimeout(() => {
+            setError(prevError => ({ ...prevError, show: false }));
+        }, 3000);
     };
 
     useEffect(() => {
@@ -58,14 +67,14 @@ const ModalOverlay: React.FC<Props> = props => {
             onHide={() => props.toggle(false)}
             show={props.toggled}
         >
-            <Error error={error} errorMessage={errorMessage} />
+            <Error error={error.show} errorMessage={error.message} />
             <Form>
                 <Modal.Body>
                     <Form.Group>
                         <Form.Label>Date</Form.Label>
                         <Form.Control
                             className='form-control editor edit-date'
-                            defaultValue={ISODate}
+                            defaultValue={transaction.date}
                             onChange={e => setTransaction({ ...transaction, date: e.target.value })}
                             type='date'
                         />
@@ -109,7 +118,7 @@ const ModalOverlay: React.FC<Props> = props => {
                     <Button onClick={() => props.toggle(false)} size='sm' variant='secondary'>
                         Cancel
                     </Button>
-                    <Button onClick={createTransaction} size='sm' type='submit' variant='primary'>
+                    <Button onClick={handleSubmit} size='sm' type='submit' variant='primary'>
                         Submit
                     </Button>
                 </Modal.Footer>
@@ -118,4 +127,4 @@ const ModalOverlay: React.FC<Props> = props => {
     );
 };
 
-export default ModalOverlay;
+export default AddModal;

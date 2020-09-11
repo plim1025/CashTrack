@@ -18,7 +18,7 @@ interface Props {
 
 const Sidebar: React.FC<Props> = props => {
     return (
-        <div className={css(ss.wrapper)}>
+        <nav className={css(ss.wrapper)}>
             <div
                 className={css(ss.account)}
                 onClick={() => props.setSelectedAccountID('All Accounts')}
@@ -46,7 +46,7 @@ const Sidebar: React.FC<Props> = props => {
                     <div className={css(ss.accountSubtitle)}>{account.name} (...{account.mask})</div>
                 </div>
             ))}
-        </div>
+        </nav>
     );
 };
 
@@ -54,8 +54,7 @@ const Sidebar: React.FC<Props> = props => {
 const ss = StyleSheet.create({
     wrapper: {
         marginTop: 100,
-        background: '#f0f0f0',
-        width: 220,
+        maxWidth: 250
     },
     account: {
         borderTop: '1px solid #dee2e6',
@@ -68,9 +67,10 @@ const ss = StyleSheet.create({
     },
     accountTitle: {
         fontSize: 16,
+        fontWeight: 700
     },
     accountSubtitle: {
-        fontSize: 12,
+        fontSize: 16,
         opacity: 0.75,
     },
 });

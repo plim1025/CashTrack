@@ -51,11 +51,12 @@ const App: React.FC<Props & RouteComponentProps> = props => {
                     <Home />
                 ) : globalSubpage === 'transactions' ? (
                     <Transactions
-                        resources={resources}
+                        transactions={resources.transactions}
+                        accounts={resources.accounts}
                         refreshResources={() => setResources(() => createResources())}
                     />
                 ) : globalSubpage === 'trends' ? (
-                    <Trends />
+                    <Trends transactions={resources.transactions} accounts={resources.accounts} />
                 ) : globalSubpage === 'budgets' ? (
                     <Budgets />
                 ) : globalSubpage === 'accounts' ? (

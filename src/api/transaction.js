@@ -29,7 +29,7 @@ router.post('/', async (req, res, next) => {
                     transactions: {
                         _id: mongooseID,
                         description: description,
-                        amount: amount,
+                        amount: amount * -1,
                         category: category,
                         date: date,
                     },
@@ -58,12 +58,41 @@ router.put('/:id', async (req, res, next) => {
             const update = {
                 $set: {
                     'transactions.$.description': description,
-                    'transactions.$.amount': amount,
+                    'transactions.$.amount': amount * -1,
                     'transactions.$.category': category,
                     'transactions.$.date': date,
                 },
             };
             await User.updateOne(query, update);
+            res.sendStatus(200);
+        } else {
+            console.log('Error posting transaction, user not logged in.');
+            throw Error;
+        }
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            res.status(422);
+        }
+        next(error);
+    }
+});
+
+router.put('/', async (req, res, next) => {
+    try {
+        if (req.user) {
+            const { transactionIDs } = req.body;
+            const { description, amount, category, date } = req.body.transaction;
+            const query = { _id: req.user._id };
+            const update = {
+                $set: {
+                    'transactions.$[element].description': description,
+                    'transactions.$[element].amount': amount * -1,
+                    'transactions.$[element].category': category,
+                    'transactions.$[element].date': date,
+                },
+            };
+            const arrayFilters = { arrayFilters: [{ 'element._id': { $in: transactionIDs } }] };
+            await User.updateMany(query, update, arrayFilters);
             res.sendStatus(200);
         } else {
             console.log('Error posting transaction, user not logged in.');

@@ -6,6 +6,7 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 // @ts-ignore
 import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
+import { updateTransaction } from '../shared/TransactionUtil';
 
 // STYLES //
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -97,7 +98,10 @@ const Table: React.FC<Props> = props => {
         <BootstrapTable
             bootstrap4
             keyField='_id'
-            data={props.transactions}
+            data={props.transactions.map(transaction => ({
+                ...transaction,
+                amount: transaction.amount.toFixed(2),
+            }))}
             bodyClasses='table-cell'
             columns={tableColumns}
             selectRow={{
@@ -147,6 +151,7 @@ const Table: React.FC<Props> = props => {
             })}
             cellEdit={cellEditFactory({
                 mode: 'click',
+                blurToSave: true,
                 afterSaveCell: async (oldValue: any, newValue: any, item: Transaction) => {
                     const transaction = {
                         description: item.description,
@@ -154,30 +159,7 @@ const Table: React.FC<Props> = props => {
                         category: item.category,
                         date: item.date,
                     };
-                    try {
-                        const transactionInfo = JSON.stringify({
-                            description: transaction.description,
-                            amount: transaction.amount,
-                            category: transaction.category,
-                            date: transaction.date,
-                        });
-                        const response = await fetch(
-                            `${process.env.BACKEND_URI}/api/transaction/${item._id}`,
-                            {
-                                method: 'PUT',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                credentials: 'include',
-                                body: transactionInfo,
-                            }
-                        );
-                        if (!response.ok) {
-                            throw Error(`Bad response from server`);
-                        }
-                    } catch (error) {
-                        throw Error(`Error updating transaction: ${error}`);
-                    }
+                    await updateTransaction(item._id, transaction);
                 },
             })}
         />
