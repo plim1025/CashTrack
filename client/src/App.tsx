@@ -30,7 +30,7 @@ interface Props {
 }
 
 const App: React.FC<Props & RouteComponentProps> = props => {
-    const [resources, setResources] = useState(() => createResources());
+    const [resources, setResources] = useState(null);
     const dispatch = useDispatch();
     const globalEmail = useSelector((redux: RootState) => redux.email);
     const globalSubpage = useSelector((redux: RootState) => redux.subpage);
@@ -39,10 +39,12 @@ const App: React.FC<Props & RouteComponentProps> = props => {
         if (!globalEmail && !sessionStorage.getItem('email')) {
             props.history.push('/signin');
         } else {
+            setResources(() => createResources());
             dispatch(loadSubpage(props.subpage));
         }
     }, []);
 
+    console.log('app loaded');
     return (
         <>
             <Header />

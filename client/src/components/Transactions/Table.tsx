@@ -88,39 +88,37 @@ const Table: React.FC<Props> = props => {
                 }
             },
             editorRenderer: (editorProps: any, value: any, row: any, column: any) => {
-                const options = [
+                const expenseOptions = props.categories
+                    .filter(category => category.type === 'expense')
+                    .map(category => ({ value: category.name, label: category.name }))
+                    .sort((a, b) => (a.value.toUpperCase() > b.value.toUpperCase() ? 0 : -1));
+                const incomeOptions = props.categories
+                    .filter(category => category.type === 'income')
+                    .map(category => ({ value: category.name, label: category.name }))
+                    .sort((a, b) => (a.value.toUpperCase() > b.value.toUpperCase() ? 0 : -1));
+                const otherOptions = props.categories
+                    .filter(category => category.type === 'other')
+                    .map(category => ({ value: category.name, label: category.name }))
+                    .sort((a, b) => (a.value.toUpperCase() > b.value.toUpperCase() ? 0 : -1));
+                console.log(expenseOptions[0]);
+                const groupedOptions = [
                     {
                         label: 'Expense',
-                        options: props.categories
-                            .filter(category => category.type === 'expense')
-                            .map(category => ({ value: category.name, label: category.name }))
-                            .sort((a, b) =>
-                                a.value.toUpperCase() > b.value.toUpperCase() ? 0 : -1
-                            ),
+                        options: expenseOptions,
                     },
                     {
                         label: 'Income',
-                        options: props.categories
-                            .filter(category => category.type === 'income')
-                            .map(category => ({ value: category.name, label: category.name }))
-                            .sort((a, b) =>
-                                a.value.toUpperCase() > b.value.toUpperCase() ? 0 : -1
-                            ),
+                        options: incomeOptions,
                     },
                     {
                         label: 'Other',
-                        options: props.categories
-                            .filter(category => category.type === 'other')
-                            .map(category => ({ value: category.name, label: category.name }))
-                            .sort((a, b) =>
-                                a.value.toUpperCase() > b.value.toUpperCase() ? 0 : -1
-                            ),
+                        options: otherOptions,
                     },
                 ];
                 return (
                     <Select
-                        options={options}
-                        defaultValue={options[0]}
+                        options={groupedOptions}
+                        // defaultValue={{ value: value.toString(), label: value.toString() }}
                         classNamePrefix='react-select'
                         formatGroupLabel={data => <div>{data.label}</div>}
                         styles={{ menuPortal: base => ({ ...base, zIndex: 99 }) }}
