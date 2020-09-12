@@ -1,5 +1,7 @@
 // REACT //
 import React from 'react';
+
+// COMPONENTS //
 import Select from 'react-select';
 
 // TYPES //
@@ -14,7 +16,6 @@ interface Props {
 }
 
 const Filters: React.FC<Props> = props => {
-    // if trend is net earnings or net worth, don't show accounts filter
     return (
         <>
             <Select

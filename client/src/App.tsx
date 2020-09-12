@@ -53,6 +53,7 @@ const App: React.FC<Props & RouteComponentProps> = props => {
                     <Transactions
                         transactions={resources.transactions}
                         accounts={resources.accounts}
+                        categories={resources.categories}
                         refreshResources={() => setResources(() => createResources())}
                     />
                 ) : globalSubpage === 'trends' ? (

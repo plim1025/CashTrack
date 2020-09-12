@@ -1,3 +1,9 @@
+const validateEmail = email => {
+    // eslint-disable-next-line no-useless-escape
+    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+};
+
 const getPresentDayFormatted = () => {
     const d = new Date();
     let month = `${d.getMonth() + 1}`;
@@ -45,7 +51,7 @@ const getTransactionType = categoryID => {
         categoryIDNum === 21003000 ||
         (categoryIDNum >= 22000000 && categoryIDNum <= 22018000)
     ) {
-        return 'expenses';
+        return 'expense';
     }
     if (
         categoryIDNum === 15001000 ||
@@ -61,6 +67,7 @@ const getTransactionType = categoryID => {
 };
 
 module.exports = {
+    validateEmail,
     getPresentDayFormatted,
     getTransactionCategory,
     getTransactionType,

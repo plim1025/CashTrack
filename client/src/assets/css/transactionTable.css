@@ -1,0 +1,93 @@
+#transaction-table {
+    font-size: 14px;
+}
+
+.transaction-table-header,
+.transaction-table-body td {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.transaction-table-header th {
+    padding: 0.5rem !important;
+}
+
+.transaction-table-header th:nth-child(2) {
+    width: 136px;
+}
+
+.transaction-table-header th:nth-child(5) {
+    width: 136px;
+}
+
+.transaction-table-body td {
+    padding: 0.25rem 0.5rem !important;
+}
+
+.transaction-table-body td:hover {
+    cursor: pointer;
+    background: rgba(0, 123, 255, 0.25);
+}
+
+.transaction-table-edit-cell .editor {
+    padding: 0.25rem;
+    height: 38px;
+}
+
+.transaction-table-edit-cell .alert {
+    margin-bottom: 0 !important;
+    white-space: normal;
+    padding: 0.25rem;
+}
+
+.transaction-table-edit-cell input {
+    font-size: 14px !important;
+    color: #212529 !important;
+}
+
+.transaction-table-edit-cell-date input {
+    padding: 0 !important;
+    font-size: 12px !important;
+}
+
+.selection-cell {
+    text-align: center;
+    background: inherit !important;
+    cursor: auto !important;
+}
+
+.selection-cell-header {
+    text-align: center;
+}
+
+/* React Select Dropdown */
+.react-select__control--menu-is-open,
+.react-select__control--is-focused {
+    border-color: #80bdff !important;
+    outline: 0 !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+}
+
+.react-select__menu {
+    font-family: 'Open Sans';
+    font-size: 14px;
+}
+
+.react-select__control {
+    height: 38px;
+}
+
+.react-select__menu-list {
+    overflow-x: hidden;
+}
+
+.react-select__option {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.react-select__option--is-focused {
+    background: rgba(0, 123, 255, 0.25);
+}

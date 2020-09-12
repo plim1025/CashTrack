@@ -2,36 +2,9 @@ const { Router } = require('express');
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const User = require('../models/User');
+const { validateEmail } = require('./utils');
 
 const router = Router();
-
-const validateEmail = email => {
-    // eslint-disable-next-line no-useless-escape
-    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
-};
-
-router.get('/', (req, res, next) => {
-    try {
-        if (req.user) {
-            res.json({ user: req.user.email });
-        } else {
-            console.log('Error setting account, user not logged in.');
-            throw Error;
-        }
-    } catch (error) {
-        next(error);
-    }
-});
-
-router.get('/all', async (req, res, next) => {
-    try {
-        const users = await User.find();
-        res.json(users);
-    } catch (error) {
-        next(error);
-    }
-});
 
 router.post('/', async (req, res, next) => {
     try {
@@ -61,36 +34,13 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.delete('/all', async (req, res, next) => {
-    try {
-        await User.deleteMany({});
-        res.sendStatus(200);
-    } catch (error) {
-        next(error);
+router.post('/signin', passport.authenticate('local'), (req, res) => {
+    if (req.user) {
+        res.json({ email: req.user.email });
+    } else {
+        res.sendStatus(401);
     }
 });
-
-router.get('/', (req, res, next) => {
-    try {
-        res.json({ error: req.session.flash.error.slice(-1)[0] });
-    } catch (error) {
-        next();
-    }
-});
-
-router.post(
-    '/signin',
-    passport.authenticate('local', {
-        failureFlash: true,
-    }),
-    (req, res) => {
-        if (req.user) {
-            res.json({ email: req.user.email });
-        } else {
-            res.sendStatus(401);
-        }
-    }
-);
 
 router.post('/logout', (req, res, next) => {
     try {

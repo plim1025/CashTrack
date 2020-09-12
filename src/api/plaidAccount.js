@@ -12,8 +12,7 @@ router.get('/', async (req, res, next) => {
             const accounts = await PlaidAccount.find(query);
             res.json(accounts);
         } else {
-            console.log('Error setting account, user not logged in.');
-            throw Error;
+            throw Error('User not logged in.');
         }
     } catch (error) {
         next(error);

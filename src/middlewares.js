@@ -23,13 +23,13 @@ const initializePassport = passport => {
     const authenticateUser = async (email, password, done) => {
         const currentUser = await User.findOne({ email: email });
         if (currentUser == null) {
-            return done(null, false, { message: 'No user with that email' });
+            return done(null, false);
         }
         try {
             if (await bcrypt.compare(password, currentUser.password)) {
                 return done(null, currentUser);
             }
-            return done(null, false, { message: 'Password incorrect' });
+            return done(null, false);
         } catch (error) {
             return done(error);
         }

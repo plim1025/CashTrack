@@ -1,5 +1,5 @@
 // TYPES //
-import { Transaction, Account } from '../../types';
+import { Transaction, Account, Category } from '../../types';
 
 const wrapPromise = (promise: any) => {
     let status = 'loading';
@@ -65,7 +65,6 @@ const fetchAccounts = async () => {
         if (!response.ok) {
             throw Error('Bad response from server');
         }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const parsedResponse = await response.json();
         if (parsedResponse.length) {
             const typedResponse = parsedResponse.map(({ batchID, ...account }: Account) => account);
@@ -77,13 +76,30 @@ const fetchAccounts = async () => {
     }
 };
 
+const fetchCategories = async () => {
+    try {
+        const response = await fetch(`${process.env.BACKEND_URI}/api/category`, {
+            credentials: 'include',
+        });
+        if (!response.ok) {
+            throw Error('Bad response from server');
+        }
+        const parsedResponse = await response.json();
+        return parsedResponse;
+    } catch (error) {
+        throw Error(`Error fetching categories: ${error}`);
+    }
+};
+
 const createResource = (): {
     transactions: { read: () => Transaction[] };
     accounts: { read: () => Account[] };
+    categories: { read: () => Category[] };
 } => {
     return {
         transactions: wrapPromise(fetchTransactions()),
         accounts: wrapPromise(fetchAccounts()),
+        categories: wrapPromise(fetchCategories()),
     };
 };
 

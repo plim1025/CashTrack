@@ -21,13 +21,13 @@ const Sidebar: React.FC<Props> = props => {
             <div
                 className={css(ss.subHeader)}
                 onClick={() => {
-                    props.setTrend('expenses');
+                    props.setTrend('expense');
                     props.setSubTrend('date');
                 }}
                 style={{
                     background:
-                        props.trend === 'expenses' && props.subTrend === 'date' ? '#007bff' : '',
-                    color: props.trend === 'expenses' && props.subTrend === 'date' ? '#fff' : '',
+                        props.trend === 'expense' && props.subTrend === 'date' ? '#007bff' : '',
+                    color: props.trend === 'expense' && props.subTrend === 'date' ? '#fff' : '',
                 }}
             >
                 Time
@@ -35,16 +35,13 @@ const Sidebar: React.FC<Props> = props => {
             <div
                 className={css(ss.subHeader)}
                 onClick={() => {
-                    props.setTrend('expenses');
+                    props.setTrend('expense');
                     props.setSubTrend('category');
                 }}
                 style={{
                     background:
-                        props.trend === 'expenses' && props.subTrend === 'category'
-                            ? '#007bff'
-                            : '',
-                    color:
-                        props.trend === 'expenses' && props.subTrend === 'category' ? '#fff' : '',
+                        props.trend === 'expense' && props.subTrend === 'category' ? '#007bff' : '',
+                    color: props.trend === 'expense' && props.subTrend === 'category' ? '#fff' : '',
                 }}
             >
                 Category
@@ -52,16 +49,13 @@ const Sidebar: React.FC<Props> = props => {
             <div
                 className={css(ss.subHeader)}
                 onClick={() => {
-                    props.setTrend('expenses');
+                    props.setTrend('expense');
                     props.setSubTrend('merchant');
                 }}
                 style={{
                     background:
-                        props.trend === 'expenses' && props.subTrend === 'merchant'
-                            ? '#007bff'
-                            : '',
-                    color:
-                        props.trend === 'expenses' && props.subTrend === 'merchant' ? '#fff' : '',
+                        props.trend === 'expense' && props.subTrend === 'merchant' ? '#007bff' : '',
+                    color: props.trend === 'expense' && props.subTrend === 'merchant' ? '#fff' : '',
                 }}
             >
                 Merchant

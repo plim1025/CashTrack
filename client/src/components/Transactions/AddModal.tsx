@@ -31,6 +31,8 @@ const AddModal: React.FC<Props> = props => {
         e.preventDefault();
         if (!transaction.date) {
             setError({ show: true, message: 'Invalid date' });
+        } else if (!transaction.description || !transaction.category || !transaction.amount) {
+            setError({ show: true, message: 'All fields must be filled.' });
         } else if (isNaN(transaction.amount) || !transaction.amount) {
             setError({ show: true, message: 'Amount should be numeric' });
         } else if (transaction.amount > 1000000000) {

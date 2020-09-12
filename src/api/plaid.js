@@ -2,11 +2,7 @@ const { Router } = require('express');
 const plaid = require('plaid');
 const User = require('../models/User');
 const PlaidAccount = require('../models/PlaidAccount');
-const {
-    getPresentDayFormatted,
-    getTransactionCategory,
-    getTransactionType,
-} = require('./plaidUtils');
+const { getPresentDayFormatted, getTransactionCategory, getTransactionType } = require('./utils');
 require('dotenv').config();
 
 const router = Router();
@@ -14,10 +10,10 @@ const router = Router();
 const plaidClient = new plaid.Client({
     clientID: process.env.PLAID_CLIENT_ID,
     secret: process.env.PLAID_SECRET,
-    env: plaid.environments.development,
-    // process.env.NODE_ENV === 'production'
-    //     ? plaid.environments.development
-    //     : plaid.environments.sandbox,
+    env:
+        process.env.NODE_ENV === 'production'
+            ? plaid.environments.development
+            : plaid.environments.sandbox,
     options: {
         version: '2019-05-29',
     },
@@ -36,8 +32,7 @@ router.post('/create_link_token', async (req, res, next) => {
             });
             res.json(link_token);
         } else {
-            console.log('Error creating link token, user not logged in.');
-            throw Error;
+            throw Error('User not logged in.');
         }
     } catch (error) {
         next(error);
@@ -114,11 +109,10 @@ router.post('/set_account', async (req, res, next) => {
                     accountIDs: { $each: newAccountIDs },
                 },
             };
-            await User.updateOne(query, update);
+            await User.updateOne(query, update, { runValidators: true });
             res.sendStatus(200);
         } else {
-            console.log('Error setting account, user not logged in.');
-            throw Error;
+            throw Error('User not logged in.');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -145,11 +139,10 @@ router.post('/logout', async (req, res, next) => {
                     accountIDs: { $in: deletedPlaidAccountIDs },
                 },
             };
-            await User.updateMany({}, userUpdate);
+            await User.updateMany({}, userUpdate, { runValidators: true });
             res.sendStatus(200);
         } else {
-            console.log('Error setting account, user not logged in.');
-            throw Error;
+            throw Error('User not logged in.');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -169,7 +162,7 @@ router.post('/refresh', async (req, res, next) => {
             const update = {
                 $pull: { transactions: { transactionID: { $in: removed_transactions } } },
             };
-            await User.updateMany({}, update);
+            await User.updateMany({}, update, { runValidators: true });
         } else if (
             (webhook_code === 'INITIAL_UPDATE' ||
                 webhook_code === 'HISTORICAL_UPDATE' ||
@@ -208,7 +201,7 @@ router.post('/refresh', async (req, res, next) => {
                     transaction => removedTransactionIDs.indexOf(transaction.transactionID) === -1
                 );
             const update = { $push: { transactions: { $each: parsedTransactions } } };
-            await User.updateOne(query, update);
+            await User.updateOne(query, update, { runValidators: true });
         }
         res.sendStatus(200);
     } catch (error) {

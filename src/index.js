@@ -1,6 +1,5 @@
 const cors = require('cors');
 const express = require('express');
-const flash = require('express-flash');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
@@ -10,6 +9,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
 const userRoute = require('./api/user');
+const categoryRoute = require('./api/category');
 const transactionRoute = require('./api/transaction');
 const plaidAccountRoute = require('./api/plaidAccount');
 const plaidRoute = require('./api/plaid');
@@ -37,7 +37,6 @@ app.use(
         origin: process.env.FRONTEND_URI,
     })
 );
-app.use(flash());
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(
@@ -58,6 +57,7 @@ app.use(passport.session());
 
 app.use('/api/user', userRoute);
 app.use('/api/transaction', transactionRoute);
+app.use('/api/category', categoryRoute);
 app.use('/api/plaidAccount', plaidAccountRoute);
 app.use('/api/plaid', plaidRoute);
 

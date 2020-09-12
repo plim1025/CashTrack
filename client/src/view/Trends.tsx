@@ -21,7 +21,7 @@ type Actions =
     | { type: 'SET_DATE'; date: Dates }
     | { type: 'SET_ACCOUNT_IDS'; accountIDs: string[] };
 
-interface ReducerProps {
+interface ReducerState {
     trend: Trends;
     subtrend: Subtrends;
     chart: Charts;
@@ -29,7 +29,7 @@ interface ReducerProps {
     accountIDs: string[];
 }
 
-const reducer = (state: ReducerProps, action: Actions) => {
+const reducer = (state: ReducerState, action: Actions) => {
     switch (action.type) {
         case 'SET_TREND':
             return { ...state, trend: action.trend };
@@ -53,7 +53,7 @@ interface Props {
 
 const Trends: React.FC<Props> = props => {
     const [state, dispatch] = useReducer(reducer, {
-        trend: 'expenses',
+        trend: 'expense',
         subtrend: 'category',
         chart: 'pie',
         date: 'all time',

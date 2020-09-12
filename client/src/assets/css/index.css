@@ -20,63 +20,6 @@ body {
     font-family: 'Open Sans';
 }
 
-/* React-Bootstrap-Table Styles */
-.table {
-    font-size: 14px;
-}
-.sortable,
-.table td {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-.table td {
-    padding: 0.25rem 0.5rem !important;
-}
-.table-cell tr :hover {
-    cursor: pointer;
-    background: rgba(0, 123, 255, 0.25);
-}
-.react-bootstrap-table-editing-cell input {
-    padding: 0.25rem;
-    background: #fff !important;
-    cursor: auto !important;
-    height: calc(1em + 0.75rem + 2px);
-}
-.react-bootstrap-table-editing-cell div {
-    margin-bottom: 0 !important;
-    white-space: normal;
-    padding: 0.25rem;
-    background: #f8d7da !important;
-}
-.react-bootstrap-table-editing-cell div :hover {
-    background: inherit !important;
-}
-.selection-cell {
-    text-align: center;
-    background: inherit !important;
-}
-.selection-cell-header {
-    text-align: center;
-}
-.table th {
-    padding: 0.5rem !important;
-}
-.sortable:nth-child(2) {
-    width: 136px;
-}
-.sortable:nth-child(5) {
-    width: 136px;
-}
-.editor {
-    font-size: 14px !important;
-    color: #212529 !important;
-}
-.table-date .edit-date {
-    padding: 0 !important;
-    font-size: 12px !important;
-}
-
 /* React Bootstrap Modal Styles */
 .modal-content {
     position: static !important;

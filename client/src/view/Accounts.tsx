@@ -9,7 +9,7 @@ interface Props {
 }
 
 const Accounts: React.FC<Props> = props => {
-    return <>{/* <PlaidLinkButton refreshResources={() => props.refreshResources()} /> */}</>;
+    return <PlaidLinkButton refreshResources={() => props.refreshResources()} />;
 };
 
 export default Accounts;

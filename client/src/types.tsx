@@ -13,7 +13,7 @@ export interface Transaction {
     categoryID?: string;
     merchant?: string;
     selected?: boolean;
-    type?: 'expenses' | 'income' | 'other';
+    type?: 'expense' | 'income' | 'other';
 }
 
 export interface Account {
@@ -28,6 +28,11 @@ export interface Account {
     batchID?: string;
 }
 
+export interface Category {
+    name: string;
+    type: 'expense' | 'income' | 'other';
+}
+
 export type RootState = ReturnType<typeof rootReducer>;
 
 export type AppThunk<ReturnType = void> = ThunkAction<
@@ -37,7 +42,7 @@ export type AppThunk<ReturnType = void> = ThunkAction<
     Action<string>
 >;
 
-export type Trends = 'expenses' | 'income' | 'net earnings' | 'net worth';
+export type Trends = 'expense' | 'income' | 'net earnings' | 'net worth';
 export type Subtrends = 'date' | 'category' | 'merchant';
 export type Dates = 'all time' | 'year' | 'month' | 'week';
 export type Charts = 'bar' | 'pie';

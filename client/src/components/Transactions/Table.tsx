@@ -6,16 +6,19 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 // @ts-ignore
 import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
+import Select from 'react-select';
 import { updateTransaction } from '../shared/TransactionUtil';
 
 // STYLES //
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
+import '../../assets/css/transactionTable.css';
 
 // TYPES //
-import { Transaction } from '../../types';
+import { Transaction, Category } from '../../types';
 
 interface Props {
+    categories: Category[];
     transactions: Transaction[];
     selectedTransactionIDs: string[];
     setSelectedTransactionIDs: (selectedTransactionIDs: string[]) => void;
@@ -26,10 +29,10 @@ const Table: React.FC<Props> = props => {
         {
             text: 'Date',
             dataField: 'date',
+            editCellClasses: 'transaction-table-edit-cell transaction-table-edit-cell-date',
             editor: {
                 type: Type.DATE,
             },
-            editCellClasses: 'table-date',
             formatter: (cell: Date) => {
                 const date = new Date(cell);
                 return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
@@ -52,24 +55,84 @@ const Table: React.FC<Props> = props => {
         {
             text: 'Description',
             dataField: 'description',
+            editCellClasses: 'transaction-table-edit-cell',
             formatter: (cell: string) => {
                 if (cell.length > 30) return `${cell.substring(0, 30)}...`;
                 return cell;
             },
             sort: true,
+            validator: (newValue: any) => {
+                if (!newValue) {
+                    return {
+                        valid: false,
+                        message: 'Description cannot be empty',
+                    };
+                }
+            },
         },
         {
             text: 'Category',
             dataField: 'category',
+            editCellClasses: 'transaction-table-edit-cell',
             formatter: (cell: string) => {
                 if (cell.length > 30) return `${cell.substring(0, 30)}...`;
                 return cell;
             },
             sort: true,
+            validator: (newValue: any) => {
+                if (!newValue) {
+                    return {
+                        valid: false,
+                        message: 'Category cannot be empty',
+                    };
+                }
+            },
+            editorRenderer: (editorProps: any, value: any, row: any, column: any) => {
+                const options = [
+                    {
+                        label: 'Expense',
+                        options: props.categories
+                            .filter(category => category.type === 'expense')
+                            .map(category => ({ value: category.name, label: category.name }))
+                            .sort((a, b) =>
+                                a.value.toUpperCase() > b.value.toUpperCase() ? 0 : -1
+                            ),
+                    },
+                    {
+                        label: 'Income',
+                        options: props.categories
+                            .filter(category => category.type === 'income')
+                            .map(category => ({ value: category.name, label: category.name }))
+                            .sort((a, b) =>
+                                a.value.toUpperCase() > b.value.toUpperCase() ? 0 : -1
+                            ),
+                    },
+                    {
+                        label: 'Other',
+                        options: props.categories
+                            .filter(category => category.type === 'other')
+                            .map(category => ({ value: category.name, label: category.name }))
+                            .sort((a, b) =>
+                                a.value.toUpperCase() > b.value.toUpperCase() ? 0 : -1
+                            ),
+                    },
+                ];
+                return (
+                    <Select
+                        options={options}
+                        defaultValue={options[0]}
+                        classNamePrefix='react-select'
+                        formatGroupLabel={data => <div>{data.label}</div>}
+                        styles={{ menuPortal: base => ({ ...base, zIndex: 99 }) }}
+                        menuPortalTarget={document.body}
+                    />
+                );
+            },
         },
         {
             text: 'Amount',
             dataField: 'amount',
+            editCellClasses: 'transaction-table-edit-cell',
             formatter: (cell: string) => {
                 const parsedCell = parseFloat(cell);
                 if (parsedCell < 0) return `-$${Math.abs(parsedCell).toFixed(2)}`;
@@ -97,13 +160,17 @@ const Table: React.FC<Props> = props => {
     return (
         <BootstrapTable
             bootstrap4
+            id='transaction-table'
             keyField='_id'
+            headerClasses='transaction-table-header'
+            bodyClasses='transaction-table-body'
             data={props.transactions.map(transaction => ({
                 ...transaction,
                 amount: transaction.amount.toFixed(2),
             }))}
-            bodyClasses='table-cell'
             columns={tableColumns}
+            defaultSortDirection='asc'
+            defaultSorted={[{ dataField: 'date', order: 'desc' }]}
             selectRow={{
                 mode: 'checkbox',
                 selected: props.selectedTransactionIDs,
@@ -126,8 +193,6 @@ const Table: React.FC<Props> = props => {
                     }
                 },
             }}
-            defaultSortDirection='asc'
-            defaultSorted={[{ dataField: 'date', order: 'desc' }]}
             pagination={paginationFactory({
                 paginationSize: 4,
                 sizePerPageList: [
@@ -151,7 +216,7 @@ const Table: React.FC<Props> = props => {
             })}
             cellEdit={cellEditFactory({
                 mode: 'click',
-                blurToSave: true,
+                // blurToSave: true,
                 afterSaveCell: async (oldValue: any, newValue: any, item: Transaction) => {
                     const transaction = {
                         description: item.description,

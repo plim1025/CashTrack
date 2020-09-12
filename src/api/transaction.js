@@ -10,8 +10,7 @@ router.get('/', async (req, res, next) => {
             const user = await User.findById(req.user._id);
             res.json(user.transactions);
         } else {
-            console.log('Error getting transaction, user not logged in.');
-            throw Error;
+            throw Error('User not logged in.');
         }
     } catch (error) {
         next(error);
@@ -35,11 +34,10 @@ router.post('/', async (req, res, next) => {
                     },
                 },
             };
-            await User.updateOne(query, update);
+            await User.updateOne(query, update, { runValidators: true });
             res.json(mongooseID);
         } else {
-            console.log('Error posting transaction, user not logged in.');
-            throw Error;
+            throw Error('User not logged in.');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -63,11 +61,10 @@ router.put('/:id', async (req, res, next) => {
                     'transactions.$.date': date,
                 },
             };
-            await User.updateOne(query, update);
+            await User.updateOne(query, update, { runValidators: true });
             res.sendStatus(200);
         } else {
-            console.log('Error posting transaction, user not logged in.');
-            throw Error;
+            throw Error('User not logged in.');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -91,12 +88,14 @@ router.put('/', async (req, res, next) => {
                     'transactions.$[element].date': date,
                 },
             };
-            const arrayFilters = { arrayFilters: [{ 'element._id': { $in: transactionIDs } }] };
+            const arrayFilters = {
+                arrayFilters: [{ 'element._id': { $in: transactionIDs } }],
+                runValidators: true,
+            };
             await User.updateMany(query, update, arrayFilters);
             res.sendStatus(200);
         } else {
-            console.log('Error posting transaction, user not logged in.');
-            throw Error;
+            throw Error('User not logged in.');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -130,11 +129,10 @@ router.delete('/', async (req, res, next) => {
                     $pull: { transactions: { _id: { $in: allTransactionIDs } } },
                 };
             }
-            await User.updateOne(query, update);
+            await User.updateOne(query, update, { runValidators: true });
             res.sendStatus(200);
         } else {
-            console.log('Error posting transaction, user not logged in.');
-            throw Error;
+            throw Error('User not logged in.');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
