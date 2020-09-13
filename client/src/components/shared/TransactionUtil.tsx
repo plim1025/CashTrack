@@ -1,8 +1,9 @@
 import { Transaction, Account } from '../../types';
 
-export const createTransaction = async (transaction: Transaction): Promise<string> => {
+export const createTransaction = async (transaction: Transaction): Promise<void> => {
     try {
         const transactionInfo = JSON.stringify({
+            _id: transaction._id,
             description: transaction.description,
             amount: transaction.amount,
             category: transaction.category,
@@ -19,8 +20,6 @@ export const createTransaction = async (transaction: Transaction): Promise<strin
         if (!response.ok) {
             throw Error('Bad response from server');
         }
-        const id = await response.json();
-        return Promise.resolve(id);
     } catch (error) {
         throw Error(`Error creating transaction: ${error}`);
     }

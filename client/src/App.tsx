@@ -44,7 +44,6 @@ const App: React.FC<Props & RouteComponentProps> = props => {
         }
     }, []);
 
-    console.log('app loaded');
     return (
         <>
             <Header />

@@ -63,7 +63,7 @@
 
 /* React Select Dropdown */
 .react-select__control--menu-is-open,
-.react-select__control--is-focused {
+.react-select__control {
     border-color: #80bdff !important;
     outline: 0 !important;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
@@ -90,4 +90,17 @@
 
 .react-select__option--is-focused {
     background: rgba(0, 123, 255, 0.25);
+}
+
+.react-select-dropdown-button {
+    font-size: 14px !important;
+}
+
+.search-label {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.search-label input {
+    height: 40px;
 }

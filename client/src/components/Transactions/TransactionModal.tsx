@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 // COMPONENTS //
 import { Button, Form, Modal } from 'react-bootstrap';
 import Error from '../shared/Error';
+import Select, { components } from 'react-select';
 
 // TYPES //
 import { Transaction } from '../../types';
@@ -11,45 +12,46 @@ import { Transaction } from '../../types';
 interface Props {
     mode: string;
     toggled: boolean;
-    toggle: (toggle: boolean) => void;
+    close: () => void;
     handleCreateTransaction: (transaction: Transaction) => void;
     handleEditMultipleTransactions: (transaction: Transaction) => void;
 }
 
-const AddModal: React.FC<Props> = props => {
+const TransactionModal: React.FC<Props> = props => {
     let errorTimeout: ReturnType<typeof setTimeout>;
     const modalRef = useRef<HTMLInputElement>(null);
     const [transaction, setTransaction] = useState({
         date: new Date().toISOString().slice(0, 10),
         description: '',
         category: '',
-        amount: 0,
+        amount: '',
     });
     const [error, setError] = useState({ show: false, message: '' });
 
-    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+        const parsedAmount = parseFloat(transaction.amount);
         if (!transaction.date) {
             setError({ show: true, message: 'Invalid date' });
         } else if (!transaction.description || !transaction.category || !transaction.amount) {
             setError({ show: true, message: 'All fields must be filled.' });
-        } else if (isNaN(transaction.amount) || !transaction.amount) {
+        } else if (isNaN(parsedAmount)) {
             setError({ show: true, message: 'Amount should be numeric' });
-        } else if (transaction.amount > 1000000000) {
+        } else if (parsedAmount > 1000000000) {
             setError({ show: true, message: 'Maximum amount is $1,000,000,000' });
         } else {
             setTransaction({
                 date: new Date().toISOString().slice(0, 10),
                 description: '',
                 category: '',
-                amount: 0,
+                amount: '',
             });
             if (props.mode === 'add') {
-                props.handleCreateTransaction(transaction);
+                props.handleCreateTransaction({ ...transaction, amount: parsedAmount });
             } else {
-                props.handleEditMultipleTransactions(transaction);
+                props.handleEditMultipleTransactions({ ...transaction, amount: parsedAmount });
             }
-            props.toggle(false);
+            props.close();
         }
         errorTimeout = setTimeout(() => {
             setError(prevError => ({ ...prevError, show: false }));
@@ -66,7 +68,7 @@ const AddModal: React.FC<Props> = props => {
         <Modal
             centered
             onShow={() => modalRef.current.focus()}
-            onHide={() => props.toggle(false)}
+            onHide={() => props.close()}
             show={props.toggled}
         >
             <Error error={error.show} errorMessage={error.message} />
@@ -95,14 +97,14 @@ const AddModal: React.FC<Props> = props => {
                     </Form.Group>
                     <Form.Group>
                         <Form.Label>Category</Form.Label>
-                        <Form.Control
+                        {/* <Form.Control
                             onChange={e =>
                                 setTransaction({
                                     ...transaction,
                                     category: e.target.value,
                                 })
                             }
-                        />
+                        /> */}
                     </Form.Group>
                     <Form.Group>
                         <Form.Label>Amount</Form.Label>
@@ -110,14 +112,14 @@ const AddModal: React.FC<Props> = props => {
                             onChange={e =>
                                 setTransaction({
                                     ...transaction,
-                                    amount: parseFloat(e.target.value),
+                                    amount: e.target.value,
                                 })
                             }
                         />
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={() => props.toggle(false)} size='sm' variant='secondary'>
+                    <Button onClick={() => props.close()} size='sm' variant='secondary'>
                         Cancel
                     </Button>
                     <Button onClick={handleSubmit} size='sm' type='submit' variant='primary'>
@@ -129,4 +131,4 @@ const AddModal: React.FC<Props> = props => {
     );
 };
 
-export default AddModal;
+export default TransactionModal;
