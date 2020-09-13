@@ -1,21 +1,21 @@
 // REACT //
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
 
 // COMPONENTS //
 import { usePlaidLink } from 'react-plaid-link';
 import { Button } from 'react-bootstrap';
 
+// CONTEXT //
+import { ResourcesContext } from '../../App';
+
 // CSS //
 import '../../assets/css/index.css';
 
-interface Props {
-    refreshResources: () => void;
-}
-
-const PlaidLinkButton: React.FC<Props> = props => {
+const PlaidLinkButton: React.FC = () => {
     const [accountsInfo, setAccountsInfo] = useState({ token: '', metadata: null });
     const [accountsLoading, setAccountsLoading] = useState(false);
     const [linkToken, setLinkToken] = useState('');
+    const { refresh } = useContext(ResourcesContext);
 
     useEffect(() => {
         const getLinkToken = async () => {
@@ -44,7 +44,7 @@ const PlaidLinkButton: React.FC<Props> = props => {
 
     const onSuccess = useCallback(async (token: string, metadata: any) => {
         setAccountsInfo({ token: token, metadata: metadata });
-        props.refreshResources();
+        refresh();
         setAccountsLoading(true);
     }, []);
 

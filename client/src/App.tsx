@@ -1,5 +1,5 @@
 // REACT //
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect, createContext } from 'react';
 
 // ROUTER //
 import { withRouter, RouteComponentProps } from 'react-router';
@@ -25,6 +25,13 @@ const Accounts = React.lazy(() => import(/* webpackChunkName: 'Accounts' */ './v
 const Budgets = React.lazy(() => import(/* webpackChunkName: 'Budgets' */ './view/Budgets'));
 const Settings = React.lazy(() => import(/* webpackChunkName: 'Settings' */ './view/Settings'));
 
+export const ResourcesContext = createContext({
+    transactions: null,
+    accounts: null,
+    categories: null,
+    refresh: null,
+});
+
 interface Props {
     subpage: string;
 }
@@ -45,31 +52,33 @@ const App: React.FC<Props & RouteComponentProps> = props => {
     }, []);
 
     return (
-        <>
+        <ResourcesContext.Provider
+            value={{
+                transactions: resources?.transactions,
+                accounts: resources?.accounts,
+                categories: resources?.categories,
+                refresh: () => setResources(() => createResources()),
+            }}
+        >
             <Header />
             <Suspense fallback={<div>Loading...</div>}>
                 {globalSubpage === 'home' ? (
                     <Home />
                 ) : globalSubpage === 'transactions' ? (
-                    <Transactions
-                        transactions={resources.transactions}
-                        accounts={resources.accounts}
-                        categories={resources.categories}
-                        refreshResources={() => setResources(() => createResources())}
-                    />
+                    <Transactions />
                 ) : globalSubpage === 'trends' ? (
-                    <Trends transactions={resources.transactions} accounts={resources.accounts} />
+                    <Trends />
                 ) : globalSubpage === 'budgets' ? (
                     <Budgets />
                 ) : globalSubpage === 'accounts' ? (
-                    <Accounts refreshResources={() => setResources(() => createResources())} />
+                    <Accounts />
                 ) : globalSubpage === 'settings' ? (
                     <Settings />
                 ) : (
                     <div>404</div>
                 )}
             </Suspense>
-        </>
+        </ResourcesContext.Provider>
     );
 };
 

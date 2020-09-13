@@ -3,8 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 
 // COMPONENTS //
 import { Button, Form, Modal } from 'react-bootstrap';
+import CategoryDropdown from './CategoryDropdown';
 import Error from '../shared/Error';
-import Select, { components } from 'react-select';
 
 // TYPES //
 import { Transaction } from '../../types';
@@ -97,14 +97,16 @@ const TransactionModal: React.FC<Props> = props => {
                     </Form.Group>
                     <Form.Group>
                         <Form.Label>Category</Form.Label>
-                        {/* <Form.Control
+                        <CategoryDropdown
+                            class='react-select-transaction-modal'
                             onChange={e =>
                                 setTransaction({
                                     ...transaction,
-                                    category: e.target.value,
+                                    category: e.value,
                                 })
                             }
-                        /> */}
+                            openCallback={() => props.close()}
+                        />
                     </Form.Group>
                     <Form.Group>
                         <Form.Label>Amount</Form.Label>

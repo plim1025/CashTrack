@@ -38,6 +38,7 @@
         "array-callback-return": "off",
         "no-lonely-if": "off",
         "import/order": "off",
+        "import/no-cycle": "off",
         "import/newline-after-import": "off",
         "import/no-extraneous-dependencies": [
             "error",

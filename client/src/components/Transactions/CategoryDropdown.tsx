@@ -1,17 +1,23 @@
 // REACT //
-import React, { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 
 // COMPONENTS //
 import { Button } from 'react-bootstrap';
 import Select, { components } from 'react-select';
 
+// CONTEXT //
+import { CategoryModalContext } from '../../view/Transactions';
+import { ResourcesContext } from '../../App';
+
 // TYPES //
 import { Category } from '../../types';
 
 interface Props {
-    editorProps: any;
-    defaultCategory: string;
-    categories: Category[];
+    defaultCategory?: string;
+    class: string;
+    onChange: (category: any) => void;
+    onBlur?: () => void;
+    openCallback?: () => void;
 }
 
 const parseCategories = (categories: Category[], type: string) => {
@@ -22,29 +28,37 @@ const parseCategories = (categories: Category[], type: string) => {
 };
 
 const CategoryDropdown: React.FC<Props> = props => {
+    const { openCategoryModal } = useContext(CategoryModalContext);
+    const { categories } = useContext(ResourcesContext);
+
     return (
         <>
             <Select
                 autoFocus
+                className={`${props.class} react-select`}
                 classNamePrefix='react-select'
                 // ref={dropdownMenuRef}
                 options={[
                     {
                         label: 'Expense',
-                        options: parseCategories(props.categories, 'expense'),
+                        options: parseCategories(categories.read(), 'expense'),
                     },
                     {
                         label: 'Income',
-                        options: parseCategories(props.categories, 'income'),
+                        options: parseCategories(categories.read(), 'income'),
                     },
                     {
                         label: 'Other',
-                        options: parseCategories(props.categories, 'other'),
+                        options: parseCategories(categories.read(), 'other'),
                     },
                 ]}
-                defaultValue={{ label: props.defaultCategory, value: props.defaultCategory }}
+                defaultValue={
+                    props.defaultCategory
+                        ? { label: props.defaultCategory, value: props.defaultCategory }
+                        : null
+                }
                 formatGroupLabel={data => <div>{data.label}</div>}
-                styles={{ menuPortal: base => ({ ...base, zIndex: 99 }) }}
+                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                 menuPortalTarget={document.body}
                 components={{
                     Menu: (menuProps: any) => (
@@ -55,15 +69,20 @@ const CategoryDropdown: React.FC<Props> = props => {
                                 variant='secondary'
                                 size='sm'
                                 block
-                                // onClick={() => setModal(true)}
+                                onClick={() => {
+                                    openCategoryModal();
+                                    if (props.openCallback) {
+                                        props.openCallback();
+                                    }
+                                }}
                             >
                                 Manage Categories
                             </Button>
                         </components.Menu>
                     ),
                 }}
-                onChange={(category: any) => props.editorProps.onUpdate(category.value)}
-                onBlur={props.editorProps.onBlur}
+                onChange={props.onChange}
+                onBlur={props.onBlur}
             />
         </>
     );

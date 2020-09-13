@@ -35,7 +35,7 @@ const Error: React.FC<Props> = props => {
 const ss = StyleSheet.create({
     wrapper: {
         // @ts-ignore
-        position: 'absolute !important',
+        position: 'fixed !important',
         transition: 'all .2s ease-in-out !important',
         left: '50%',
         transform: 'translateX(-50%)',

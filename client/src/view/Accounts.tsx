@@ -4,12 +4,8 @@ import React from 'react';
 // COMPONENTS //
 import PlaidLinkButton from '../components/Accounts/PlaidLinkButton';
 
-interface Props {
-    refreshResources: () => void;
-}
-
-const Accounts: React.FC<Props> = props => {
-    return <PlaidLinkButton refreshResources={() => props.refreshResources()} />;
+const Accounts: React.FC = () => {
+    return <PlaidLinkButton />;
 };
 
 export default Accounts;

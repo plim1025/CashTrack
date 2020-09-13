@@ -62,8 +62,14 @@
 }
 
 /* React Select Dropdown */
-.react-select__control--menu-is-open,
 .react-select__control {
+    height: calc(1.5em + 0.75rem + 2px) !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+}
+
+.react-select__control--menu-is-open,
+.react-select__control--is-focused {
     border-color: #80bdff !important;
     outline: 0 !important;
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
@@ -72,10 +78,6 @@
 .react-select__menu {
     font-family: 'Open Sans';
     font-size: 14px;
-}
-
-.react-select__control {
-    height: 38px;
 }
 
 .react-select__menu-list {
@@ -96,6 +98,18 @@
     font-size: 14px !important;
 }
 
+.react-select-dropdown-table-modal {
+    height: 38px;
+}
+
+.react-select-transaction-modal .react-select__value-container {
+    padding: 2px 0.75rem !important;
+}
+
+.react-select-dropdown-transaction-modal {
+    height: 45px;
+}
+
 .search-label {
     width: 100%;
     margin-bottom: 20px;
@@ -103,4 +117,19 @@
 
 .search-label input {
     height: 40px;
+}
+
+.category-modal {
+    max-width: none !important;
+    width: 600px !important;
+}
+
+.category-modal > div {
+    display: flex;
+    max-height: 700px;
+    padding-bottom: 10px;
+}
+
+.modal-header .close {
+    margin-left: 0 !important;
 }

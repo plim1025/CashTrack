@@ -15,10 +15,9 @@ import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.m
 import '../../assets/css/transactionTable.css';
 
 // TYPES //
-import { Transaction, Category } from '../../types';
+import { Transaction } from '../../types';
 
 interface Props {
-    categories: Category[];
     transactions: Transaction[];
     selectedTransactionIDs: string[];
     setSelectedTransactionIDs: (selectedTransactionIDs: string[]) => void;
@@ -35,7 +34,7 @@ const Table: React.FC<Props> = props => {
             dataField: 'date',
             editCellClasses: 'transaction-table-edit-cell transaction-table-edit-cell-date',
             editor: {
-                type: Type.SELECT,
+                type: Type.DATE,
             },
             formatter: (cell: Date) => {
                 const date = new Date(cell);
@@ -81,9 +80,10 @@ const Table: React.FC<Props> = props => {
             sort: true,
             editorRenderer: (editorProps: any, value: any) => (
                 <CategoryDropdown
-                    editorProps={editorProps}
+                    class='react-select-table-modal'
                     defaultCategory={value}
-                    categories={props.categories}
+                    onChange={category => editorProps.onUpdate(category.value)}
+                    onBlur={editorProps.onBlur}
                 />
             ),
         },

@@ -16,6 +16,7 @@ import './assets/css/index.css';
 // VIEWS //
 import Signin from './view/Signin';
 import Register from './view/Register';
+import Landing from './view/Landing';
 import App from './App';
 
 const { store, persistor } = configureStore();
@@ -29,6 +30,7 @@ ReactDOM.render(
         <PersistGate loading={null} persistor={persistor}>
             <BrowserRouter>
                 <Switch>
+                    <Route exact path='/landing' component={Landing} />
                     <Route exact path='/signin' component={Signin} />
                     <Route exact path='/register' component={Register} />
                     <Redirect exact from='/' to='/home' />

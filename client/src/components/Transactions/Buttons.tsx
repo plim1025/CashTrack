@@ -2,20 +2,24 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 /* eslint-disable react/jsx-wrap-multilines */
 // REACT //
-import React from 'react';
+import React, { useContext } from 'react';
 
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
 import { Button } from 'react-bootstrap';
 
+// CONTEXT //
+import { ResourcesContext } from '../../App';
+
 interface Props {
     showModal: () => void;
     handleEditButton: () => void;
     handleDeleteButton: () => void;
-    refreshResources: () => void;
 }
 
 const Buttons: React.FC<Props> = props => {
+    const { refresh } = useContext(ResourcesContext);
+
     return (
         <div className={css(ss.wrapper)}>
             <Button
@@ -51,7 +55,7 @@ const Buttons: React.FC<Props> = props => {
             </Button>
             <Button
                 variant='success'
-                onClick={() => props.refreshResources()}
+                onClick={() => refresh()}
                 className={css(ss.button)}
             >
                 <svg className={css(ss.icon)} viewBox='0 0 512 512'>

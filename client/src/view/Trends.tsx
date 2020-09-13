@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 /* eslint-disable prettier/prettier */
 // REACT //
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useEffect, useReducer, useContext } from 'react';
 
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
@@ -10,6 +10,9 @@ import Filters from '../components/Trends/Filters';
 import TrendInfo from '../components/Trends/TrendInfo';
 import Sidebar from '../components/Trends/Sidebar';
 import { parseSelectedTransactions, parseTransactionData } from '../components/shared/TrendUtil';
+
+// CONTEXT //
+import { ResourcesContext } from '../App';
 
 // TYPES //
 import { Transaction, Account, Trends, Subtrends, Charts, Dates, Data } from '../types';
@@ -46,25 +49,21 @@ const reducer = (state: ReducerState, action: Actions) => {
     }
 };
 
-interface Props {
-    transactions: { read: () => Transaction[] };
-    accounts: { read: () => Account[] };
-}
-
-const Trends: React.FC<Props> = props => {
+const Trends: React.FC = () => {
+    const { transactions, accounts } = useContext(ResourcesContext);
     const [state, dispatch] = useReducer(reducer, {
         trend: 'expense',
         subtrend: 'category',
         chart: 'pie',
         date: 'all time',
-        accountIDs: props.accounts.read().map(account => account.id),
+        accountIDs: accounts.read().map((account: Account) => account.id),
     });
     const [selectedTransactions, setSelectedTransactions] = useState<Transaction[]>([]);
     const [data, setData] = useState<Data[]>([]);
 
     useEffect(() => {
         const newSelectedTransactions = parseSelectedTransactions(
-            props.transactions.read(),
+            transactions.read(),
             state.trend,
             state.date,
             state.accountIDs
