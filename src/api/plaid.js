@@ -191,9 +191,12 @@ router.post('/refresh', async (req, res, next) => {
                         categoryID: transaction.category_id,
                         description: transaction.name,
                         amount: transaction.amount,
-                        category: getTransactionCategory(transaction.category),
+                        category: getTransactionCategory(
+                            transaction.category_id,
+                            transaction.amount
+                        ),
                         merchant: transaction.merchant_name,
-                        type: getTransactionType(transaction.category_id),
+                        type: getTransactionType(transaction.category_id, transaction.amount),
                         date: transaction.date,
                     };
                 })

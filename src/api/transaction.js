@@ -20,9 +20,9 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
     try {
         if (req.user) {
-            const { description, amount, category, date } = req.body;
+            const { description, amount, category, date, _id } = req.body;
             const query = { _id: req.user._id };
-            const mongooseID = mongoose.Types.ObjectId();
+            const mongooseID = mongoose.Types.ObjectId(_id);
             const update = {
                 $push: {
                     transactions: {
@@ -35,7 +35,7 @@ router.post('/', async (req, res, next) => {
                 },
             };
             await User.updateOne(query, update, { runValidators: true });
-            res.json(mongooseID);
+            res.sendStatus(200);
         } else {
             throw Error('User not logged in.');
         }
@@ -52,13 +52,15 @@ router.put('/:id', async (req, res, next) => {
         if (req.user) {
             const { id } = req.params;
             const { description, amount, category, date } = req.body;
+            const newDate = new Date(date);
+            newDate.setDate(newDate.getDate() - 1);
             const query = { _id: req.user._id, 'transactions._id': id };
             const update = {
                 $set: {
                     'transactions.$.description': description,
                     'transactions.$.amount': amount * -1,
                     'transactions.$.category': category,
-                    'transactions.$.date': date,
+                    'transactions.$.date': newDate,
                 },
             };
             await User.updateOne(query, update, { runValidators: true });
