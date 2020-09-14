@@ -10,13 +10,14 @@ import { useSelector } from 'react-redux';
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
 import { Button, Card, Form } from 'react-bootstrap';
-import Error from '../components/shared/Error';
+import ErrorMessage from '../components/shared/ErrorMessage';
 
 // TYPES //
 import { RootState } from '../types';
 
+let errorTimeout: ReturnType<typeof setTimeout>;
+
 const Register: React.FC<RouteComponentProps> = props => {
-    let errorTimeout: ReturnType<typeof setTimeout>;
     const globalEmail = useSelector((redux: RootState) => redux.email);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -47,6 +48,9 @@ const Register: React.FC<RouteComponentProps> = props => {
                 setError({ show: true, type: 'danger', message: 'Error in creating account.' });
             }
         }
+        if (errorTimeout) {
+            clearTimeout(errorTimeout);
+        }
         errorTimeout = setTimeout(() => {
             setError(prevError => ({ ...prevError, show: false }));
         }, 3000);
@@ -63,7 +67,7 @@ const Register: React.FC<RouteComponentProps> = props => {
     }
     return (
         <div className={css(ss.wrapper)}>
-            <Error
+            <ErrorMessage
                 error={error.show}
                 type={error.type}
                 errorMessage={error.message}

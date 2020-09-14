@@ -40,7 +40,7 @@ export const deleteTransactions = async (transactionIDs: string[]): Promise<void
             throw Error('Bad response from server');
         }
     } catch (error) {
-        console.log(`Error deleting transaction: ${error}`);
+        console.log(`Error deleting transactions: ${error}`);
     }
 };
 
@@ -94,7 +94,85 @@ export const updateMultipleTransactions = async (
             throw Error(`Bad response from server`);
         }
     } catch (error) {
-        throw Error(`Error updating transaction: ${error}`);
+        throw Error(`Error updating multiple transactions: ${error}`);
+    }
+};
+
+export const addAndUpdateCategory = async (
+    name: string,
+    type: string,
+    oldName?: string,
+    transactionIDs?: string[]
+): Promise<void> => {
+    try {
+        if (oldName) {
+            Promise.all([
+                fetch(`${process.env.BACKEND_URI}/api/category/${oldName}`, {
+                    method: 'DELETE',
+                    credentials: 'include',
+                }),
+                fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        transactionIDs: transactionIDs,
+                        category: oldName,
+                        newCategory: name,
+                    }),
+                }),
+            ]).then(([deleteResponse, editResponse]) => {
+                if (!deleteResponse.ok || !editResponse.ok) {
+                    throw Error('Bad response from server');
+                }
+            });
+        }
+        const response = await fetch(`${process.env.BACKEND_URI}/api/category`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                type: type,
+            }),
+        });
+        if (!response.ok) {
+            throw Error('Bad response from server');
+        }
+    } catch (error) {
+        throw Error(`Error ${oldName ? 'editing' : 'adding'} transaction: ${error}`);
+    }
+};
+
+export const deleteCategory = (name: string, transactionIDs: string[]) => {
+    try {
+        Promise.all([
+            fetch(`${process.env.BACKEND_URI}/api/category/${name}`, {
+                method: 'DELETE',
+                credentials: 'include',
+            }),
+            fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    transactionIDs: transactionIDs,
+                    category: name,
+                }),
+            }),
+        ]).then(([deleteResponse, editResponse]) => {
+            if (!deleteResponse.ok || !editResponse.ok) {
+                throw Error('Bad response from server');
+            }
+        });
+    } catch (error) {
+        throw Error(`Error deleting transaction: ${error}`);
     }
 };
 

@@ -80,16 +80,34 @@ router.put('/', async (req, res, next) => {
     try {
         if (req.user) {
             const { transactionIDs } = req.body;
-            const { description, amount, category, date } = req.body.transaction;
-            const query = { _id: req.user._id };
-            const update = {
-                $set: {
-                    'transactions.$[element].description': description,
-                    'transactions.$[element].amount': amount * -1,
-                    'transactions.$[element].category': category,
-                    'transactions.$[element].date': date,
-                },
-            };
+            let query;
+            let update;
+            if (req.body.transaction) {
+                const { description, amount, category, date } = req.body.transaction;
+                query = { _id: req.user._id };
+                update = {
+                    $set: {
+                        'transactions.$[element].description': description,
+                        'transactions.$[element].amount': amount * -1,
+                        'transactions.$[element].category': category,
+                        'transactions.$[element].date': date,
+                    },
+                };
+            } else if (req.body.category && req.body.newCategory) {
+                query = { _id: req.user._id, 'transactions.category': req.body.category };
+                update = {
+                    $set: {
+                        'transactions.$[element].category': req.body.newCategory,
+                    },
+                };
+            } else {
+                query = { _id: req.user._id, 'transactions.category': req.body.category };
+                update = {
+                    $set: {
+                        'transactions.$[element].category': 'Uncategorized',
+                    },
+                };
+            }
             const arrayFilters = {
                 arrayFilters: [{ 'element._id': { $in: transactionIDs } }],
                 runValidators: true,

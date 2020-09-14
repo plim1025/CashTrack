@@ -58,7 +58,7 @@ router.delete('/:name', async (req, res, next) => {
             const categoryExists = categories.find(category => category.name === name);
             if (categoryExists) {
                 const update = {
-                    $pull: { transactions: { name: name } },
+                    $pull: { categories: { name: name } },
                 };
                 await User.updateOne(query, update, { runValidators: true });
                 res.sendStatus(200);

@@ -84,6 +84,7 @@ const Table: React.FC<Props> = props => {
                     defaultCategory={value}
                     onChange={category => editorProps.onUpdate(category.value)}
                     onBlur={editorProps.onBlur}
+                    dropdownRef={dropdownMenuRef}
                 />
             ),
         },
@@ -186,7 +187,6 @@ const Table: React.FC<Props> = props => {
                         })}
                         cellEdit={cellEditFactory({
                             mode: 'click',
-                            // blurToSave: true,
                             afterSaveCell: (
                                 oldValue: any,
                                 newValue: any,

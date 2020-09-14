@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 // COMPONENTS //
 import { Button, Form, Modal } from 'react-bootstrap';
 import CategoryDropdown from './CategoryDropdown';
-import Error from '../shared/Error';
+import ErrorMessage from '../shared/ErrorMessage';
 
 // TYPES //
 import { Transaction } from '../../types';
@@ -17,8 +17,9 @@ interface Props {
     handleEditMultipleTransactions: (transaction: Transaction) => void;
 }
 
+let errorTimeout: ReturnType<typeof setTimeout>;
+
 const TransactionModal: React.FC<Props> = props => {
-    let errorTimeout: ReturnType<typeof setTimeout>;
     const modalRef = useRef<HTMLInputElement>(null);
     const [transaction, setTransaction] = useState({
         date: new Date().toISOString().slice(0, 10),
@@ -52,6 +53,10 @@ const TransactionModal: React.FC<Props> = props => {
                 props.handleEditMultipleTransactions({ ...transaction, amount: parsedAmount });
             }
             props.close();
+            return;
+        }
+        if (errorTimeout) {
+            clearTimeout(errorTimeout);
         }
         errorTimeout = setTimeout(() => {
             setError(prevError => ({ ...prevError, show: false }));
@@ -71,7 +76,7 @@ const TransactionModal: React.FC<Props> = props => {
             onHide={() => props.close()}
             show={props.toggled}
         >
-            <Error error={error.show} errorMessage={error.message} />
+            <ErrorMessage error={error.show} errorMessage={error.message} />
             <Form>
                 <Modal.Body>
                     <Form.Group>
@@ -98,7 +103,7 @@ const TransactionModal: React.FC<Props> = props => {
                     <Form.Group>
                         <Form.Label>Category</Form.Label>
                         <CategoryDropdown
-                            class='react-select-transaction-modal'
+                            class='react-select-padded-modal'
                             onChange={e =>
                                 setTransaction({
                                     ...transaction,

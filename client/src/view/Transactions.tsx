@@ -14,10 +14,11 @@ import Table from '../components/Transactions/Table';
 import TransactionModal from '../components/Transactions/TransactionModal';
 import CategoryModal from '../components/Transactions/CategoryModal';
 import CategorySubmodal from '../components/Transactions/CategorySubmodal';
+import CategoryDeleteModal from '../components/Transactions/CategoryDeleteModal';
 import Sidebar from '../components/Transactions/Sidebar';
 import AccountInfo from '../components/Transactions/AccountInfo';
 import Buttons from '../components/Transactions/Buttons';
-import Error from '../components/shared/Error';
+import ErrorMessage from '../components/shared/ErrorMessage';
 import { Button } from 'react-bootstrap';
 import { v1 as uuidv4 } from 'uuid';
 import {
@@ -31,11 +32,14 @@ import {
 import { ResourcesContext } from '../App';
 
 // TYPES //
-import { Transaction, Account } from '../types';
+import { Transaction, Account, Category } from '../types';
+
+export const CategoryContext = createContext({ categories: null, openCategoryModal: null });
 
 type Actions =
     | { type: 'SET_TRANSACTIONS'; transactions: Transaction[] }
     | { type: 'SET_ACCOUNTS'; accounts: Account[] }
+    | { type: 'SET_CATEGORIES'; categories: Category[] }
     | { type: 'SET_SELECTED_TRANSACTION_IDS'; ids: string[] }
     | { type: 'SET_SELECTED_ACCOUNT_ID'; id: string }
     | { type: 'SHOW_TRANSACTION_ADD_MODAL' }
@@ -43,14 +47,17 @@ type Actions =
     | { type: 'HIDE_TRANSACTION_MODAL' }
     | { type: 'SHOW_CATEGORY_MODAL' }
     | { type: 'HIDE_CATEGORY_MODAL' }
-    | { type: 'SHOW_CATEGORY_SUBMODAL'; category: { name: string; type: string } }
+    | { type: 'SHOW_CATEGORY_SUBMODAL'; mode: string; category?: Category }
     | { type: 'HIDE_CATEGORY_SUBMODAL' }
+    | { type: 'SHOW_CATEGORY_DELETE_MODAL' }
+    | { type: 'HIDE_CATEGORY_DELETE_MODAL' }
     | { type: 'SET_ERROR'; message: string }
     | { type: 'HIDE_ERROR' };
 
 interface ReducerState {
     transactions: Transaction[];
     accounts: Account[];
+    categories: Category[];
     selectedTransactionIDs: string[];
     selectedAccountID: string;
     transactionModal: {
@@ -60,11 +67,10 @@ interface ReducerState {
     categoryModal: boolean;
     categorySubmodal: {
         show: boolean;
-        category: {
-            name: string;
-            type: string;
-        };
+        mode: string;
+        category: Category;
     };
+    categoryDeleteModal: boolean;
     error: {
         show: boolean;
         message: string;
@@ -77,6 +83,8 @@ const reducer = (state: ReducerState, action: Actions) => {
             return { ...state, transactions: action.transactions };
         case 'SET_ACCOUNTS':
             return { ...state, accounts: action.accounts };
+        case 'SET_CATEGORIES':
+            return { ...state, categories: action.categories };
         case 'SET_SELECTED_TRANSACTION_IDS':
             return { ...state, selectedTransactionIDs: action.ids };
         case 'SET_SELECTED_ACCOUNT_ID':
@@ -97,10 +105,8 @@ const reducer = (state: ReducerState, action: Actions) => {
                 categoryModal: false,
                 categorySubmodal: {
                     show: true,
-                    category: {
-                        name: action.category.name,
-                        type: action.category.type,
-                    },
+                    mode: action.mode,
+                    category: action.category,
                 },
             };
         case 'HIDE_CATEGORY_SUBMODAL':
@@ -108,6 +114,18 @@ const reducer = (state: ReducerState, action: Actions) => {
                 ...state,
                 categoryModal: true,
                 categorySubmodal: { ...state.categorySubmodal, show: false },
+            };
+        case 'SHOW_CATEGORY_DELETE_MODAL':
+            return {
+                ...state,
+                categoryDeleteModal: true,
+                categorySubmodal: { ...state.categorySubmodal, show: false },
+            };
+        case 'HIDE_CATEGORY_DELETE_MODAL':
+            return {
+                ...state,
+                categoryDeleteModal: false,
+                categoryModal: true,
             };
         case 'SET_ERROR':
             return { ...state, error: { show: true, message: action.message } };
@@ -118,20 +136,15 @@ const reducer = (state: ReducerState, action: Actions) => {
     }
 };
 
-export const CategoryModalContext = createContext({
-    openCategoryModal: null,
-    closeCategoryModal: null,
-    openCategorySubmodal: null,
-    closeCategorySubmodal: null,
-});
+let errorTimeout: ReturnType<typeof setTimeout>;
 
 const Transactions: React.FC<RouteComponentProps> = props => {
-    let errorTimeout: ReturnType<typeof setTimeout>;
-    const { transactions, accounts } = useContext(ResourcesContext);
+    const { transactions, accounts, categories } = useContext(ResourcesContext);
     const reduxDispatch = useDispatch();
     const [state, dispatch] = useReducer(reducer, {
         transactions: transactions.read(),
         accounts: accounts.read(),
+        categories: categories.read(),
         selectedTransactionIDs: [],
         selectedAccountID: 'All Accounts',
         transactionModal: {
@@ -141,11 +154,10 @@ const Transactions: React.FC<RouteComponentProps> = props => {
         categoryModal: false,
         categorySubmodal: {
             show: false,
-            category: {
-                name: '',
-                type: '',
-            },
+            mode: 'add',
+            category: null,
         },
+        categoryDeleteModal: false,
         error: {
             show: false,
             message: '',
@@ -170,7 +182,8 @@ const Transactions: React.FC<RouteComponentProps> = props => {
     useEffect(() => {
         dispatch({ type: 'SET_TRANSACTIONS', transactions: transactions.read() });
         dispatch({ type: 'SET_ACCOUNTS', accounts: accounts.read() });
-    }, [transactions, accounts]);
+        dispatch({ type: 'SET_CATEGORIES', categories: categories.read() });
+    }, [transactions, accounts, categories]);
 
     const handleCreateTransaction = async (newTransaction: Transaction) => {
         const newID = uuidv4().substr(0, 12);
@@ -212,6 +225,9 @@ const Transactions: React.FC<RouteComponentProps> = props => {
     const handleDeleteMultipleTransactions = async () => {
         if (!state.selectedTransactionIDs.length) {
             dispatch({ type: 'SET_ERROR', message: 'No transactions selected to delete' });
+            if (errorTimeout) {
+                clearTimeout(errorTimeout);
+            }
             errorTimeout = setTimeout(() => dispatch({ type: 'HIDE_ERROR' }), 3000);
         } else {
             const newTransactions = state.transactions.filter(
@@ -227,6 +243,9 @@ const Transactions: React.FC<RouteComponentProps> = props => {
     const handleEditButton = () => {
         if (!state.selectedTransactionIDs.length) {
             dispatch({ type: 'SET_ERROR', message: 'No transactions selected to edit' });
+            if (errorTimeout) {
+                clearTimeout(errorTimeout);
+            }
             errorTimeout = setTimeout(() => dispatch({ type: 'HIDE_ERROR' }), 3000);
         } else {
             dispatch({ type: 'SHOW_TRANSACTION_EDIT_MODAL' });
@@ -245,16 +264,10 @@ const Transactions: React.FC<RouteComponentProps> = props => {
     }, []);
 
     return (
-        <CategoryModalContext.Provider
+        <CategoryContext.Provider
             value={{
+                categories: state.categories,
                 openCategoryModal: () => dispatch({ type: 'SHOW_CATEGORY_MODAL' }),
-                closeCategoryModal: () => dispatch({ type: 'HIDE_CATEGORY_MODAL' }),
-                openCategorySubmodal: (name?: string, type?: string) =>
-                    dispatch({
-                        type: 'SHOW_CATEGORY_SUBMODAL',
-                        category: { name: name, type: type },
-                    }),
-                closeCategorySubmodal: () => dispatch({ type: 'HIDE_CATEGORY_SUBMODAL' }),
             }}
         >
             <div className={css(ss.wrapper)}>
@@ -305,15 +318,51 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                     <CategoryModal
                         toggled={state.categoryModal}
                         close={() => dispatch({ type: 'HIDE_CATEGORY_MODAL' })}
+                        categories={state.categories}
+                        openSubmodal={(mode: string, category?: Category) =>
+                            dispatch({
+                                type: 'SHOW_CATEGORY_SUBMODAL',
+                                mode: mode,
+                                category: category,
+                            })
+                        }
                     />
                     <CategorySubmodal
                         toggled={state.categorySubmodal.show}
                         close={() => dispatch({ type: 'HIDE_CATEGORY_SUBMODAL' })}
+                        mode={state.categorySubmodal.mode}
+                        category={state.categorySubmodal.category}
+                        categories={state.categories}
+                        transactions={state.transactions}
+                        setCategories={(newCategories: Category[]) =>
+                            dispatch({ type: 'SET_CATEGORIES', categories: newCategories })
+                        }
+                        setTransactions={(newTransactions: Transaction[]) => {
+                            dispatch({ type: 'SET_TRANSACTIONS', transactions: newTransactions });
+                        }}
+                        openDeleteModal={() => dispatch({ type: 'SHOW_CATEGORY_DELETE_MODAL' })}
+                    />
+                    <CategoryDeleteModal
+                        toggled={state.categoryDeleteModal}
+                        close={() => dispatch({ type: 'HIDE_CATEGORY_DELETE_MODAL' })}
+                        categoryName={
+                            state.categorySubmodal.category
+                                ? state.categorySubmodal.category.name
+                                : null
+                        }
+                        categories={state.categories}
+                        transactions={state.transactions}
+                        setCategories={(newCategories: Category[]) =>
+                            dispatch({ type: 'SET_CATEGORIES', categories: newCategories })
+                        }
+                        setTransactions={(newTransactions: Transaction[]) => {
+                            dispatch({ type: 'SET_TRANSACTIONS', transactions: newTransactions });
+                        }}
                     />
                 </div>
-                <Error error={state.error.show} errorMessage={state.error.message} />
+                <ErrorMessage error={state.error.show} errorMessage={state.error.message} />
             </div>
-        </CategoryModalContext.Provider>
+        </CategoryContext.Provider>
     );
 };
 

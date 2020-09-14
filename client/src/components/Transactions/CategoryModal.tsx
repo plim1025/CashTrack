@@ -1,15 +1,10 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 // REACT //
-import React, { useState, useEffect, useContext } from 'react';
+import React from 'react';
 
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
 import { Button, Modal } from 'react-bootstrap';
-import Error from '../shared/Error';
-
-// CONTEXT //
-import { ResourcesContext } from '../../App';
-import { CategoryModalContext } from '../../view/Transactions';
 
 // TYPES //
 import { Category } from '../../types';
@@ -17,24 +12,26 @@ import { Category } from '../../types';
 interface Props {
     toggled: boolean;
     close: () => void;
+    categories: Category[];
+    openSubmodal: (mode: string, category?: Category) => void;
 }
 
 const parseCategories = (
     categories: Category[],
     type: string,
-    onClickHandler: (name?: string, type?: string) => void
+    onClickHandler: (category: Category) => void
 ) => {
     return categories
         .filter((category: Category) => category.type === type)
         .sort((a: Category, b: Category) => (a.name.toUpperCase() > b.name.toUpperCase() ? 0 : -1))
         .map((category: Category) => {
             // eslint-disable-next-line prettier/prettier
-            const defaultCategories = ['Bank Fees', 'Legal Fees', 'Charitable Giving', 'Medical', 'Cash', 'Check', 'Education', 'Membership Fee', 'Service', 'Utilities', 'Postage/Shipping', 'Restaurant', 'Entertainment', 'Loan', 'Rent', 'Home Maintenance/Improvement', 'Automotive', 'Electronic', 'Insurance', 'Business Expenditure', 'Real Estate', 'Personal Care', 'Gas', 'Subscription', 'Travel', 'Shopping', 'Clothing', 'Groceries', 'Tax', 'Subsidy', 'Interest', 'Deposit', 'Payroll/Salary', 'Cash', 'Transfer'];
+            const defaultCategories = ['Uncategorized', 'Bank Fees', 'Legal Fees', 'Charitable Giving', 'Medical', 'Cash', 'Check', 'Education', 'Membership Fee', 'Service', 'Utilities', 'Postage/Shipping', 'Restaurant', 'Entertainment', 'Loan', 'Rent', 'Home Maintenance/Improvement', 'Automotive', 'Electronic', 'Insurance', 'Business Expenditure', 'Real Estate', 'Personal Care', 'Gas', 'Subscription', 'Travel', 'Shopping', 'Clothing', 'Groceries', 'Tax', 'Subsidy', 'Interest', 'Deposit', 'Payroll/Salary', 'Cash', 'Transfer'];
             if (defaultCategories.indexOf(category.name) === -1) {
                 return (
                     <div
                         key={category.name}
-                        onClick={() => onClickHandler(category.name, category.type)}
+                        onClick={() => onClickHandler(category)}
                         className={css(ss.columnCell)}
                         style={{ cursor: 'pointer' }}
                     >
@@ -62,10 +59,6 @@ const parseCategories = (
 };
 
 const CategoryModal: React.FC<Props> = props => {
-    const { categories: resourceCategories } = useContext(ResourcesContext);
-    const { openCategorySubmodal } = useContext(CategoryModalContext);
-    const [categories, setCategories] = useState(() => resourceCategories.read());
-
     return (
         <Modal
             centered
@@ -75,27 +68,27 @@ const CategoryModal: React.FC<Props> = props => {
         >
             <Modal.Header closeButton>
                 <h4 className={css(ss.header)}>Manage Categories</h4>
-                <Button className={css(ss.button)} onClick={() => openCategorySubmodal()}>
+                <Button className={css(ss.button)} onClick={() => props.openSubmodal('add')}>
                     + Category
                 </Button>
             </Modal.Header>
             <div className={css(ss.table)}>
                 <div className={css(ss.column)}>
                     <div className={css(ss.columnHeader)}>Expense</div>
-                    {parseCategories(categories, 'expense', () => (name: string, type: string) =>
-                        openCategorySubmodal(name, type)
+                    {parseCategories(props.categories, 'expense', (category: Category) =>
+                        props.openSubmodal('edit', category)
                     )}
                 </div>
                 <div className={css(ss.column)}>
                     <div className={css(ss.columnHeader)}>Income</div>
-                    {parseCategories(categories, 'income', (name: string, type: string) =>
-                        openCategorySubmodal(name, type)
+                    {parseCategories(props.categories, 'income', (category: Category) =>
+                        props.openSubmodal('edit', category)
                     )}
                 </div>
                 <div className={css(ss.column)}>
                     <div className={css(ss.columnHeader)}>Other</div>
-                    {parseCategories(categories, 'other', (name: string, type: string) =>
-                        openCategorySubmodal(name, type)
+                    {parseCategories(props.categories, 'other', (category: Category) =>
+                        props.openSubmodal('edit', category)
                     )}
                 </div>
             </div>

@@ -11,7 +11,7 @@ import { loadEmail } from '../redux/Actions';
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
 import { Button, Card, Form } from 'react-bootstrap';
-import Error from '../components/shared/Error';
+import ErrorMessage from '../components/shared/ErrorMessage';
 
 // TYPES //
 import { RootState } from '../types';
@@ -50,8 +50,9 @@ const ss = StyleSheet.create({
     },
 });
 
+let errorTimeout: ReturnType<typeof setTimeout>;
+
 const Signin: React.FC<RouteComponentProps> = props => {
-    let errorTimeout: ReturnType<typeof setTimeout>;
     const dispatch = useDispatch();
     const globalEmail = useSelector((redux: RootState) => redux.email);
     const [email, setEmail] = useState('');
@@ -94,6 +95,9 @@ const Signin: React.FC<RouteComponentProps> = props => {
                 setErrorMessage('Email and password do not match.');
             }
         }
+        if (errorTimeout) {
+            clearTimeout(errorTimeout);
+        }
         errorTimeout = setTimeout(() => setError(false), 3000);
     };
 
@@ -108,7 +112,7 @@ const Signin: React.FC<RouteComponentProps> = props => {
     }
     return (
         <div className={css(ss.wrapper)}>
-            <Error error={error} errorMessage={errorMessage} />
+            <ErrorMessage error={error} errorMessage={errorMessage} />
             <Card className={css(ss.card)}>
                 <svg
                     className={css(ss.logo)}

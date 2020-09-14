@@ -90,6 +90,7 @@ const UserSchema = new Schema({
             { name: 'Payroll/Salary', type: 'income' },
             { name: 'Cash', type: 'income' },
             { name: 'Transfer', type: 'other' },
+            { name: 'Uncategorized', type: 'other' },
         ],
     },
 });
