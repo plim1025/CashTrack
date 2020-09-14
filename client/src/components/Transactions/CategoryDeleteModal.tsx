@@ -10,6 +10,7 @@ import { Transaction, Category } from '../../types';
 import { deleteCategory } from '../shared/TransactionUtil';
 
 interface Props {
+    setLoading: (loading: boolean) => void;
     toggled: boolean;
     close: () => void;
     categoryName: string;
@@ -20,7 +21,12 @@ interface Props {
 }
 
 const CategoryModal: React.FC<Props> = props => {
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        const transactionIDsToModify = props.transactions
+            .filter(transaction => transaction.category === props.categoryName)
+            .map(transaction => transaction._id);
+        props.setLoading(true);
+        await deleteCategory(props.categoryName, transactionIDsToModify);
         props.setCategories(
             props.categories.filter(category => category.name !== props.categoryName)
         );
@@ -32,10 +38,7 @@ const CategoryModal: React.FC<Props> = props => {
                 transaction => transaction.category !== props.categoryName
             ),
         ]);
-        const transactionIDsToModify = props.transactions
-            .filter(transaction => transaction.category === props.categoryName)
-            .map(transaction => transaction._id);
-        deleteCategory(props.categoryName, transactionIDsToModify);
+        props.setLoading(false);
         props.close();
     };
 

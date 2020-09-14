@@ -66,8 +66,8 @@ const CategoryModal: React.FC<Props> = props => {
             show={props.toggled}
             dialogClassName='category-modal'
         >
-            <Modal.Header closeButton>
-                <h4 className={css(ss.header)}>Manage Categories</h4>
+            <Modal.Header className={css(ss.header)} closeButton>
+                <div className={css(ss.headerText)}>Manage Categories</div>
                 <Button className={css(ss.button)} onClick={() => props.openSubmodal('add')}>
                     + Category
                 </Button>
@@ -105,7 +105,13 @@ const ss = StyleSheet.create({
         paddingTop: '.5rem',
     },
     header: {
+        display: 'flex',
+        // @ts-ignore
+        alignItems: 'center !important',
+    },
+    headerText: {
         fontWeight: 700,
+        fontSize: 24,
     },
     column: {
         display: 'flex',

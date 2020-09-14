@@ -17,6 +17,9 @@ import { ResourcesContext } from '../App';
 // TYPES //
 import { Transaction, Account, Trends, Subtrends, Charts, Dates, Data } from '../types';
 
+// STYLES //
+import '../assets/css/reactSelectDropdown.css';
+
 type Actions =
     | { type: 'SET_TREND'; trend: Trends }
     | { type: 'SET_SUBTREND'; subtrend: Subtrends }
@@ -30,6 +33,7 @@ interface ReducerState {
     chart: Charts;
     date: Dates;
     accountIDs: string[];
+    accounts: Account[];
 }
 
 const reducer = (state: ReducerState, action: Actions) => {
@@ -57,6 +61,7 @@ const Trends: React.FC = () => {
         chart: 'pie',
         date: 'all time',
         accountIDs: accounts.read().map((account: Account) => account.id),
+        accounts: accounts.read(),
     });
     const [selectedTransactions, setSelectedTransactions] = useState<Transaction[]>([]);
     const [data, setData] = useState<Data[]>([]);
@@ -96,7 +101,7 @@ const Trends: React.FC = () => {
                 <div className={css(ss.subtitle)}>By {state.subtrend}</div>
                 <Filters
                     trend={state.trend}
-                    accounts={state.accountIDs}
+                    accounts={state.accounts}
                     date={state.date}
                     setAccounts={(accountIDs: string[]) =>
                         dispatch({ type: 'SET_ACCOUNT_IDS', accountIDs: accountIDs })

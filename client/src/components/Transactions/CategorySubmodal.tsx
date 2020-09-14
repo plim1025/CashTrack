@@ -12,6 +12,7 @@ import { Category, Transaction } from '../../types';
 import { addAndUpdateCategory } from '../shared/TransactionUtil';
 
 interface Props {
+    setLoading: (loading: boolean) => void;
     toggled: boolean;
     close: () => void;
     mode: string;
@@ -41,7 +42,7 @@ const CategoryModal: React.FC<Props> = props => {
         }
     }, [props.toggled]);
 
-    const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         if (!category.name || !category.type) {
             setError({ show: true, message: 'All fields must be filled in' });
@@ -51,14 +52,25 @@ const CategoryModal: React.FC<Props> = props => {
         ) {
             setError({ show: true, message: 'There is already a category with that name' });
         } else {
+            props.setLoading(true);
+            await addAndUpdateCategory(
+                category.name,
+                category.type,
+                props.mode === 'edit' ? props.category.name : null,
+                props.mode === 'edit'
+                    ? props.transactions
+                          .filter(transaction => transaction.category === props.category.name)
+                          .map(transaction => transaction._id)
+                    : null
+            );
             if (props.mode === 'edit') {
                 props.setTransactions([
-                    ...props.transactions.filter(
-                        transaction => transaction.category !== props.category.name
-                    ),
                     ...props.transactions
                         .filter(transaction => transaction.category === props.category.name)
                         .map(transaction => ({ ...transaction, category: category.name })),
+                    ...props.transactions.filter(
+                        transaction => transaction.category !== props.category.name
+                    ),
                 ]);
                 props.setCategories([
                     ...props.categories.filter(
@@ -66,19 +78,10 @@ const CategoryModal: React.FC<Props> = props => {
                     ),
                     category,
                 ]);
-                const transactionIDsToModify = props.transactions
-                    .filter(transaction => transaction.category === props.category.name)
-                    .map(transaction => transaction._id);
-                addAndUpdateCategory(
-                    category.name,
-                    category.type,
-                    props.category.name,
-                    transactionIDsToModify
-                );
             } else {
                 props.setCategories([...props.categories, category]);
-                addAndUpdateCategory(category.name, category.type);
             }
+            props.setLoading(false);
             props.close();
             return;
         }
@@ -96,7 +99,6 @@ const CategoryModal: React.FC<Props> = props => {
         };
     }, []);
 
-    console.log(category);
     return (
         <Modal centered show={props.toggled} onShow={() => modalRef.current.focus()}>
             <Form>
@@ -143,14 +145,16 @@ const CategoryModal: React.FC<Props> = props => {
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button
-                        onClick={() => props.openDeleteModal()}
-                        style={{ marginRight: 'auto' }}
-                        size='sm'
-                        variant='danger'
-                    >
-                        Delete
-                    </Button>
+                    {props.mode === 'edit' ? (
+                        <Button
+                            onClick={() => props.openDeleteModal()}
+                            style={{ marginRight: 'auto' }}
+                            size='sm'
+                            variant='danger'
+                        >
+                            Delete
+                        </Button>
+                    ) : null}
                     <Button onClick={() => props.close()} size='sm' variant='secondary'>
                         Cancel
                     </Button>

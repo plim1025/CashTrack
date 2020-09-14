@@ -72,7 +72,7 @@ const Buttons: React.FC<Props> = props => {
 const ss = StyleSheet.create({
     wrapper: {
         display: 'flex',
-        '@media(max-width:750px)': {
+        '@media(max-width:900px)': {
             justifyContent: 'space-around',
         }
     },
@@ -88,12 +88,14 @@ const ss = StyleSheet.create({
         lineHeight: 'inherit !important',
         height: 40,
         whiteSpace: 'nowrap',
-        '@media(max-width:750px)': {
-            width: 'initial',
+        paddingLeft: '.375rem !important',
+        paddingRight: '.375rem !important',
+        '@media(max-width:900px)': {
+            width: 60,
         }
     },
     buttonText: {
-        '@media(max-width:750px)': {
+        '@media(max-width:900px)': {
             display: 'none'
         }
     },
@@ -102,7 +104,7 @@ const ss = StyleSheet.create({
         height: 16,
         width: 16,
         marginRight: 8,
-        '@media(max-width:750px)': {
+        '@media(max-width:900px)': {
             marginRight: 0,
         }
     },

@@ -44,7 +44,7 @@ const PlaidLinkButton: React.FC = () => {
 
     const onSuccess = useCallback(async (token: string, metadata: any) => {
         setAccountsInfo({ token: token, metadata: metadata });
-        refresh();
+        refresh('Fetching account information...');
         setAccountsLoading(true);
     }, []);
 

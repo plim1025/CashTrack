@@ -12,16 +12,15 @@ import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
 // STYLES //
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
-import '../../assets/css/transactionTable.css';
 
 // TYPES //
 import { Transaction } from '../../types';
+import { updateTransaction } from '../shared/TransactionUtil';
 
 interface Props {
     transactions: Transaction[];
     selectedTransactionIDs: string[];
     setSelectedTransactionIDs: (selectedTransactionIDs: string[]) => void;
-    updateTransaction: (transactionID: string, transaction: Transaction) => void;
 }
 
 const Table: React.FC<Props> = props => {
@@ -199,7 +198,7 @@ const Table: React.FC<Props> = props => {
                                     ...item,
                                     [itemType.dataField]: newValue,
                                 };
-                                props.updateTransaction(item._id, transaction);
+                                updateTransaction(item._id, transaction);
                             },
                         })}
                     />

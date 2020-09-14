@@ -6,14 +6,14 @@ import { withRouter, RouteComponentProps } from 'react-router';
 
 // REDUX //
 import { useSelector, useDispatch } from 'react-redux';
-import { loadSubpage } from './redux/Actions';
+import { loadEmail } from './redux/Actions';
 
 // COMPONENTS //
 import Header from './components/shared/Header';
 import createResources from './components/shared/Resources';
 
 // TYPES //
-import { RootState } from './types';
+import { RootState, Transaction, Account, Category } from './types';
 
 // VIEWS //
 const Home = React.lazy(() => import(/* webpackChunkName: 'Home' */ './view/Home'));
@@ -25,11 +25,24 @@ const Accounts = React.lazy(() => import(/* webpackChunkName: 'Accounts' */ './v
 const Budgets = React.lazy(() => import(/* webpackChunkName: 'Budgets' */ './view/Budgets'));
 const Settings = React.lazy(() => import(/* webpackChunkName: 'Settings' */ './view/Settings'));
 
-export const ResourcesContext = createContext({
+interface ResourcesContextType {
+    transactions: { read: () => Transaction[] };
+    accounts: { read: () => Account[] };
+    categories: { read: () => Category[] };
+    refresh: (message?: string) => void;
+    subpage: string;
+    setSubpage: (subpage: string) => void;
+    logout: () => void;
+}
+
+export const ResourcesContext = createContext<ResourcesContextType>({
     transactions: null,
     accounts: null,
     categories: null,
     refresh: null,
+    subpage: null,
+    setSubpage: null,
+    logout: null,
 });
 
 interface Props {
@@ -37,17 +50,40 @@ interface Props {
 }
 
 const App: React.FC<Props & RouteComponentProps> = props => {
-    const [resources, setResources] = useState(null);
     const dispatch = useDispatch();
+    const [resources, setResources] = useState(null);
+    const [subpage, setSubpage] = useState(props.subpage);
+    const [refreshMessage, setRefreshMessage] = useState('');
     const globalEmail = useSelector((redux: RootState) => redux.email);
-    const globalSubpage = useSelector((redux: RootState) => redux.subpage);
+
+    const logout = async () => {
+        try {
+            const response = await fetch(`${process.env.BACKEND_URI}/api/user/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+            if (!response.ok) {
+                throw Error('Bad response from server');
+            }
+        } catch (error) {
+            throw Error(`Error logging out: ${error}`);
+        }
+        if (globalEmail) {
+            dispatch(loadEmail(''));
+        }
+        if (sessionStorage.getItem('email')) {
+            sessionStorage.setItem('email', '');
+        }
+        setSubpage('home');
+        props.history.push('/signin');
+    };
 
     useEffect(() => {
         if (!globalEmail && !sessionStorage.getItem('email')) {
             props.history.push('/signin');
         } else {
             setResources(() => createResources());
-            dispatch(loadSubpage(props.subpage));
+            setSubpage(props.subpage);
         }
     }, []);
 
@@ -57,22 +93,32 @@ const App: React.FC<Props & RouteComponentProps> = props => {
                 transactions: resources?.transactions,
                 accounts: resources?.accounts,
                 categories: resources?.categories,
-                refresh: () => setResources(() => createResources()),
+                refresh: (message?: string) => {
+                    setResources(() => createResources());
+                    if (message) {
+                        setRefreshMessage(message);
+                    } else {
+                        setRefreshMessage(null);
+                    }
+                },
+                subpage: subpage,
+                setSubpage: (newSubpage: string) => setSubpage(newSubpage),
+                logout: () => logout(),
             }}
         >
             <Header />
-            <Suspense fallback={<div>Loading...</div>}>
-                {globalSubpage === 'home' ? (
+            <Suspense fallback={<div>{refreshMessage || 'Loading...'}</div>}>
+                {subpage === 'home' ? (
                     <Home />
-                ) : globalSubpage === 'transactions' ? (
+                ) : subpage === 'transactions' ? (
                     <Transactions />
-                ) : globalSubpage === 'trends' ? (
+                ) : subpage === 'trends' ? (
                     <Trends />
-                ) : globalSubpage === 'budgets' ? (
+                ) : subpage === 'budgets' ? (
                     <Budgets />
-                ) : globalSubpage === 'accounts' ? (
+                ) : subpage === 'accounts' ? (
                     <Accounts />
-                ) : globalSubpage === 'settings' ? (
+                ) : subpage === 'settings' ? (
                     <Settings />
                 ) : (
                     <div>404</div>

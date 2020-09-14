@@ -2,7 +2,7 @@
     font-size: 14px;
 }
 
-.transaction-table-header,
+.transaction-table-header th,
 .transaction-table-body td {
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -59,55 +59,6 @@
 
 .selection-cell-header {
     text-align: center;
-}
-
-/* React Select Dropdown */
-.react-select__control {
-    height: calc(1.5em + 0.75rem + 2px) !important;
-    border: 1px solid #ced4da !important;
-    border-radius: 0.25rem !important;
-}
-
-.react-select__control--menu-is-open,
-.react-select__control--is-focused {
-    border-color: #80bdff !important;
-    outline: 0 !important;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
-}
-
-.react-select__menu {
-    font-family: 'Open Sans';
-    font-size: 14px;
-}
-
-.react-select__menu-list {
-    overflow-x: hidden;
-}
-
-.react-select__option {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-
-.react-select__option--is-focused {
-    background: rgba(0, 123, 255, 0.25);
-}
-
-.react-select-dropdown-button {
-    font-size: 14px !important;
-}
-
-.react-select-dropdown-table-modal {
-    height: 38px;
-}
-
-.react-select-padded-modal .react-select__value-container {
-    padding: 2px 0.75rem !important;
-}
-
-.react-select-dropdown-transaction-modal {
-    height: 45px;
 }
 
 .search-label {

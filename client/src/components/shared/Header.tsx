@@ -1,12 +1,8 @@
 // REACT //
-import React from 'react';
-
-// ROUTER //
-import { withRouter, RouteComponentProps } from 'react-router';
+import React, { useContext } from 'react';
 
 // REDUX //
-import { useSelector, useDispatch } from 'react-redux';
-import { loadSubpage, logout } from '../../redux/Actions';
+import { useSelector } from 'react-redux';
 
 // COMPONENTS //
 import { css, StyleSheet } from 'aphrodite/no-important';
@@ -15,14 +11,16 @@ import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 // TYPES //
 import { RootState } from '../../types';
 
-const Header: React.FC<RouteComponentProps> = props => {
-    const dispatch = useDispatch();
-    const reduxEmail = useSelector((redux: RootState) => redux.email);
-    const reduxSubpage = useSelector((redux: RootState) => redux.subpage);
+// CONTEXT //
+import { ResourcesContext } from '../../App';
 
-    const changeLink = (subpage: string) => {
-        dispatch(loadSubpage(subpage));
-        window.history.replaceState(null, '', `/${subpage}`);
+const Header: React.FC = () => {
+    const reduxEmail = useSelector((redux: RootState) => redux.email);
+    const { subpage, setSubpage, logout } = useContext(ResourcesContext);
+
+    const changeLink = (newSubpage: string) => {
+        setSubpage(newSubpage);
+        window.history.replaceState(null, '', `/${newSubpage}`);
     };
 
     return (
@@ -44,25 +42,25 @@ const Header: React.FC<RouteComponentProps> = props => {
                 <Nav>
                     <Nav.Link
                         onClick={() => changeLink('home')}
-                        style={{ color: reduxSubpage === 'home' ? '#fff' : '' }}
+                        style={{ color: subpage === 'home' ? '#fff' : '' }}
                     >
                         Home
                     </Nav.Link>
                     <Nav.Link
                         onClick={() => changeLink('transactions')}
-                        style={{ color: reduxSubpage === 'transactions' ? '#fff' : '' }}
+                        style={{ color: subpage === 'transactions' ? '#fff' : '' }}
                     >
                         Transactions
                     </Nav.Link>
                     <Nav.Link
                         onClick={() => changeLink('trends')}
-                        style={{ color: reduxSubpage === 'trends' ? '#fff' : '' }}
+                        style={{ color: subpage === 'trends' ? '#fff' : '' }}
                     >
                         Trends
                     </Nav.Link>
                     <Nav.Link
                         onClick={() => changeLink('budgets')}
-                        style={{ color: reduxSubpage === 'budgets' ? '#fff' : '' }}
+                        style={{ color: subpage === 'budgets' ? '#fff' : '' }}
                     >
                         Budgets
                     </Nav.Link>
@@ -79,7 +77,7 @@ const Header: React.FC<RouteComponentProps> = props => {
                             Settings
                         </NavDropdown.Item>
                     </NavDropdown>
-                    <Nav.Link onClick={() => dispatch(logout(props.history))}>Logout</Nav.Link>
+                    <Nav.Link onClick={() => logout()}>Logout</Nav.Link>
                 </Nav>
             </Navbar.Collapse>
         </Navbar>
@@ -105,4 +103,4 @@ const ss = StyleSheet.create({
     },
 });
 
-export default withRouter(Header);
+export default Header;

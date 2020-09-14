@@ -20,6 +20,7 @@ export const createTransaction = async (transaction: Transaction): Promise<void>
         if (!response.ok) {
             throw Error('Bad response from server');
         }
+        return;
     } catch (error) {
         throw Error(`Error creating transaction: ${error}`);
     }
@@ -101,11 +102,11 @@ export const updateMultipleTransactions = async (
 export const addAndUpdateCategory = async (
     name: string,
     type: string,
-    oldName?: string,
-    transactionIDs?: string[]
+    oldName: string,
+    transactionIDs: string[]
 ): Promise<void> => {
     try {
-        if (oldName) {
+        if (oldName && transactionIDs) {
             Promise.all([
                 fetch(`${process.env.BACKEND_URI}/api/category/${oldName}`, {
                     method: 'DELETE',
@@ -148,9 +149,9 @@ export const addAndUpdateCategory = async (
     }
 };
 
-export const deleteCategory = (name: string, transactionIDs: string[]) => {
+export const deleteCategory = async (name: string, transactionIDs: string[]): Promise<void> => {
     try {
-        Promise.all([
+        await Promise.all([
             fetch(`${process.env.BACKEND_URI}/api/category/${name}`, {
                 method: 'DELETE',
                 credentials: 'include',
