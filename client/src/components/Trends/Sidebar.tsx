@@ -2,7 +2,7 @@
 import React from 'react';
 
 // COMPONENTS //
-import { css, StyleSheet } from 'aphrodite/no-important';
+import styled from 'styled-components';
 
 // TYPES //
 import { Trends, Subtrends } from '../../types';
@@ -16,153 +16,142 @@ interface Props {
 
 const Sidebar: React.FC<Props> = props => {
     return (
-        <nav className={css(ss.wrapper)}>
-            <div className={css(ss.header)}>Expenses</div>
-            <div
-                className={css(ss.subHeader)}
+        <Wrapper>
+            <Header>Expenses</Header>
+            <Subheader
                 onClick={() => {
                     props.setTrend('expense');
                     props.setSubTrend('date');
                 }}
-                style={{
-                    background:
-                        props.trend === 'expense' && props.subTrend === 'date' ? '#007bff' : '',
-                    color: props.trend === 'expense' && props.subTrend === 'date' ? '#fff' : '',
-                }}
+                trend='expense'
+                subTrend='date'
+                curTrend={props.trend}
+                curSubTrend={props.subTrend}
             >
                 Time
-            </div>
-            <div
-                className={css(ss.subHeader)}
+            </Subheader>
+            <Subheader
                 onClick={() => {
                     props.setTrend('expense');
                     props.setSubTrend('category');
                 }}
-                style={{
-                    background:
-                        props.trend === 'expense' && props.subTrend === 'category' ? '#007bff' : '',
-                    color: props.trend === 'expense' && props.subTrend === 'category' ? '#fff' : '',
-                }}
+                trend='expense'
+                subTrend='category'
+                curTrend={props.trend}
+                curSubTrend={props.subTrend}
             >
                 Category
-            </div>
-            <div
-                className={css(ss.subHeader)}
+            </Subheader>
+            <Subheader
                 onClick={() => {
                     props.setTrend('expense');
                     props.setSubTrend('merchant');
                 }}
-                style={{
-                    background:
-                        props.trend === 'expense' && props.subTrend === 'merchant' ? '#007bff' : '',
-                    color: props.trend === 'expense' && props.subTrend === 'merchant' ? '#fff' : '',
-                }}
+                trend='expense'
+                subTrend='merchant'
+                curTrend={props.trend}
+                curSubTrend={props.subTrend}
             >
                 Merchant
-            </div>
-            <div className={css(ss.header)}>Income</div>
-            <div
-                className={css(ss.subHeader)}
+            </Subheader>
+            <Header>Income</Header>
+            <Subheader
                 onClick={() => {
                     props.setTrend('income');
                     props.setSubTrend('date');
                 }}
-                style={{
-                    background:
-                        props.trend === 'income' && props.subTrend === 'date' ? '#007bff' : '',
-                    color: props.trend === 'income' && props.subTrend === 'date' ? '#fff' : '',
-                }}
+                trend='income'
+                subTrend='date'
+                curTrend={props.trend}
+                curSubTrend={props.subTrend}
             >
                 Time
-            </div>
-            <div
-                className={css(ss.subHeader)}
+            </Subheader>
+            <Subheader
                 onClick={() => {
                     props.setTrend('income');
                     props.setSubTrend('category');
                 }}
-                style={{
-                    background:
-                        props.trend === 'income' && props.subTrend === 'category' ? '#007bff' : '',
-                    color: props.trend === 'income' && props.subTrend === 'category' ? '#fff' : '',
-                }}
+                trend='income'
+                subTrend='category'
+                curTrend={props.trend}
+                curSubTrend={props.subTrend}
             >
                 Category
-            </div>
-            <div
-                className={css(ss.subHeader)}
+            </Subheader>
+            <Subheader
                 onClick={() => {
                     props.setTrend('income');
                     props.setSubTrend('merchant');
                 }}
-                style={{
-                    background:
-                        props.trend === 'income' && props.subTrend === 'merchant' ? '#007bff' : '',
-                    color: props.trend === 'income' && props.subTrend === 'merchant' ? '#fff' : '',
-                }}
+                trend='income'
+                subTrend='merchant'
+                curTrend={props.trend}
+                curSubTrend={props.subTrend}
             >
                 Merchant
-            </div>
-            <div className={css(ss.header)}>Net Earnings</div>
-            <div
-                className={css(ss.subHeader)}
+            </Subheader>
+            <Header>Net Earnings</Header>
+            <Subheader
                 onClick={() => {
                     props.setTrend('net earnings');
                     props.setSubTrend('date');
                 }}
-                style={{
-                    background:
-                        props.trend === 'net earnings' && props.subTrend === 'date'
-                            ? '#007bff'
-                            : '',
-                    color:
-                        props.trend === 'net earnings' && props.subTrend === 'date' ? '#fff' : '',
-                }}
+                trend='net earnings'
+                subTrend='date'
+                curTrend={props.trend}
+                curSubTrend={props.subTrend}
             >
                 Time
-            </div>
-            <div className={css(ss.header)}>Net Worth</div>
-            <div
-                className={css(ss.subHeader)}
+            </Subheader>
+            <Header>Net Worth</Header>
+            <Subheader
                 onClick={() => {
                     props.setTrend('net worth');
                     props.setSubTrend('date');
                 }}
-                style={{
-                    background:
-                        props.trend === 'net worth' && props.subTrend === 'date' ? '#007bff' : '',
-                    color: props.trend === 'net worth' && props.subTrend === 'date' ? '#fff' : '',
-                }}
+                trend='net worth'
+                subTrend='date'
+                curTrend={props.trend}
+                curSubTrend={props.subTrend}
             >
                 Time
-            </div>
-        </nav>
+            </Subheader>
+        </Wrapper>
     );
 };
 
 // STYLES //
-const ss = StyleSheet.create({
-    wrapper: {
-        marginTop: 100,
-        background: '#f0f0f0',
-        width: 200,
-    },
-    header: {
-        borderTop: '1px solid #dee2e6',
-        borderOpacity: 0.5,
-        padding: 10,
-        paddingBottom: 5,
-        fontSize: 16,
-        fontWeight: 700,
-    },
-    subHeader: {
-        fontSize: 16,
-        padding: '5px 30px',
-        cursor: 'pointer',
-        ':hover': {
-            color: '#007bff',
-        },
-    },
-});
+const Wrapper = styled.nav`
+    background: #f0f0f0;
+    margin-top: 20px;
+    width: 200px;
+`;
+
+const Header = styled.div`
+    border-top: 1px solid rgba(222, 226, 230, 0.5);
+    font-size: 16px;
+    font-weight: 700;
+    padding: 10px;
+    padding-bottom: 5px;
+`;
+
+const Subheader = styled.div<{
+    trend: string;
+    subTrend: string;
+    curTrend: string;
+    curSubTrend: string;
+}>`
+    background: ${({ trend, subTrend, curTrend, curSubTrend }) =>
+        trend === curTrend && subTrend === curSubTrend && '#007bff'};
+    color: ${({ trend, subTrend, curTrend, curSubTrend }) =>
+        trend === curTrend && subTrend === curSubTrend && '#fff'};
+    cursor: pointer;
+    & :hover {
+        color: #007bff;
+    }
+    font-size: 14px;
+    padding: 5px 30px;
+`;
 
 export default Sidebar;

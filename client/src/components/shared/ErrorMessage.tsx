@@ -2,7 +2,7 @@
 import React from 'react';
 
 // COMPONENTS //
-import { css, StyleSheet } from 'aphrodite/no-important';
+import styled from 'styled-components';
 import { Alert } from 'react-bootstrap';
 
 interface Props {
@@ -16,36 +16,33 @@ interface Props {
 
 const Error: React.FC<Props> = props => {
     return (
-        <Alert
-            className={css(ss.wrapper)}
-            style={{ top: props.error ? 10 : -200 }}
-            variant={props.type || 'danger'}
-        >
+        <AlertWrapper variant={props.type || 'danger'} display={props.error ? 1 : 0}>
             {props.errorMessage}
             {props.link ? (
-                <Alert.Link className={css(ss.link)} onClick={() => props.history.push(props.link)}>
+                <AlertLinkWrapper onClick={() => props.history.push(props.link)}>
                     {props.linkTitle}
-                </Alert.Link>
+                </AlertLinkWrapper>
             ) : null}
-        </Alert>
+        </AlertWrapper>
     );
 };
 
 // STYLES //
-const ss = StyleSheet.create({
-    wrapper: {
-        // @ts-ignore
-        position: 'fixed !important',
-        transition: 'all .2s ease-in-out !important',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        margin: 'auto 0',
-    },
-    link: {
-        ':hover': {
-            textDecoration: 'underline',
-        },
-    },
-});
+const AlertWrapper = styled(Alert)<{ display: number }>`
+    &&& {
+        position: fixed;
+        transition: all 0.2s ease-in-out;
+    }
+    left: 50%;
+    margin: auto 0;
+    top: ${({ display }) => (display ? '10px' : '-200px')};
+    transform: translateX(-50%);
+`;
+
+const AlertLinkWrapper = styled(Alert.Link)`
+    & :hover {
+        text-decoration: underline;
+    }
+`;
 
 export default Error;

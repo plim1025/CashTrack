@@ -8,9 +8,6 @@ import { Button } from 'react-bootstrap';
 // CONTEXT //
 import { ResourcesContext } from '../../App';
 
-// CSS //
-import '../../assets/css/index.css';
-
 const PlaidLinkButton: React.FC = () => {
     const [accountsInfo, setAccountsInfo] = useState({ token: '', metadata: null });
     const [accountsLoading, setAccountsLoading] = useState(false);

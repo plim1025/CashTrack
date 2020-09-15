@@ -2,12 +2,14 @@
 import React, { useState, useEffect } from 'react';
 
 // COMPONENTS //
-import { css, StyleSheet } from 'aphrodite/no-important';
+import styled from 'styled-components';
 import { Card } from 'react-bootstrap';
-import { moneyFormat, parseAccountInfo } from '../shared/TransactionUtil';
 
 // TYPES //
 import { Account } from '../../types';
+
+// UTIL //
+import { moneyFormat, parseAccountInfo } from '../shared/TransactionUtil';
 
 interface Props {
     accounts: Account[];
@@ -33,79 +35,73 @@ const AccountInfo: React.FC<Props> = props => {
     return (
         <Card>
             <Card.Body>
-                <Card.Title className={css(ss.title)}>{curAccount.institution}</Card.Title>
-                <Card.Subtitle className={css(ss.subtitle)}>{curAccount.name}</Card.Subtitle>
+                <CardTitleWrapper>{curAccount.institution}</CardTitleWrapper>
+                <CardSubtitleWrapper>{curAccount.name}</CardSubtitleWrapper>
             </Card.Body>
-            <div className={css(ss.accountSummary)}>
+            <Wrapper>
                 {curAccount.balance !== null ? (
-                    <div className={css(ss.accountSummaryItem)}>
-                        <div className={css(ss.accountSummaryTitle)}>
+                    <Item>
+                        <Title>
                             {props.selectedAccountID === 'All Accounts'
                                 ? 'Total Balance'
                                 : 'Balance'}
-                        </div>
-                        <div className={css(ss.accountSummaryMoney)}>
-                            {moneyFormat(curAccount.balance)}
-                        </div>
-                    </div>
+                        </Title>
+                        <Money>{moneyFormat(curAccount.balance)}</Money>
+                    </Item>
                 ) : null}
                 {curAccount.available !== null ? (
-                    <div className={css(ss.accountSummaryItem)}>
-                        <div className={css(ss.accountSummaryTitle)}>
+                    <Item>
+                        <Title>
                             {curAccount.type === 'credit' ? 'Available Credit' : 'Available'}
-                        </div>
-                        <div className={css(ss.accountSummaryMoney)}>
-                            {moneyFormat(curAccount.available)}
-                        </div>
-                    </div>
+                        </Title>
+                        <Money>{moneyFormat(curAccount.available)}</Money>
+                    </Item>
                 ) : null}
                 {curAccount.debt !== null ? (
-                    <div className={css(ss.accountSummaryItem)}>
-                        <div className={css(ss.accountSummaryTitle)}>Total Debt</div>
-                        <div className={css(ss.accountSummaryMoney)}>
-                            {moneyFormat(curAccount.debt)}
-                        </div>
-                    </div>
+                    <Item>
+                        <Title>Total Debt</Title>
+                        <Money>{moneyFormat(curAccount.debt)}</Money>
+                    </Item>
                 ) : null}
                 {curAccount.creditLimit !== null ? (
-                    <div className={css(ss.accountSummaryItem)}>
-                        <div className={css(ss.accountSummaryTitle)}>Credit Limit</div>
-                        <div className={css(ss.accountSummaryMoney)}>
-                            {moneyFormat(curAccount.creditLimit)}
-                        </div>
-                    </div>
+                    <Item>
+                        <Title>Credit Limit</Title>
+                        <Money>{moneyFormat(curAccount.creditLimit)}</Money>
+                    </Item>
                 ) : null}
-            </div>
+            </Wrapper>
         </Card>
     );
 };
 
 // STYLES //
-const ss = StyleSheet.create({
-    title: {
-        // @ts-ignore
-        fontWeight: '700 !important',
-    },
-    subtitle: {
-        fontSize: 16,
-        opacity: 0.75,
-    },
-    accountSummary: {
-        display: 'flex',
-        padding: '1.25rem',
-        paddingTop: 0,
-    },
-    accountSummaryItem: {
-        marginRight: 25,
-    },
-    accountSummaryTitle: {
-        textTransform: 'uppercase',
-        fontSize: 14,
-        opacity: 0.75,
-    },
-    accountSummaryMoney: {
-        fontWeight: 700,
-    },
-});
+const Wrapper = styled.div`
+    display: flex;
+    padding: 1.25rem;
+    padding-top: 0;
+`;
+
+const CardTitleWrapper = styled(Card.Title)`
+    font-weight: 700;
+`;
+
+const CardSubtitleWrapper = styled(Card.Subtitle)`
+    font-size: 16px;
+    opacity: 0.75;
+`;
+
+const Item = styled.div`
+    margin-right: 25;
+`;
+
+const Title = styled.div`
+    font-size: 14;
+    opacity: 0.75;
+    text-transform: 'uppercase';
+`;
+
+const Money = styled.div`
+    font-weight: 700;
+`;
 
 export default AccountInfo;

@@ -2,7 +2,7 @@
 import React from 'react';
 
 // COMPONENTS //
-import { css, StyleSheet } from 'aphrodite/no-important';
+import styled from 'styled-components';
 import { Spinner } from 'react-bootstrap';
 
 interface Props {
@@ -15,8 +15,8 @@ const FallbackSpinner: React.FC<Props> = props => {
         <>
             {props.show ? (
                 <>
-                    <Spinner className={css(ss.wrapper)} variant='primary' animation='border' />
-                    {props.backdrop ? <div className={css(ss.backdrop)} /> : null}
+                    <SpinnerWrapper variant='primary' animation='border' />
+                    {props.backdrop ? <Backdrop /> : null}
                 </>
             ) : null}
         </>
@@ -24,25 +24,23 @@ const FallbackSpinner: React.FC<Props> = props => {
 };
 
 // STYLES //
-const ss = StyleSheet.create({
-    wrapper: {
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        marginTop: -20,
-        marginLeft: -20,
-        zIndex: 9999,
-    },
-    backdrop: {
-        opacity: 0.5,
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 9998,
-        width: '100vw',
-        height: '100vh',
-        background: '#000',
-    },
-});
+const SpinnerWrapper = styled(Spinner)`
+    left: 50%;
+    margin-left: -20;
+    margin-top: -20;
+    position: fixed;
+    top: 50%;
+    z-index: 9999;
+`;
 
+const Backdrop = styled.div`
+    background: #000;
+    height: 100vh;
+    left: 0;
+    opacity: 0.5;
+    position: fixed;
+    top: 0;
+    width: 100vw;
+    z-index: 9998;
+`;
 export default FallbackSpinner;

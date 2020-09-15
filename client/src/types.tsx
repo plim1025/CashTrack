@@ -1,5 +1,5 @@
 import rootReducer from './redux/Reducers';
-import { Action } from 'redux';
+// import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 
 export interface Transaction {
@@ -35,12 +35,12 @@ export interface Category {
 
 export type RootState = ReturnType<typeof rootReducer>;
 
-export type AppThunk<ReturnType = void> = ThunkAction<
-    ReturnType,
-    RootState,
-    unknown,
-    Action<string>
->;
+// export type AppThunk<ReturnType = void> = ThunkAction<
+//     ReturnType,
+//     RootState,
+//     unknown,
+//     Action<string>
+// >;
 
 export type Trends = 'expense' | 'income' | 'net earnings' | 'net worth';
 export type Subtrends = 'date' | 'category' | 'merchant';

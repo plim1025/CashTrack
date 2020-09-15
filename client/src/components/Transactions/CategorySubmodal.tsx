@@ -9,6 +9,8 @@ import Select from 'react-select';
 
 // TYPES //
 import { Category, Transaction } from '../../types';
+
+// UTIL //
 import { addAndUpdateCategory } from '../shared/TransactionUtil';
 
 interface Props {

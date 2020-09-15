@@ -7,6 +7,8 @@ import { Button, Modal } from 'react-bootstrap';
 
 // TYPES //
 import { Transaction, Category } from '../../types';
+
+// UTIL //
 import { deleteCategory } from '../shared/TransactionUtil';
 
 interface Props {

@@ -1,15 +1,12 @@
-/* eslint-disable react/jsx-one-expression-per-line */
-/* eslint-disable prettier/prettier */
 // REACT //
-import React, { useState, useEffect, useReducer, useContext } from 'react';
+import React, { useEffect, useReducer, useContext } from 'react';
 
 // COMPONENTS //
-import { css, StyleSheet } from 'aphrodite/no-important';
+import styled from 'styled-components';
 import Chart from '../components/Trends/Chart';
 import Filters from '../components/Trends/Filters';
 import TrendInfo from '../components/Trends/TrendInfo';
 import Sidebar from '../components/Trends/Sidebar';
-import { parseSelectedTransactions, parseTransactionData } from '../components/shared/TrendUtil';
 
 // CONTEXT //
 import { ResourcesContext } from '../App';
@@ -17,15 +14,17 @@ import { ResourcesContext } from '../App';
 // TYPES //
 import { Transaction, Account, Trends, Subtrends, Charts, Dates, Data } from '../types';
 
-// STYLES //
-import '../assets/css/reactSelectDropdown.css';
+// UTIL //
+import { parseSelectedTransactions, parseTransactionData } from '../components/shared/TrendUtil';
 
 type Actions =
     | { type: 'SET_TREND'; trend: Trends }
     | { type: 'SET_SUBTREND'; subtrend: Subtrends }
     | { type: 'SET_CHART'; chart: Charts }
     | { type: 'SET_DATE'; date: Dates }
-    | { type: 'SET_ACCOUNT_IDS'; accountIDs: string[] };
+    | { type: 'SET_ACCOUNT_IDS'; accountIDs: string[] }
+    | { type: 'SET_SELECTED_TRANSACTIONS'; selectedTransactions: Transaction[] }
+    | { type: 'SET_DATA'; data: Data[] };
 
 interface ReducerState {
     trend: Trends;
@@ -33,7 +32,8 @@ interface ReducerState {
     chart: Charts;
     date: Dates;
     accountIDs: string[];
-    accounts: Account[];
+    selectedTransactions: Transaction[];
+    data: Data[];
 }
 
 const reducer = (state: ReducerState, action: Actions) => {
@@ -48,32 +48,39 @@ const reducer = (state: ReducerState, action: Actions) => {
             return { ...state, date: action.date };
         case 'SET_ACCOUNT_IDS':
             return { ...state, accountIDs: action.accountIDs };
+        case 'SET_SELECTED_TRANSACTIONS':
+            return { ...state, selectedTransactions: action.selectedTransactions };
+        case 'SET_DATA':
+            return { ...state, data: action.data };
         default:
             return state;
     }
 };
 
 const Trends: React.FC = () => {
-    const { transactions, accounts } = useContext(ResourcesContext);
+    const { transactions, accounts, categories } = useContext(ResourcesContext);
     const [state, dispatch] = useReducer(reducer, {
         trend: 'expense',
         subtrend: 'category',
         chart: 'pie',
         date: 'all time',
         accountIDs: accounts.read().map((account: Account) => account.id),
-        accounts: accounts.read(),
+        selectedTransactions: [],
+        data: [],
     });
-    const [selectedTransactions, setSelectedTransactions] = useState<Transaction[]>([]);
-    const [data, setData] = useState<Data[]>([]);
 
     useEffect(() => {
         const newSelectedTransactions = parseSelectedTransactions(
             transactions.read(),
+            categories.read(),
             state.trend,
             state.date,
             state.accountIDs
         );
-        setSelectedTransactions(newSelectedTransactions);
+        dispatch({
+            type: 'SET_SELECTED_TRANSACTIONS',
+            selectedTransactions: newSelectedTransactions,
+        });
     }, [state.trend, state.subtrend, state.date, state.accountIDs]);
 
     useEffect(() => {
@@ -83,11 +90,17 @@ const Trends: React.FC = () => {
     }, [state.subtrend]);
 
     useEffect(() => {
-        setData(parseTransactionData(selectedTransactions, state.subtrend, state.date));
-    }, [selectedTransactions]);
+        const newData = parseTransactionData(
+            state.selectedTransactions,
+            state.subtrend,
+            state.date
+        );
+        dispatch({ type: 'SET_DATA', data: newData });
+    }, [state.selectedTransactions]);
 
+    console.log(state.data);
     return (
-        <div className={css(ss.wrapper)}>
+        <Wrapper>
             <Sidebar
                 trend={state.trend}
                 subTrend={state.subtrend}
@@ -96,45 +109,54 @@ const Trends: React.FC = () => {
                     dispatch({ type: 'SET_SUBTREND', subtrend: subtrend })
                 }
             />
-            <div className={css(ss.subWrapper)}>
-                <h3 className={css(ss.title)}>{state.trend}</h3>
-                <div className={css(ss.subtitle)}>By {state.subtrend}</div>
+            <SubWrapper>
+                <TitleWrapper>
+                    <Title>{state.trend}</Title>
+                    <Subtitle>
+                        {'By '}
+                        {state.subtrend}
+                    </Subtitle>
+                </TitleWrapper>
                 <Filters
                     trend={state.trend}
-                    accounts={state.accounts}
+                    accounts={accounts.read()}
                     date={state.date}
                     setAccounts={(accountIDs: string[]) =>
                         dispatch({ type: 'SET_ACCOUNT_IDS', accountIDs: accountIDs })
                     }
                     setDate={(date: Dates) => dispatch({ type: 'SET_DATE', date: date })}
+                    selectedAccountIDs={state.accountIDs}
                 />
-                <Chart chart={state.chart} data={data} />
-                <TrendInfo transactions={selectedTransactions} />
-            </div>
-        </div>
+            </SubWrapper>
+            <Chart chart={state.chart} data={state.data} />
+            <TrendInfo transactions={state.selectedTransactions} />
+        </Wrapper>
     );
 };
 
 // STYLES //
-const ss = StyleSheet.create({
-    wrapper: {
-        display: 'flex',
-        justifyContent: 'center',
-        height: 'calc(100% - 75px)',
-    },
-    subWrapper: {
-        maxWidth: 800,
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    title: {
-        textTransform: 'capitalize',
-    },
-    subtitle: {
-        textTransform: 'capitalize',
-    },
-});
+const Wrapper = styled.div`
+    display: flex;
+    height: calc(100% - 75px);
+    justify-content: center;
+`;
+
+const SubWrapper = styled.div`
+    display: flex;
+    height: 100%;
+    max-width: 800px;
+    padding: 20px;
+    width: 100%;
+`;
+
+const TitleWrapper = styled.div``;
+
+const Title = styled.h3`
+    text-transform: capitalize;
+`;
+
+const Subtitle = styled.div`
+    text-transform: capitalize;
+`;
 
 export default Trends;

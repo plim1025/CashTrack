@@ -1,8 +1,8 @@
 // REACT //
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 // COMPONENTS //
-import { css, StyleSheet } from 'aphrodite/no-important';
+import styled from 'styled-components';
 import ViewModal from './ViewModal';
 import { ResponsiveBar } from '@nivo/bar';
 import { ResponsivePie } from '@nivo/pie';
@@ -17,7 +17,7 @@ interface Props {
 
 const Chart: React.FC<Props> = props => {
     return (
-        <div className={css(ss.wrapper)}>
+        <Wrapper>
             {props.chart === 'bar' ? (
                 <ResponsiveBar
                     data={props.data}
@@ -31,16 +31,14 @@ const Chart: React.FC<Props> = props => {
                     margin={{ top: 100, right: 100, bottom: 100, left: 100 }}
                 />
             ) : null}
-        </div>
+        </Wrapper>
     );
 };
 
 // STYLES //
-const ss = StyleSheet.create({
-    wrapper: {
-        height: '100%',
-        overflow: 'hidden',
-    },
-});
+const Wrapper = styled.div`
+    height: 100%;
+    overflow: hidden;
+`;
 
 export default Chart;

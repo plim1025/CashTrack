@@ -5,7 +5,7 @@ import React, { useEffect, useReducer, useContext, createContext } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router';
 
 // COMPONENTS //
-import { css, StyleSheet } from 'aphrodite/no-important';
+import styled from 'styled-components';
 import Table from '../components/Transactions/Table';
 import Modals from '../components/Transactions/Modals';
 import Sidebar from '../components/Transactions/Sidebar';
@@ -15,11 +15,6 @@ import ErrorMessage from '../components/shared/ErrorMessage';
 import FallbackSpinner from '../components/shared/FallbackSpinner';
 import { Button } from 'react-bootstrap';
 import { v1 as uuidv4 } from 'uuid';
-import {
-    createTransaction,
-    updateMultipleTransactions,
-    deleteTransactions,
-} from '../components/shared/TransactionUtil';
 
 // CONTEXT //
 import { ResourcesContext } from '../App';
@@ -27,9 +22,12 @@ import { ResourcesContext } from '../App';
 // TYPES //
 import { Transaction, Account, Category } from '../types';
 
-// STYLES //
-import '../assets/css/transactionTable.css';
-import '../assets/css/reactSelectDropdown.css';
+// UTIL //
+import {
+    createTransaction,
+    updateMultipleTransactions,
+    deleteTransactions,
+} from '../components/shared/TransactionUtil';
 
 export const CategoryContext = createContext({ categories: null, openCategoryModal: null });
 
@@ -263,7 +261,7 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                 openCategoryModal: () => dispatch({ type: 'SHOW_CATEGORY_MODAL' }),
             }}
         >
-            <div className={css(ss.wrapper)}>
+            <Wrapper>
                 <Sidebar
                     accounts={state.accounts}
                     selectedAccountID={state.selectedAccountID}
@@ -271,7 +269,7 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                         dispatch({ type: 'SET_SELECTED_ACCOUNT_ID', id: id })
                     }
                 />
-                <div className={css(ss.subWrapper)}>
+                <SubWrapper>
                     {state.accounts.length ? (
                         <AccountInfo
                             accounts={state.accounts}
@@ -284,7 +282,7 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                         handleDeleteButton={handleDeleteMultipleTransactions}
                     />
                     {!state.accounts.length ? (
-                        <div className={css(ss.noTransactionsText)}>
+                        <NoTransactionsText>
                             <span>No accounts added.</span>
                             <Button
                                 variant='link'
@@ -295,7 +293,7 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                             >
                                 Link an account.
                             </Button>
-                        </div>
+                        </NoTransactionsText>
                     ) : null}
                     <Table
                         transactions={state.transactions.filter(
@@ -306,7 +304,7 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                             dispatch({ type: 'SET_SELECTED_TRANSACTION_IDS', ids: ids })
                         }
                     />
-                </div>
+                </SubWrapper>
                 <Modals
                     setLoading={(loading: boolean) =>
                         dispatch({ type: 'SET_LOADING', loading: loading })
@@ -339,28 +337,28 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                     handleEditMultipleTransactions={handleEditMultipleTransactions}
                 />
                 <ErrorMessage error={state.error.show} errorMessage={state.error.message} />
-            </div>
+            </Wrapper>
             <FallbackSpinner backdrop show={state.loading} />
         </CategoryContext.Provider>
     );
 };
 
 // STYLES //
-const ss = StyleSheet.create({
-    wrapper: {
-        display: 'flex',
-        justifyContent: 'center',
-    },
-    subWrapper: {
-        width: '100%',
-        padding: 20,
-        maxWidth: 800,
-    },
-    noTransactionsText: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-});
+const Wrapper = styled.div`
+    display: flex;
+    justify-content: center;
+`;
+
+const SubWrapper = styled.div`
+    max-width: 800px;
+    padding: 20px;
+    width: 100%;
+`;
+
+const NoTransactionsText = styled.div`
+    align-items: center;
+    display: block;
+    justify-content: center;
+`;
 
 export default withRouter(Transactions);

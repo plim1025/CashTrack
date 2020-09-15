@@ -19,14 +19,3 @@ body {
     height: 100%;
     font-family: 'Open Sans';
 }
-
-/* React Bootstrap Modal Styles */
-.modal-content {
-    position: static !important;
-}
-.modal-dialog {
-    position: static !important;
-}
-.form-group .editor {
-    font-size: 1rem !important;
-}

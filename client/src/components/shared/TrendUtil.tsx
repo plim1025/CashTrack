@@ -1,7 +1,8 @@
-import { Transaction, Trends, Subtrends, Dates, Data } from '../../types';
+import { Transaction, Category, Trends, Subtrends, Dates, Data } from '../../types';
 
 export const parseSelectedTransactions = (
     transactions: Transaction[],
+    categories: Category[],
     trend: Trends,
     date: Dates,
     accountIDs: string[]
@@ -41,7 +42,10 @@ export const parseSelectedTransactions = (
         return dateFilteredTransactions;
     }
     return dateFilteredTransactions
-        .filter(transaction => transaction.type === trend)
+        .filter(
+            transaction =>
+                categories.find(category => category.name === transaction.category).type === trend
+        )
         .filter(transaction => accountIDs.indexOf(transaction.accountID) !== -1);
 };
 

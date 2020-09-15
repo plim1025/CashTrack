@@ -103,7 +103,7 @@ const TransactionModal: React.FC<Props> = props => {
                     <Form.Group>
                         <Form.Label>Category</Form.Label>
                         <CategoryDropdown
-                            class='react-select-padded-modal'
+                            padded
                             onChange={e =>
                                 setTransaction({
                                     ...transaction,
