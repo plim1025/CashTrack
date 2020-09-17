@@ -9,9 +9,9 @@ import { Trends, Subtrends } from '../../types';
 
 interface Props {
     trend: Trends;
-    subTrend: Subtrends;
+    subtrend: Subtrends;
     setTrend: (trend: Trends) => void;
-    setSubTrend: (subtrend: Subtrends) => void;
+    setSubtrend: (subtrend: Subtrends) => void;
 }
 
 const Sidebar: React.FC<Props> = props => {
@@ -20,37 +20,37 @@ const Sidebar: React.FC<Props> = props => {
             <Header>Expenses</Header>
             <Subheader
                 onClick={() => {
-                    props.setTrend('expense');
-                    props.setSubTrend('date');
+                    props.setTrend('expenses');
+                    props.setSubtrend('date');
                 }}
-                trend='expense'
-                subTrend='date'
+                trend='expenses'
+                subtrend='date'
                 curTrend={props.trend}
-                curSubTrend={props.subTrend}
+                curSubtrend={props.subtrend}
             >
                 Time
             </Subheader>
             <Subheader
                 onClick={() => {
-                    props.setTrend('expense');
-                    props.setSubTrend('category');
+                    props.setTrend('expenses');
+                    props.setSubtrend('category');
                 }}
-                trend='expense'
-                subTrend='category'
+                trend='expenses'
+                subtrend='category'
                 curTrend={props.trend}
-                curSubTrend={props.subTrend}
+                curSubtrend={props.subtrend}
             >
                 Category
             </Subheader>
             <Subheader
                 onClick={() => {
-                    props.setTrend('expense');
-                    props.setSubTrend('merchant');
+                    props.setTrend('expenses');
+                    props.setSubtrend('merchant');
                 }}
-                trend='expense'
-                subTrend='merchant'
+                trend='expenses'
+                subtrend='merchant'
                 curTrend={props.trend}
-                curSubTrend={props.subTrend}
+                curSubtrend={props.subtrend}
             >
                 Merchant
             </Subheader>
@@ -58,36 +58,36 @@ const Sidebar: React.FC<Props> = props => {
             <Subheader
                 onClick={() => {
                     props.setTrend('income');
-                    props.setSubTrend('date');
+                    props.setSubtrend('date');
                 }}
                 trend='income'
-                subTrend='date'
+                subtrend='date'
                 curTrend={props.trend}
-                curSubTrend={props.subTrend}
+                curSubtrend={props.subtrend}
             >
                 Time
             </Subheader>
             <Subheader
                 onClick={() => {
                     props.setTrend('income');
-                    props.setSubTrend('category');
+                    props.setSubtrend('category');
                 }}
                 trend='income'
-                subTrend='category'
+                subtrend='category'
                 curTrend={props.trend}
-                curSubTrend={props.subTrend}
+                curSubtrend={props.subtrend}
             >
                 Category
             </Subheader>
             <Subheader
                 onClick={() => {
                     props.setTrend('income');
-                    props.setSubTrend('merchant');
+                    props.setSubtrend('merchant');
                 }}
                 trend='income'
-                subTrend='merchant'
+                subtrend='merchant'
                 curTrend={props.trend}
-                curSubTrend={props.subTrend}
+                curSubtrend={props.subtrend}
             >
                 Merchant
             </Subheader>
@@ -95,12 +95,12 @@ const Sidebar: React.FC<Props> = props => {
             <Subheader
                 onClick={() => {
                     props.setTrend('net earnings');
-                    props.setSubTrend('date');
+                    props.setSubtrend('date');
                 }}
                 trend='net earnings'
-                subTrend='date'
+                subtrend='date'
                 curTrend={props.trend}
-                curSubTrend={props.subTrend}
+                curSubtrend={props.subtrend}
             >
                 Time
             </Subheader>
@@ -108,12 +108,12 @@ const Sidebar: React.FC<Props> = props => {
             <Subheader
                 onClick={() => {
                     props.setTrend('net worth');
-                    props.setSubTrend('date');
+                    props.setSubtrend('date');
                 }}
                 trend='net worth'
-                subTrend='date'
+                subtrend='date'
                 curTrend={props.trend}
-                curSubTrend={props.subTrend}
+                curSubtrend={props.subtrend}
             >
                 Time
             </Subheader>
@@ -124,7 +124,9 @@ const Sidebar: React.FC<Props> = props => {
 // STYLES //
 const Wrapper = styled.nav`
     background: #f0f0f0;
-    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-top: calc(20px + 1.25rem);
+    min-width: 200px;
     width: 200px;
 `;
 
@@ -136,19 +138,22 @@ const Header = styled.div`
     padding-bottom: 5px;
 `;
 
-const Subheader = styled.div<{
+const Subheader = styled(({ trend, subtrend, curTrend, curSubtrend, ...rest }) => (
+    <div {...rest} />
+))<{
     trend: string;
-    subTrend: string;
+    subtrend: string;
     curTrend: string;
-    curSubTrend: string;
+    curSubtrend: string;
 }>`
-    background: ${({ trend, subTrend, curTrend, curSubTrend }) =>
-        trend === curTrend && subTrend === curSubTrend && '#007bff'};
-    color: ${({ trend, subTrend, curTrend, curSubTrend }) =>
-        trend === curTrend && subTrend === curSubTrend && '#fff'};
+    background: ${({ trend, subtrend, curTrend, curSubtrend }) =>
+        trend === curTrend && subtrend === curSubtrend && '#007bff'};
+    color: ${({ trend, subtrend, curTrend, curSubtrend }) =>
+        trend === curTrend && subtrend === curSubtrend && '#fff'};
     cursor: pointer;
-    & :hover {
-        color: #007bff;
+    &:hover {
+        color: ${({ trend, subtrend, curTrend, curSubtrend }) =>
+            (trend !== curTrend || subtrend !== curSubtrend) && '#007bff'};
     }
     font-size: 14px;
     padding: 5px 30px;

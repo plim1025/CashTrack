@@ -3,11 +3,15 @@ import React, { useState, useEffect, useRef } from 'react';
 
 // COMPONENTS //
 import { Button, Form, Modal } from 'react-bootstrap';
-import CategoryDropdown from './CategoryDropdown';
+import Dropdown from '../shared/Dropdown';
 import ErrorMessage from '../shared/ErrorMessage';
+import CategoryDropdownMenu from './CategoryDropdownMenu';
 
 // TYPES //
-import { Transaction } from '../../types';
+import { Transaction, Category } from '../../types';
+
+// UTILS //
+import { parseCategoryDropdownOptions } from '../shared/TransactionUtil';
 
 interface Props {
     mode: string;
@@ -15,6 +19,8 @@ interface Props {
     close: () => void;
     handleCreateTransaction: (transaction: Transaction) => void;
     handleEditMultipleTransactions: (transaction: Transaction) => void;
+    categories: Category[];
+    openCategory: () => void;
 }
 
 let errorTimeout: ReturnType<typeof setTimeout>;
@@ -102,15 +108,27 @@ const TransactionModal: React.FC<Props> = props => {
                     </Form.Group>
                     <Form.Group>
                         <Form.Label>Category</Form.Label>
-                        <CategoryDropdown
+                        <Dropdown
+                            size='bg'
                             padded
+                            options={parseCategoryDropdownOptions(props.categories)}
+                            defaultOption={{
+                                value: transaction.category,
+                                label: transaction.category,
+                            }}
                             onChange={e =>
                                 setTransaction({
                                     ...transaction,
                                     category: e.value,
                                 })
                             }
-                            openCallback={() => props.close()}
+                            menuComponent={(menuProps: any) => (
+                                <CategoryDropdownMenu
+                                    menuProps={menuProps}
+                                    openCategoryModal={props.openCategory}
+                                    openCallback={props.close}
+                                />
+                            )}
                         />
                     </Form.Group>
                     <Form.Group>

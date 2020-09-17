@@ -7,26 +7,34 @@ import Chart from '../components/Trends/Chart';
 import Filters from '../components/Trends/Filters';
 import TrendInfo from '../components/Trends/TrendInfo';
 import Sidebar from '../components/Trends/Sidebar';
+import FallbackSpinner from '../components/shared/FallbackSpinner';
+import ViewModal from '../components/Trends/ViewModal';
 
 // CONTEXT //
 import { ResourcesContext } from '../App';
 
 // TYPES //
-import { Transaction, Account, Trends, Subtrends, Charts, Dates, Data } from '../types';
+import { Transaction, Account, Category, Trends, Subtrends, Charts, Dates, Data } from '../types';
 
 // UTIL //
 import { parseSelectedTransactions, parseTransactionData } from '../components/shared/TrendUtil';
 
 type Actions =
+    | { type: 'SET_LOADING'; loading: boolean }
     | { type: 'SET_TREND'; trend: Trends }
     | { type: 'SET_SUBTREND'; subtrend: Subtrends }
     | { type: 'SET_CHART'; chart: Charts }
     | { type: 'SET_DATE'; date: Dates }
     | { type: 'SET_ACCOUNT_IDS'; accountIDs: string[] }
     | { type: 'SET_SELECTED_TRANSACTIONS'; selectedTransactions: Transaction[] }
-    | { type: 'SET_DATA'; data: Data[] };
+    | { type: 'SET_DATA'; data: Data[] }
+    | { type: 'SHOW_VIEW_MODAL' }
+    | { type: 'HIDE_VIEW_MODAL' };
 
 interface ReducerState {
+    transactions: Transaction[];
+    categories: Category[];
+    loading: boolean;
     trend: Trends;
     subtrend: Subtrends;
     chart: Charts;
@@ -34,10 +42,13 @@ interface ReducerState {
     accountIDs: string[];
     selectedTransactions: Transaction[];
     data: Data[];
+    viewModal: boolean;
 }
 
 const reducer = (state: ReducerState, action: Actions) => {
     switch (action.type) {
+        case 'SET_LOADING':
+            return { ...state, loading: action.loading };
         case 'SET_TREND':
             return { ...state, trend: action.trend };
         case 'SET_SUBTREND':
@@ -52,6 +63,10 @@ const reducer = (state: ReducerState, action: Actions) => {
             return { ...state, selectedTransactions: action.selectedTransactions };
         case 'SET_DATA':
             return { ...state, data: action.data };
+        case 'SHOW_VIEW_MODAL':
+            return { ...state, viewModal: true };
+        case 'HIDE_VIEW_MODAL':
+            return { ...state, viewModal: false };
         default:
             return state;
     }
@@ -60,19 +75,28 @@ const reducer = (state: ReducerState, action: Actions) => {
 const Trends: React.FC = () => {
     const { transactions, accounts, categories } = useContext(ResourcesContext);
     const [state, dispatch] = useReducer(reducer, {
-        trend: 'expense',
+        transactions: transactions.read(),
+        categories: categories.read(),
+        loading: false,
+        trend: 'expenses',
         subtrend: 'category',
-        chart: 'pie',
+        chart: 'bar',
         date: 'all time',
-        accountIDs: accounts.read().map((account: Account) => account.id),
+        accountIDs: [],
         selectedTransactions: [],
         data: [],
+        viewModal: false,
     });
 
     useEffect(() => {
+        const fetchedAccountIDs = accounts.read().map((account: Account) => account.id);
+        dispatch({ type: 'SET_ACCOUNT_IDS', accountIDs: fetchedAccountIDs });
+    }, []);
+
+    useEffect(() => {
         const newSelectedTransactions = parseSelectedTransactions(
-            transactions.read(),
-            categories.read(),
+            state.transactions,
+            state.categories,
             state.trend,
             state.date,
             state.accountIDs
@@ -98,38 +122,39 @@ const Trends: React.FC = () => {
         dispatch({ type: 'SET_DATA', data: newData });
     }, [state.selectedTransactions]);
 
-    console.log(state.data);
     return (
         <Wrapper>
             <Sidebar
                 trend={state.trend}
-                subTrend={state.subtrend}
+                subtrend={state.subtrend}
                 setTrend={(trend: Trends) => dispatch({ type: 'SET_TREND', trend: trend })}
-                setSubTrend={(subtrend: Subtrends) =>
+                setSubtrend={(subtrend: Subtrends) =>
                     dispatch({ type: 'SET_SUBTREND', subtrend: subtrend })
                 }
             />
-            <SubWrapper>
-                <TitleWrapper>
-                    <Title>{state.trend}</Title>
-                    <Subtitle>
-                        {'By '}
-                        {state.subtrend}
-                    </Subtitle>
-                </TitleWrapper>
+            <Subwrapper>
                 <Filters
                     trend={state.trend}
+                    subtrend={state.subtrend}
+                    chart={state.chart}
                     accounts={accounts.read()}
                     date={state.date}
                     setAccounts={(accountIDs: string[]) =>
                         dispatch({ type: 'SET_ACCOUNT_IDS', accountIDs: accountIDs })
                     }
+                    setChart={(chart: Charts) => dispatch({ type: 'SET_CHART', chart: chart })}
                     setDate={(date: Dates) => dispatch({ type: 'SET_DATE', date: date })}
                     selectedAccountIDs={state.accountIDs}
                 />
-            </SubWrapper>
-            <Chart chart={state.chart} data={state.data} />
-            <TrendInfo transactions={state.selectedTransactions} />
+                <Chart
+                    chart={state.chart}
+                    data={state.data}
+                    openViewModal={() => dispatch({ type: 'SHOW_VIEW_MODAL' })}
+                />
+                <TrendInfo transactions={state.selectedTransactions} />
+            </Subwrapper>
+            <ViewModal show={state.viewModal} close={() => dispatch({ type: 'HIDE_VIEW_MODAL' })} />
+            <FallbackSpinner backdrop show={state.loading} />
         </Wrapper>
     );
 };
@@ -139,24 +164,15 @@ const Wrapper = styled.div`
     display: flex;
     height: calc(100% - 75px);
     justify-content: center;
-`;
-
-const SubWrapper = styled.div`
-    display: flex;
-    height: 100%;
-    max-width: 800px;
-    padding: 20px;
     width: 100%;
 `;
 
-const TitleWrapper = styled.div``;
-
-const Title = styled.h3`
-    text-transform: capitalize;
-`;
-
-const Subtitle = styled.div`
-    text-transform: capitalize;
+const Subwrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    width: 800px;
 `;
 
 export default Trends;

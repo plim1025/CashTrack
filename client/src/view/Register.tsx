@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 
 // COMPONENTS //
 import styled from 'styled-components';
-import { Button, Card, Form } from 'react-bootstrap';
+import { Button, Card, Form, Spinner } from 'react-bootstrap';
 import ErrorMessage from '../components/shared/ErrorMessage';
 
 // TYPES //
@@ -22,6 +22,7 @@ const Register: React.FC<RouteComponentProps> = props => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState({ show: false, type: '', message: '' });
+    const [loading, setLoading] = useState(false);
 
     const register = async (e: any) => {
         e.preventDefault();
@@ -29,6 +30,7 @@ const Register: React.FC<RouteComponentProps> = props => {
             setError({ show: true, type: 'danger', message: 'All fields must be filled in.' });
         } else {
             try {
+                setLoading(true);
                 const registrationInfo = JSON.stringify({ email: email, password: password });
                 const response = await fetch(`${process.env.BACKEND_URI}/api/user`, {
                     method: 'POST',
@@ -41,6 +43,7 @@ const Register: React.FC<RouteComponentProps> = props => {
                 if (parsedResponse.error) {
                     setError({ show: true, type: 'danger', message: parsedResponse.error });
                 } else {
+                    setLoading(false);
                     setError({ show: true, type: 'success', message: 'Account created. ' });
                     return;
                 }
@@ -96,9 +99,9 @@ const Register: React.FC<RouteComponentProps> = props => {
                             Sign In
                         </Button>
                     </SignIn>
-                    <Button onClick={register} variant='primary' type='submit' block>
-                        Register
-                    </Button>
+                    <ButtonWrapper onClick={register} variant='primary' type='submit' block>
+                        {loading ? <Spinner as='span' animation='border' size='sm' /> : 'Register'}
+                    </ButtonWrapper>
                 </Form>
             </CardWrapper>
         </Wrapper>
@@ -139,6 +142,15 @@ const SignIn = styled.div`
     align-items: center;
     display: flex;
     margin-bottom: 1rem;
+`;
+
+const ButtonWrapper = styled(Button)`
+    align-items: center;
+    height: 47px;
+    justify-content: center;
+    &&& {
+        display: flex;
+    }
 `;
 
 export default Register;

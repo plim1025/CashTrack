@@ -1,7 +1,7 @@
 // TYPES //
 import { Transaction, Account, Category } from '../../types';
 
-const wrapPromise = (promise: any) => {
+const wrapPromise = (promise: any, promiseName: string) => {
     let status = 'loading';
     let result: any;
     const suspender = promise.then(
@@ -18,6 +18,7 @@ const wrapPromise = (promise: any) => {
     return {
         read() {
             if (status === 'loading') {
+                console.log(promiseName);
                 throw suspender;
             } else if (status === 'error') {
                 throw result;
@@ -97,9 +98,9 @@ const createResource = (): {
     categories: { read: () => Category[] };
 } => {
     return {
-        transactions: wrapPromise(fetchTransactions()),
-        accounts: wrapPromise(fetchAccounts()),
-        categories: wrapPromise(fetchCategories()),
+        transactions: wrapPromise(fetchTransactions(), 'transactions'),
+        accounts: wrapPromise(fetchAccounts(), 'accounts'),
+        categories: wrapPromise(fetchCategories(), 'categories'),
     };
 };
 

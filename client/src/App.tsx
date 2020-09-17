@@ -103,7 +103,9 @@ const App: React.FC<Props & RouteComponentProps> = props => {
                 },
                 subpage: subpage,
                 setSubpage: (newSubpage: string) => setSubpage(newSubpage),
-                logout: () => logout(),
+                logout: () => {
+                    throw logout();
+                },
             }}
         >
             <Header />

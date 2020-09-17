@@ -1,4 +1,4 @@
-import { Transaction, Account } from '../../types';
+import { Transaction, Account, Category, GroupedDropdownOption } from '../../types';
 
 export const createTransaction = async (transaction: Transaction): Promise<void> => {
     try {
@@ -177,13 +177,25 @@ export const deleteCategory = async (name: string, transactionIDs: string[]): Pr
     }
 };
 
-export const moneyFormat = (money: number): string => {
-    if (money < 0) {
-        return `-$${Math.abs(money)
-            .toFixed(2)
-            .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+export const moneyFormat = (money: number | string | Date): string => {
+    if (typeof money === 'number') {
+        if (money < 0) {
+            return `-$${Math.abs(money)
+                .toFixed(2)
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+        }
+        return `$${money.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
     }
-    return `$${money.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    if (typeof money === 'string') {
+        const moneyNum = parseFloat(money);
+        if (moneyNum < 0) {
+            return `-$${Math.abs(moneyNum)
+                .toFixed(2)
+                .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+        }
+        return `$${moneyNum.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
+    }
+    return 'Error, cannot parse money from date';
 };
 
 export const parseAccountInfo = (
@@ -239,4 +251,85 @@ export const parseAccountInfo = (
         creditLimit: selectedAccount.creditLimit || null,
         type: selectedAccount.type,
     };
+};
+
+export const formatDate = (cell: Date): string => {
+    const date = new Date(cell);
+    return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
+};
+
+export const sortDate = (a: string, b: string, order: string): number => {
+    if (order === 'asc') return Date.parse(a) - Date.parse(b);
+    return Date.parse(b) - Date.parse(a);
+};
+
+export const validateDate = (newValue: any): { valid: boolean; message?: string } => {
+    if (!newValue) {
+        return {
+            valid: false,
+            message: 'Invalid Date',
+        };
+    }
+    return { valid: true };
+};
+
+export const formatDescription = (cell: string): string => {
+    if (cell.length > 30) return `${cell.substring(0, 30)}...`;
+    return cell;
+};
+
+export const validateDescription = (newValue: any): { valid: boolean; message?: string } => {
+    if (!newValue) {
+        return {
+            valid: false,
+            message: 'Description cannot be empty',
+        };
+    }
+    return { valid: true };
+};
+
+export const formatAmount = (cell: string): string => {
+    const parsedCell = parseFloat(cell);
+    if (parsedCell < 0) return `-$${Math.abs(parsedCell).toFixed(2)}`;
+    return `$${parsedCell.toFixed(2)}`;
+};
+
+export const validateAmount = (newValue: any): { valid: boolean; message?: string } => {
+    if (isNaN(newValue) || !newValue) {
+        return {
+            valid: false,
+            message: 'Amount should be numeric',
+        };
+    }
+    if (parseInt(newValue) > 1000000000) {
+        return {
+            valid: false,
+            message: 'Maximum amount is $1,000,000,000',
+        };
+    }
+    return { valid: true };
+};
+
+const parseCategoryGroup = (categories: Category[], type: string) => {
+    return categories
+        .filter(category => category.type === type)
+        .map(category => ({ value: category.name, label: category.name }))
+        .sort((a, b) => (a.value.toUpperCase() > b.value.toUpperCase() ? 0 : -1));
+};
+
+export const parseCategoryDropdownOptions = (categories: Category[]): GroupedDropdownOption[] => {
+    return [
+        {
+            label: 'expenses',
+            options: parseCategoryGroup(categories, 'expenses'),
+        },
+        {
+            label: 'income',
+            options: parseCategoryGroup(categories, 'income'),
+        },
+        {
+            label: 'other',
+            options: parseCategoryGroup(categories, 'other'),
+        },
+    ];
 };

@@ -109,7 +109,10 @@ const NavWrapper = styled(Nav)`
     }
 `;
 
-const NavLinkWrapper = styled(Nav.Link)<{ subpage: string; curSubpage: string }>`
+const NavLinkWrapper = styled(({ subpage, curSubpage, ...rest }) => <Nav.Link {...rest} />)<{
+    subpage: string;
+    curSubpage: string;
+}>`
     color: ${({ subpage, curSubpage }) => subpage === curSubpage && '#fff !important'};
 `;
 

@@ -1,4 +1,5 @@
 import { Transaction, Category, Trends, Subtrends, Dates, Data } from '../../types';
+import { sortDate } from './TransactionUtil';
 
 export const parseSelectedTransactions = (
     transactions: Transaction[],
@@ -169,5 +170,15 @@ export const parseTransactionData = (
         id: databin,
         value: newData.get(databin),
     }));
+    if ((subtrend === 'category' || subtrend === 'merchant') && parsedData.length > 10) {
+        const sortedData = parsedData.sort((a, b) => b.value - a.value);
+        const tenBinsData = sortedData.slice(0, 10);
+        const extraData = sortedData.slice(10, sortedData.length);
+        tenBinsData[tenBinsData.length - 1].id = 'Other';
+        extraData.forEach(bin => {
+            tenBinsData[tenBinsData.length - 1].value += bin.value;
+        });
+        return tenBinsData;
+    }
     return parsedData;
 };

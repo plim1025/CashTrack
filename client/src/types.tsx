@@ -1,6 +1,6 @@
 import rootReducer from './redux/Reducers';
 // import { Action } from 'redux';
-import { ThunkAction } from 'redux-thunk';
+// import { ThunkAction } from 'redux-thunk';
 
 export interface Transaction {
     date: Date | string;
@@ -13,7 +13,7 @@ export interface Transaction {
     categoryID?: string;
     merchant?: string;
     selected?: boolean;
-    type?: 'expense' | 'income' | 'other';
+    type?: 'expenses' | 'income' | 'other';
 }
 
 export interface Account {
@@ -30,7 +30,7 @@ export interface Account {
 
 export interface Category {
     name: string;
-    type: 'expense' | 'income' | 'other';
+    type: 'expenses' | 'income' | 'other';
 }
 
 export type RootState = ReturnType<typeof rootReducer>;
@@ -42,7 +42,7 @@ export type RootState = ReturnType<typeof rootReducer>;
 //     Action<string>
 // >;
 
-export type Trends = 'expense' | 'income' | 'net earnings' | 'net worth';
+export type Trends = 'expenses' | 'income' | 'net earnings' | 'net worth';
 export type Subtrends = 'date' | 'category' | 'merchant';
 export type Dates = 'all time' | 'year' | 'month' | 'week';
 export type Charts = 'bar' | 'pie';
@@ -51,4 +51,16 @@ export interface Data {
     id: string;
     value: number;
     [key: string]: string | number;
+}
+
+export interface DropdownOption {
+    value: string;
+    label: string;
+    sublabel?: string;
+}
+
+export interface GroupedDropdownOption {
+    label: string;
+    options: DropdownOption[];
+    sublabel?: string;
 }

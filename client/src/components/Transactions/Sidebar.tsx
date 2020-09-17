@@ -34,6 +34,7 @@ const Sidebar: React.FC<Props> = props => {
                     lastAccountIndex={props.accounts.length - 1}
                     onClick={() => props.setSelectedAccountID(account.id)}
                     selectedAccountID={props.selectedAccountID}
+                    
                 >
                     <AccountTitle>{account.institution}</AccountTitle>
                     <AccountSubtitle>{account.name} (...{account.mask})</AccountSubtitle>
@@ -45,12 +46,13 @@ const Sidebar: React.FC<Props> = props => {
 
 // STYLES //
 const Wrapper = styled.nav`
-    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-top: calc(20px + 1.25rem);
     max-width: 250px;
     min-width: 200px;
 `;
 
-const AllAccounts = styled.div<{ selectedAccountID: string }>`
+const AllAccounts = styled(({ selectedAccountID, ...rest}) => <div {...rest} />)<{ selectedAccountID: string }>`
     background: ${({ selectedAccountID }) => selectedAccountID === 'All Accounts' && '#007bff'};
     border-top: 1px solid rgba(222, 226, 230, 0.5);
     color: ${({ selectedAccountID }) => selectedAccountID === 'All Accounts' && '#fff'};
@@ -61,7 +63,7 @@ const AllAccounts = styled.div<{ selectedAccountID: string }>`
     }
 `;
 
-const Account = styled.div<{ selectedAccountID: string; id: string; index: number; lastAccountIndex: number }>`
+const Account = styled(({ selectedAccountID, id, index, lastAccountIndex, ...rest}) => <div {...rest} />)<{ selectedAccountID: string; id: string; index: number; lastAccountIndex: number }>`
     background: ${({ selectedAccountID, id }) => selectedAccountID === id && '#007bff'};
     border-bottom: ${({ index, lastAccountIndex }) => index === lastAccountIndex && '1px solid #dee2e6'};
     border-top: 1px solid rgba(222, 226, 230, 0.5);

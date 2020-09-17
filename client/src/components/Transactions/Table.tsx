@@ -1,35 +1,45 @@
 // REACT //
-import React, { useRef } from 'react';
+import React from 'react';
 
 // COMPONENTS //
 import styled from 'styled-components';
-import CategoryDropdown from './CategoryDropdown';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit';
 // @ts-ignore
 import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
+import Dropdown from '../shared/Dropdown';
+import CategoryDropdownMenu from './CategoryDropdownMenu';
 
 // TYPES //
-import { Transaction } from '../../types';
+import { Transaction, Category } from '../../types';
 
 // STYLES //
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.min.css';
 
 // UTILS //
-import { updateTransaction } from '../shared/TransactionUtil';
+import {
+    updateTransaction,
+    formatDate,
+    sortDate,
+    validateDate,
+    formatDescription,
+    validateDescription,
+    formatAmount,
+    validateAmount,
+    parseCategoryDropdownOptions,
+} from '../shared/TransactionUtil';
 
 interface Props {
     transactions: Transaction[];
+    categories: Category[];
     selectedTransactionIDs: string[];
     setSelectedTransactionIDs: (selectedTransactionIDs: string[]) => void;
+    openCategoryModal: () => void;
 }
 
 const Table: React.FC<Props> = props => {
-    const dropdownMenuRef = useRef(null);
-    window.onresize = () => dropdownMenuRef.current.blur();
-
     const tableColumns = [
         {
             text: 'Date',
@@ -38,54 +48,38 @@ const Table: React.FC<Props> = props => {
             editor: {
                 type: Type.DATE,
             },
-            formatter: (cell: Date) => {
-                const date = new Date(cell);
-                return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
-            },
+            formatter: formatDate,
             sort: true,
-            sortFunc: (a: string, b: string, order: string) => {
-                if (order === 'asc') return Date.parse(a) - Date.parse(b);
-                return Date.parse(b) - Date.parse(a);
-            },
-            validator: (newValue: any) => {
-                if (!newValue) {
-                    return {
-                        valid: false,
-                        message: 'Invalid Date',
-                    };
-                }
-                return { valid: true };
-            },
+            sortFunc: sortDate,
+            validator: validateDate,
         },
         {
             text: 'Description',
             dataField: 'description',
             editCellClasses: 'transaction-table-edit-cell',
-            formatter: (cell: string) => {
-                if (cell.length > 30) return `${cell.substring(0, 30)}...`;
-                return cell;
-            },
+            formatter: formatDescription,
             sort: true,
-            validator: (newValue: any) => {
-                if (!newValue) {
-                    return {
-                        valid: false,
-                        message: 'Description cannot be empty',
-                    };
-                }
-            },
+            validator: validateDescription,
         },
         {
             text: 'Category',
             dataField: 'category',
             editCellClasses: 'transaction-table-edit-cell',
             sort: true,
+            blurToSave: false,
             editorRenderer: (editorProps: any, value: any) => (
-                <CategoryDropdown
-                    defaultCategory={value}
+                <Dropdown
+                    size='sm'
+                    options={parseCategoryDropdownOptions(props.categories)}
+                    defaultOption={{ label: value, value: value }}
                     onChange={category => editorProps.onUpdate(category.value)}
-                    onBlur={editorProps.onBlur}
-                    dropdownRef={dropdownMenuRef}
+                    onUpdate={editorProps.onUpdate}
+                    menuComponent={(menuProps: any) => (
+                        <CategoryDropdownMenu
+                            menuProps={menuProps}
+                            openCategoryModal={props.openCategoryModal}
+                        />
+                    )}
                 />
             ),
         },
@@ -93,27 +87,9 @@ const Table: React.FC<Props> = props => {
             text: 'Amount',
             dataField: 'amount',
             editCellClasses: 'transaction-table-edit-cell',
-            formatter: (cell: string) => {
-                const parsedCell = parseFloat(cell);
-                if (parsedCell < 0) return `-$${Math.abs(parsedCell).toFixed(2)}`;
-                return `$${parsedCell.toFixed(2)}`;
-            },
+            formatter: formatAmount,
             sort: true,
-            validator: (newValue: any) => {
-                if (isNaN(newValue) || !newValue) {
-                    return {
-                        valid: false,
-                        message: 'Amount should be numeric',
-                    };
-                }
-                if (parseInt(newValue) > 1000000000) {
-                    return {
-                        valid: false,
-                        message: 'Maximum amount is $1,000,000,000',
-                    };
-                }
-                return { valid: true };
-            },
+            validator: validateAmount,
         },
     ];
 
@@ -130,10 +106,7 @@ const Table: React.FC<Props> = props => {
                     <>
                         <Search.SearchBar {...toolkitProps.searchProps} />
                         <BootstrapTable
-                            bootstrap4
-                            keyField='_id'
-                            data={props.transactions}
-                            columns={tableColumns}
+                            {...toolkitProps.baseProps}
                             id='transaction-table'
                             headerClasses='transaction-table-header'
                             bodyClasses='transaction-table-body'
@@ -189,6 +162,7 @@ const Table: React.FC<Props> = props => {
                             })}
                             cellEdit={cellEditFactory({
                                 mode: 'click',
+                                blurToSave: true,
                                 afterSaveCell: (
                                     oldValue: any,
                                     newValue: any,

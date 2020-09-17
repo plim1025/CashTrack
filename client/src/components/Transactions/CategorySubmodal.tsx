@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
 // COMPONENTS //
 import { Button, Modal, Form } from 'react-bootstrap';
 import ErrorMessage from '../shared/ErrorMessage';
-import Select from 'react-select';
+import Dropdown from '../shared/Dropdown';
 
 // TYPES //
 import { Category, Transaction } from '../../types';
@@ -115,13 +115,12 @@ const CategoryModal: React.FC<Props> = props => {
                     </Form.Group>
                     <Form.Group>
                         <Form.Label>Type</Form.Label>
-                        <Select
-                            classNamePrefix='react-select'
-                            className='react-select react-select-padded-modal'
+                        <Dropdown
+                            size='bg'
                             options={[
                                 {
-                                    label: 'Expense',
-                                    value: 'expense',
+                                    label: 'Expenses',
+                                    value: 'expenses',
                                 },
                                 {
                                     label: 'Income',
@@ -132,7 +131,7 @@ const CategoryModal: React.FC<Props> = props => {
                                     value: 'other',
                                 },
                             ]}
-                            defaultValue={
+                            defaultOption={
                                 props.mode === 'edit'
                                     ? {
                                           label: `${props.category.type

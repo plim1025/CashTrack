@@ -27,6 +27,7 @@ interface Props {
         category: Category;
     };
     categoryDeleteModal: boolean;
+    openCategoryModal: () => void;
     openCategorySubmodal: (mode: string, category: Category) => void;
     openCategoryDeleteModal: () => void;
     hideTransactionModal: () => void;
@@ -44,8 +45,10 @@ const Modals: React.FC<Props> = props => {
                 toggled={props.transactionModal.show}
                 mode={props.transactionModal.mode}
                 close={props.hideTransactionModal}
+                openCategory={props.openCategoryModal}
                 handleCreateTransaction={props.handleCreateTransaction}
                 handleEditMultipleTransactions={props.handleEditMultipleTransactions}
+                categories={props.categories}
             />
             <CategoryModal
                 toggled={props.categoryModal}

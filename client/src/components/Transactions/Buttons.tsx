@@ -88,7 +88,7 @@ const ButtonWrapper = styled(Button)`
 
 const ButtonText = styled.div`
     @media (max-width: 750px) {
-        display: 'none';
+        display: none;
     } ;
 `;
 

@@ -82,7 +82,9 @@ const Wrapper = styled.div`
 `;
 
 const CardTitleWrapper = styled(Card.Title)`
-    font-weight: 700;
+    &&& {
+        font-weight: 700;
+    }
 `;
 
 const CardSubtitleWrapper = styled(Card.Subtitle)`
@@ -91,13 +93,13 @@ const CardSubtitleWrapper = styled(Card.Subtitle)`
 `;
 
 const Item = styled.div`
-    margin-right: 25;
+    margin-right: 25px;
 `;
 
 const Title = styled.div`
-    font-size: 14;
+    font-size: 14px;
     opacity: 0.75;
-    text-transform: 'uppercase';
+    text-transform: uppercase;
 `;
 
 const Money = styled.div`

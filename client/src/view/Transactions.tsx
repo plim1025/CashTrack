@@ -1,5 +1,5 @@
 // REACT //
-import React, { useEffect, useReducer, useContext, createContext } from 'react';
+import React, { useEffect, useReducer, useContext } from 'react';
 
 // ROUTER //
 import { withRouter, RouteComponentProps } from 'react-router';
@@ -28,8 +28,6 @@ import {
     updateMultipleTransactions,
     deleteTransactions,
 } from '../components/shared/TransactionUtil';
-
-export const CategoryContext = createContext({ categories: null, openCategoryModal: null });
 
 type Actions =
     | { type: 'SET_LOADING'; loading: boolean }
@@ -255,91 +253,87 @@ const Transactions: React.FC<RouteComponentProps> = props => {
     }, []);
 
     return (
-        <CategoryContext.Provider
-            value={{
-                categories: state.categories,
-                openCategoryModal: () => dispatch({ type: 'SHOW_CATEGORY_MODAL' }),
-            }}
-        >
-            <Wrapper>
-                <Sidebar
-                    accounts={state.accounts}
-                    selectedAccountID={state.selectedAccountID}
-                    setSelectedAccountID={(id: string) =>
-                        dispatch({ type: 'SET_SELECTED_ACCOUNT_ID', id: id })
-                    }
+        <Wrapper>
+            <Sidebar
+                accounts={state.accounts}
+                selectedAccountID={state.selectedAccountID}
+                setSelectedAccountID={(id: string) =>
+                    dispatch({ type: 'SET_SELECTED_ACCOUNT_ID', id: id })
+                }
+            />
+            <SubWrapper>
+                {state.accounts.length ? (
+                    <AccountInfo
+                        accounts={state.accounts}
+                        selectedAccountID={state.selectedAccountID}
+                    />
+                ) : null}
+                <Buttons
+                    showModal={() => dispatch({ type: 'SHOW_TRANSACTION_ADD_MODAL' })}
+                    handleEditButton={handleEditButton}
+                    handleDeleteButton={handleDeleteMultipleTransactions}
                 />
-                <SubWrapper>
-                    {state.accounts.length ? (
-                        <AccountInfo
-                            accounts={state.accounts}
-                            selectedAccountID={state.selectedAccountID}
-                        />
-                    ) : null}
-                    <Buttons
-                        showModal={() => dispatch({ type: 'SHOW_TRANSACTION_ADD_MODAL' })}
-                        handleEditButton={handleEditButton}
-                        handleDeleteButton={handleDeleteMultipleTransactions}
-                    />
-                    {!state.accounts.length ? (
-                        <NoTransactionsText>
-                            <span>No accounts added.</span>
-                            <Button
-                                variant='link'
-                                onClick={() => {
-                                    props.history.push('/accounts');
-                                    setSubpage('accounts');
-                                }}
-                            >
-                                Link an account.
-                            </Button>
-                        </NoTransactionsText>
-                    ) : null}
-                    <Table
-                        transactions={state.transactions.filter(
-                            (transaction: Transaction) => transaction.selected
-                        )}
-                        selectedTransactionIDs={state.selectedTransactionIDs}
-                        setSelectedTransactionIDs={(ids: string[]) =>
-                            dispatch({ type: 'SET_SELECTED_TRANSACTION_IDS', ids: ids })
-                        }
-                    />
-                </SubWrapper>
-                <Modals
-                    setLoading={(loading: boolean) =>
-                        dispatch({ type: 'SET_LOADING', loading: loading })
-                    }
-                    transactions={state.transactions}
+                {!state.accounts.length ? (
+                    <NoTransactionsText>
+                        <span>No accounts added.</span>
+                        <Button
+                            variant='link'
+                            onClick={() => {
+                                props.history.push('/accounts');
+                                setSubpage('accounts');
+                            }}
+                        >
+                            Link an account.
+                        </Button>
+                    </NoTransactionsText>
+                ) : null}
+                <Table
+                    transactions={state.transactions.filter(
+                        (transaction: Transaction) => transaction.selected
+                    )}
                     categories={state.categories}
-                    setTransactions={(newTransactions: Transaction[]) => {
-                        dispatch({ type: 'SET_TRANSACTIONS', transactions: newTransactions });
-                    }}
-                    setCategories={(newCategories: Category[]) =>
-                        dispatch({ type: 'SET_CATEGORIES', categories: newCategories })
+                    selectedTransactionIDs={state.selectedTransactionIDs}
+                    setSelectedTransactionIDs={(ids: string[]) =>
+                        dispatch({ type: 'SET_SELECTED_TRANSACTION_IDS', ids: ids })
                     }
-                    transactionModal={state.transactionModal}
-                    categoryModal={state.categoryModal}
-                    categorySubmodal={state.categorySubmodal}
-                    categoryDeleteModal={state.categoryDeleteModal}
-                    openCategorySubmodal={(mode: string, category?: Category) =>
-                        dispatch({
-                            type: 'SHOW_CATEGORY_SUBMODAL',
-                            mode: mode,
-                            category: category,
-                        })
-                    }
-                    openCategoryDeleteModal={() => dispatch({ type: 'SHOW_CATEGORY_DELETE_MODAL' })}
-                    hideTransactionModal={() => dispatch({ type: 'HIDE_TRANSACTION_MODAL' })}
-                    hideCategoryModal={() => dispatch({ type: 'HIDE_CATEGORY_MODAL' })}
-                    hideCategorySubmodal={() => dispatch({ type: 'HIDE_CATEGORY_SUBMODAL' })}
-                    hideCategoryDeleteModal={() => dispatch({ type: 'HIDE_CATEGORY_DELETE_MODAL' })}
-                    handleCreateTransaction={handleCreateTransaction}
-                    handleEditMultipleTransactions={handleEditMultipleTransactions}
+                    openCategoryModal={() => dispatch({ type: 'SHOW_CATEGORY_MODAL' })}
                 />
-                <ErrorMessage error={state.error.show} errorMessage={state.error.message} />
-            </Wrapper>
+            </SubWrapper>
+            <Modals
+                setLoading={(loading: boolean) =>
+                    dispatch({ type: 'SET_LOADING', loading: loading })
+                }
+                transactions={state.transactions}
+                categories={state.categories}
+                setTransactions={(newTransactions: Transaction[]) => {
+                    dispatch({ type: 'SET_TRANSACTIONS', transactions: newTransactions });
+                }}
+                setCategories={(newCategories: Category[]) =>
+                    dispatch({ type: 'SET_CATEGORIES', categories: newCategories })
+                }
+                transactionModal={state.transactionModal}
+                categoryModal={state.categoryModal}
+                categorySubmodal={state.categorySubmodal}
+                categoryDeleteModal={state.categoryDeleteModal}
+                openCategoryModal={() => dispatch({ type: 'SHOW_CATEGORY_MODAL' })}
+                openCategorySubmodal={(mode: string, category?: Category) =>
+                    dispatch({
+                        type: 'SHOW_CATEGORY_SUBMODAL',
+                        mode: mode,
+                        category: category,
+                    })
+                }
+                openCategoryDeleteModal={() => dispatch({ type: 'SHOW_CATEGORY_DELETE_MODAL' })}
+                hideTransactionModal={() => dispatch({ type: 'HIDE_TRANSACTION_MODAL' })}
+                hideCategoryModal={() => dispatch({ type: 'HIDE_CATEGORY_MODAL' })}
+                hideCategorySubmodal={() => dispatch({ type: 'HIDE_CATEGORY_SUBMODAL' })}
+                hideCategoryDeleteModal={() => dispatch({ type: 'HIDE_CATEGORY_DELETE_MODAL' })}
+                handleCreateTransaction={handleCreateTransaction}
+                handleEditMultipleTransactions={handleEditMultipleTransactions}
+            />
+            <ErrorMessage error={state.error.show} errorMessage={state.error.message} />
             <FallbackSpinner backdrop show={state.loading} />
-        </CategoryContext.Provider>
+        </Wrapper>
     );
 };
 
@@ -357,8 +351,9 @@ const SubWrapper = styled.div`
 
 const NoTransactionsText = styled.div`
     align-items: center;
-    display: block;
+    display: flex;
     justify-content: center;
+    opacity: 0.75;
 `;
 
 export default withRouter(Transactions);

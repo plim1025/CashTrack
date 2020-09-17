@@ -29,7 +29,11 @@ const parseCategories = (
             const defaultCategories = ['Uncategorized', 'Bank Fees', 'Legal Fees', 'Charitable Giving', 'Medical', 'Cash', 'Check', 'Education', 'Membership Fee', 'Service', 'Utilities', 'Postage/Shipping', 'Restaurant', 'Entertainment', 'Loan', 'Rent', 'Home Maintenance/Improvement', 'Automotive', 'Electronic', 'Insurance', 'Business Expenditure', 'Real Estate', 'Personal Care', 'Gas', 'Subscription', 'Travel', 'Shopping', 'Clothing', 'Groceries', 'Tax', 'Subsidy', 'Interest', 'Deposit', 'Payroll/Salary', 'Cash', 'Transfer'];
             if (defaultCategories.indexOf(category.name) === -1) {
                 return (
-                    <Cell key={category.name} onClick={() => onClickHandler(category)}>
+                    <Cell
+                        key={category.name}
+                        onClick={() => onClickHandler(category)}
+                        style={{ cursor: 'pointer' }}
+                    >
                         <CellText>{category.name}</CellText>
                         <CellIcon>
                             <svg viewBox='0 0 512 512'>
@@ -65,7 +69,7 @@ const CategoryModal: React.FC<Props> = props => {
             <Table>
                 <Column>
                     <ColumnHeader>Expense</ColumnHeader>
-                    {parseCategories(props.categories, 'expense', (category: Category) =>
+                    {parseCategories(props.categories, 'expenses', (category: Category) =>
                         props.openSubmodal('edit', category)
                     )}
                 </Column>
@@ -136,7 +140,6 @@ const ColumnHeader = styled.div`
 
 const Cell = styled.div`
     align-items: center;
-    cursor: pointer;
     display: flex;
     height: 30px;
     min-height: 30px;

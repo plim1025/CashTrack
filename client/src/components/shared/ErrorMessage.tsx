@@ -16,7 +16,7 @@ interface Props {
 
 const Error: React.FC<Props> = props => {
     return (
-        <AlertWrapper variant={props.type || 'danger'} display={props.error ? 1 : 0}>
+        <AlertWrapper variant={props.type || 'danger'} display={props.error}>
             {props.errorMessage}
             {props.link ? (
                 <AlertLinkWrapper onClick={() => props.history.push(props.link)}>
@@ -28,7 +28,7 @@ const Error: React.FC<Props> = props => {
 };
 
 // STYLES //
-const AlertWrapper = styled(Alert)<{ display: number }>`
+const AlertWrapper = styled(({ display, ...rest }) => <Alert {...rest} />)<{ display: boolean }>`
     &&& {
         position: fixed;
         transition: all 0.2s ease-in-out;
