@@ -1,0 +1,72 @@
+.LandTitle {
+    text-align: center;
+ /* margin: 200px 0px 0px 0px; */
+    color: #0dfc94;
+    background-color: rgb(52, 58, 64);
+    padding: 20px 0 0 0 
+}
+
+.SignIn {
+   position:absolute;
+   top: 20px;
+   right: 20px;
+   color: #0dfc94;
+}
+
+.SignIn:hover {
+    text-decoration: none;
+}
+
+.sign {
+    background-color: lightblue;
+    color: black;
+    padding: 5px;
+    margin: 20px 0 20px 0
+}
+
+.content1 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    margin: 200px 0 0 0;
+}
+
+.content1 .a,
+.content1 .b, 
+.content1 .c {
+    width: 600px;
+    margin-bottom: 0;
+} 
+
+.f1 {
+    margin: 200px 0 0 0;
+}
+
+#spacing {
+    margin: 20px 5px 0 0;
+}
+
+h1 {
+    text-align: center;
+}
+
+.CashTrck {
+    font-weight: bold;
+    font-size: 17px;
+    padding: 20px;
+    background-color:rgb(52, 58, 64);
+    color: #0dfc94;
+}
+    
+li { 
+    text-align:left;
+}
+
+.title {
+    color:  #0dfc94;
+}
+
+.title:hover {
+    text-decoration: none;
+}
