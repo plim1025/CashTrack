@@ -38,6 +38,7 @@ const Header: React.FC = () => {
                         onClick={() => changeLink('home')}
                         subpage='home'
                         curSubpage={subpage}
+                        eventKey='1'
                     >
                         Home
                     </NavLinkWrapper>
@@ -45,6 +46,7 @@ const Header: React.FC = () => {
                         onClick={() => changeLink('transactions')}
                         subpage='transactions'
                         curSubpage={subpage}
+                        eventKey='2'
                     >
                         Transactions
                     </NavLinkWrapper>
@@ -52,6 +54,7 @@ const Header: React.FC = () => {
                         onClick={() => changeLink('trends')}
                         subpage='trends'
                         curSubpage={subpage}
+                        eventKey='3'
                     >
                         Trends
                     </NavLinkWrapper>
@@ -59,6 +62,7 @@ const Header: React.FC = () => {
                         onClick={() => changeLink('budgets')}
                         subpage='budgets'
                         curSubpage={subpage}
+                        eventKey='4'
                     >
                         Budgets
                     </NavLinkWrapper>
@@ -68,14 +72,16 @@ const Header: React.FC = () => {
                         id='basic-nav-dropdown'
                         title={reduxEmail || sessionStorage.getItem('email') || ''}
                     >
-                        <NavDropdown.Item onClick={() => changeLink('accounts')}>
+                        <NavDropdown.Item onClick={() => changeLink('accounts')} eventKey='5'>
                             Accounts
                         </NavDropdown.Item>
-                        <NavDropdown.Item onClick={() => changeLink('accounts')}>
+                        <NavDropdown.Item onClick={() => changeLink('accounts')} eventKey='6'>
                             Settings
                         </NavDropdown.Item>
                     </NavDropdown>
-                    <Nav.Link onClick={() => logout()}>Logout</Nav.Link>
+                    <Nav.Link onClick={() => logout()} eventKey='7'>
+                        Logout
+                    </Nav.Link>
                 </NavWrapper>
             </Navbar.Collapse>
         </Navbar>

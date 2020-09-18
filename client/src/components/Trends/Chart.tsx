@@ -96,16 +96,16 @@ const Chart: React.FC<Props> = props => {
                                 );
                             }}
                             onClick={({ data }: any) => {
-                                // if (props.trend !== 'net worth') {
-                                props.openViewModal(data.id.toString(), data.transactions);
-                                // }
+                                if (props.trend !== 'net worth') {
+                                    props.openViewModal(data.id.toString(), data.transactions);
+                                }
                             }}
                         />
                     ) : null}
                     {props.chart === 'pie' ? (
                         <ResponsivePie
                             data={props.data}
-                            margin={{ top: 25, right: 75, bottom: 75, left: 75 }}
+                            margin={{ top: 50, right: 100, bottom: 100, left: 100 }}
                             colors={['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8']}
                             enableSlicesLabels={false}
                             tooltipFormat={tooltip => moneyFormat(tooltip)}

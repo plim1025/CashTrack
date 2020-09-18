@@ -7,7 +7,8 @@ import { Spinner } from 'react-bootstrap';
 
 interface Props {
     show: boolean;
-    backdrop: boolean;
+    backdrop?: boolean;
+    message?: string;
 }
 
 const FallbackSpinner: React.FC<Props> = props => {
@@ -15,7 +16,10 @@ const FallbackSpinner: React.FC<Props> = props => {
         <>
             {props.show ? (
                 <>
-                    <SpinnerWrapper variant='primary' animation='border' />
+                    <Wrapper>
+                        <SpinnerWrapper variant='primary' animation='border' />
+                        {props.message ? <Message>{props.message}</Message> : null}
+                    </Wrapper>
                     {props.backdrop ? <Backdrop /> : null}
                 </>
             ) : null}
@@ -24,13 +28,24 @@ const FallbackSpinner: React.FC<Props> = props => {
 };
 
 // STYLES //
-const SpinnerWrapper = styled(Spinner)`
+const Wrapper = styled.div`
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     left: 50%;
-    margin-left: -20;
-    margin-top: -20;
     position: fixed;
     top: 50%;
+    transform: translate(-50%, -50%);
     z-index: 9999;
+`;
+
+const SpinnerWrapper = styled(Spinner)``;
+
+const Message = styled.div`
+    font-weight: 700;
+    margin-top: 10px;
+    opacity: 0.75;
 `;
 
 const Backdrop = styled.div`

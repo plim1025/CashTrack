@@ -11,6 +11,7 @@ import { loadEmail } from './redux/Actions';
 // COMPONENTS //
 import Header from './components/shared/Header';
 import createResources from './components/shared/Resources';
+import FallbackSpinner from './components/shared/FallbackSpinner';
 
 // TYPES //
 import { RootState, Transaction, Account, Category } from './types';
@@ -109,7 +110,7 @@ const App: React.FC<Props & RouteComponentProps> = props => {
             }}
         >
             <Header />
-            <Suspense fallback={<div>{refreshMessage || 'Loading...'}</div>}>
+            <Suspense fallback={<FallbackSpinner show message={refreshMessage} />}>
                 {subpage === 'home' ? (
                     <Home />
                 ) : subpage === 'transactions' ? (

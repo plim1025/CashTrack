@@ -5,7 +5,6 @@ import React, { useEffect, useReducer, useContext } from 'react';
 import styled from 'styled-components';
 import Chart from '../components/Trends/Chart';
 import Filters from '../components/Trends/Filters';
-import TrendInfo from '../components/Trends/TrendInfo';
 import Sidebar from '../components/Trends/Sidebar';
 import FallbackSpinner from '../components/shared/FallbackSpinner';
 import ViewModal from '../components/Trends/ViewModal';
@@ -174,7 +173,6 @@ const Trends: React.FC = () => {
                         })
                     }
                 />
-                <TrendInfo transactions={state.selectedTransactions} />
             </Subwrapper>
             <ViewModal
                 show={state.viewModal.show}
