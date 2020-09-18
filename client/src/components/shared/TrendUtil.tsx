@@ -38,10 +38,7 @@ export const parseSelectedTransactions = (
             }
         }
     });
-    if (trend === 'net worth') {
-        return dateFilteredTransactions;
-    }
-    if (trend === 'net earnings') {
+    if (trend === 'net earnings' || trend === 'net worth') {
         return dateFilteredTransactions
             .map(transaction => {
                 const transactionType = categories.find(
@@ -130,7 +127,7 @@ export const parseTransactionData = (
             });
         }
     }
-    if (trend === 'net earnings') {
+    if (trend === 'net earnings' || trend === 'net worth') {
         Array.from(newData.keys()).map(key => {
             newData.set(key, { transactions: [], expenses: 0, income: 0 });
         });
@@ -148,7 +145,7 @@ export const parseTransactionData = (
             curKey = transaction[subtrend];
         }
         if (curKey) {
-            if (trend === 'net earnings') {
+            if (trend === 'net earnings' || trend === 'net worth') {
                 const curData = newData.get(curKey);
                 const curExpenses = parseFloat(curData?.expenses) || 0;
                 const curIncome = parseFloat(curData?.income) || 0;
@@ -186,7 +183,18 @@ export const parseTransactionData = (
             income: newData.get(databin).income,
             transactions: newData.get(databin).transactions,
         }));
-        console.log(parsedData);
+        return parsedData;
+    }
+    if (trend === 'net worth') {
+        let curNetWorth = 0;
+        const parsedData = Array.from(newData.keys()).map(databin => {
+            const monthNetWorth = newData.get(databin).income + newData.get(databin).expenses;
+            curNetWorth += monthNetWorth;
+            return {
+                id: databin,
+                value: curNetWorth,
+            };
+        });
         return parsedData;
     }
     const parsedData = Array.from(newData.keys()).map(databin => ({

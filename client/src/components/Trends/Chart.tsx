@@ -57,11 +57,10 @@ const Chart: React.FC<Props> = props => {
                 : value.toString(),
     };
 
-    console.log(props.data);
     return (
         <>
             {props.data.length ? (
-                <Wrapper>
+                <Wrapper trend={props.trend}>
                     {props.chart === 'bar' ? (
                         <ResponsiveBar
                             data={props.data}
@@ -96,9 +95,11 @@ const Chart: React.FC<Props> = props => {
                                     </span>
                                 );
                             }}
-                            onClick={({ data }: any) =>
-                                props.openViewModal(data.id.toString(), data.transactions)
-                            }
+                            onClick={({ data }: any) => {
+                                // if (props.trend !== 'net worth') {
+                                props.openViewModal(data.id.toString(), data.transactions);
+                                // }
+                            }}
                         />
                     ) : null}
                     {props.chart === 'pie' ? (
@@ -115,7 +116,9 @@ const Chart: React.FC<Props> = props => {
                             radialLabelsLinkHorizontalLength={24}
                             radialLabelsSkipAngle={4}
                             onClick={({ id, transactions }: any) => {
-                                props.openViewModal(id.toString(), transactions);
+                                if (props.trend !== 'net worth') {
+                                    props.openViewModal(id.toString(), transactions);
+                                }
                             }}
                         />
                     ) : null}
@@ -128,7 +131,7 @@ const Chart: React.FC<Props> = props => {
 };
 
 // STYLES //
-const Wrapper = styled.div`
+const Wrapper = styled(({ trend, ...rest }) => <div {...rest} />)<{ trend: Trends }>`
     height: 100%;
     overflow: hidden;
     & text {
@@ -136,7 +139,7 @@ const Wrapper = styled.div`
     }
     & path,
     & rect {
-        cursor: pointer;
+        cursor: ${({ trend }) => (trend !== 'net worth' ? 'pointer' : 'auto')};
     }
     & svg > rect {
         cursor: auto;
