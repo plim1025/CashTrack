@@ -18,7 +18,6 @@ const wrapPromise = (promise: any, promiseName: string) => {
     return {
         read() {
             if (status === 'loading') {
-                console.log(promiseName);
                 throw suspender;
             } else if (status === 'error') {
                 throw result;

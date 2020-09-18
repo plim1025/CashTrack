@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 // REACT //
-import React, { useState } from 'react';
+import React from 'react';
 
 // COMPONENTS //
 import styled from 'styled-components';
@@ -8,47 +8,97 @@ import { ResponsiveBar } from '@nivo/bar';
 import { ResponsivePie } from '@nivo/pie';
 
 // TYPES //
-import { Charts, Data } from '../../types';
+import { Charts, Transaction, Trends, Subtrends } from '../../types';
 
 // UTILS //
 import { moneyFormat } from '../shared/TransactionUtil';
 
 interface Props {
     chart: Charts;
-    data: Data[];
-    openViewModal: (show: boolean) => void;
+    trend: Trends;
+    subtrend: Subtrends;
+    data: any;
+    openViewModal: (title: string, transactions: Transaction[]) => void;
 }
 
 const Chart: React.FC<Props> = props => {
-    const [mouseOver, setMouseOver] = useState(false);
+    const barChartBottomAxis = {
+        format: (value: any) => (props.subtrend === 'date' ? value : moneyFormat(value)),
+        tickValues: 5,
+        ...(props.subtrend === 'date' && {
+            renderTick: (tickInfo: any) => (
+                <g transform={`translate(${tickInfo.x},${tickInfo.y})`}>
+                    <line
+                        x1='0'
+                        y1='0'
+                        x2={tickInfo.lineX}
+                        y2={tickInfo.lineY}
+                        style={{ stroke: 'rgb(119, 119, 119)', strokeWidth: 1 }}
+                    />
+                    <text
+                        dominantBaseline={tickInfo.textBaseline}
+                        textAnchor='end'
+                        style={{ fontSize: 11, fill: 'rgb(51, 51, 51)' }}
+                        transform={`translate(-8,${tickInfo.textY}) rotate(270)`}
+                    >
+                        {tickInfo.value}
+                    </text>
+                </g>
+            ),
+        }),
+    };
 
+    const barChartLeftAxis = {
+        format: (value: any) =>
+            props.subtrend === 'date'
+                ? moneyFormat(value)
+                : value.toString().length > 13
+                ? `${value.toString().substring(0, 10)}...`
+                : value.toString(),
+    };
+
+    console.log(props.data);
     return (
         <>
             {props.data.length ? (
-                <Wrapper mouseOver={mouseOver}>
+                <Wrapper>
                     {props.chart === 'bar' ? (
                         <ResponsiveBar
                             data={props.data}
-                            layout='horizontal'
-                            colors={['#007bff']}
-                            markers={[{ axis: 'x', value: 0 }]}
+                            keys={
+                                props.trend === 'net earnings' ? ['income', 'expenses'] : ['value']
+                            }
+                            layout={props.subtrend === 'date' ? 'vertical' : 'horizontal'}
+                            colors={
+                                props.trend === 'net earnings'
+                                    ? ['#007bff', '#dc3545']
+                                    : ['#007bff']
+                            }
+                            markers={[{ axis: props.subtrend === 'date' ? 'y' : 'x', value: 0 }]}
                             enableLabel={false}
-                            margin={{ top: 50, right: 100, bottom: 50, left: 100 }}
-                            axisBottom={{ format: value => moneyFormat(value), tickValues: 5 }}
-                            axisLeft={{
-                                format: value =>
-                                    value.toString().length > 13
-                                        ? `${value.toString().substring(0, 10)}...`
-                                        : value.toString(),
+                            margin={{ top: 50, right: 100, bottom: 100, left: 100 }}
+                            axisBottom={barChartBottomAxis}
+                            axisLeft={barChartLeftAxis}
+                            tooltip={(tooltip: any) => {
+                                if (props.trend === 'net earnings') {
+                                    return (
+                                        <span>
+                                            {tooltip.id.charAt(0).toUpperCase()}
+                                            {tooltip.id.slice(1)} - {tooltip.indexValue} :{' '}
+                                            <strong>{moneyFormat(tooltip.value)}</strong>
+                                        </span>
+                                    );
+                                }
+                                return (
+                                    <span>
+                                        {tooltip.data.id}:{' '}
+                                        <strong>{moneyFormat(tooltip.value)}</strong>
+                                    </span>
+                                );
                             }}
-                            tooltip={tooltip => (
-                                <span>
-                                    {tooltip.data.id}: <strong>{moneyFormat(tooltip.value)}</strong>
-                                </span>
-                            )}
-                            onClick={() => props.openViewModal(true)}
-                            onMouseEnter={() => setMouseOver(true)}
-                            onMouseLeave={() => setMouseOver(false)}
+                            onClick={({ data }: any) =>
+                                props.openViewModal(data.id.toString(), data.transactions)
+                            }
                         />
                     ) : null}
                     {props.chart === 'pie' ? (
@@ -64,9 +114,9 @@ const Chart: React.FC<Props> = props => {
                             borderWidth={1}
                             radialLabelsLinkHorizontalLength={24}
                             radialLabelsSkipAngle={4}
-                            onClick={() => props.openViewModal(true)}
-                            onMouseEnter={() => setMouseOver(true)}
-                            onMouseLeave={() => setMouseOver(false)}
+                            onClick={({ id, transactions }: any) => {
+                                props.openViewModal(id.toString(), transactions);
+                            }}
                         />
                     ) : null}
                 </Wrapper>
@@ -78,15 +128,18 @@ const Chart: React.FC<Props> = props => {
 };
 
 // STYLES //
-const Wrapper = styled(({ mouseOver, ...rest }) => <div {...rest} />)<{ mouseOver: boolean }>`
+const Wrapper = styled.div`
     height: 100%;
     overflow: hidden;
     & text {
         font-family: 'Open Sans' !important;
     }
     & path,
-    & g {
-        cursor: ${({ mouseOver }) => (mouseOver ? 'pointer' : 'auto')};
+    & rect {
+        cursor: pointer;
+    }
+    & svg > rect {
+        cursor: auto;
     }
 `;
 

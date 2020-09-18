@@ -49,7 +49,9 @@ export type Charts = 'bar' | 'pie';
 
 export interface Data {
     id: string;
-    value: number;
+    value?: number;
+    expenses?: number;
+    income?: number;
     [key: string]: string | number;
 }
 

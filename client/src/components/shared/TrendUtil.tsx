@@ -1,5 +1,4 @@
-import { Transaction, Category, Trends, Subtrends, Dates, Data } from '../../types';
-import { sortDate } from './TransactionUtil';
+import { Transaction, Account, Category, Trends, Subtrends, Dates, Data } from '../../types';
 
 export const parseSelectedTransactions = (
     transactions: Transaction[],
@@ -39,8 +38,18 @@ export const parseSelectedTransactions = (
             }
         }
     });
-    if (trend === 'net earnings' || trend === 'net worth') {
+    if (trend === 'net worth') {
         return dateFilteredTransactions;
+    }
+    if (trend === 'net earnings') {
+        return dateFilteredTransactions
+            .map(transaction => {
+                const transactionType = categories.find(
+                    category => category.name === transaction.category
+                ).type;
+                return { ...transaction, type: transactionType };
+            })
+            .filter(transaction => transaction.type !== 'other');
     }
     return dateFilteredTransactions
         .filter(
@@ -52,6 +61,8 @@ export const parseSelectedTransactions = (
 
 export const parseTransactionData = (
     transactions: Transaction[],
+    accounts: Account[],
+    trend: Trends,
     subtrend: Subtrends,
     date: Dates
 ): Data[] => {
@@ -71,7 +82,10 @@ export const parseTransactionData = (
         let firstTransactionYear = firstTransactionDate.getFullYear();
         if (date === 'all time') {
             while (todayMonth !== firstTransactionMonth || todayYear !== firstTransactionYear) {
-                newData.set(`${monthArr[firstTransactionMonth]} ${firstTransactionYear}`, 0);
+                newData.set(`${monthArr[firstTransactionMonth]} ${firstTransactionYear}`, {
+                    transactions: [],
+                    amount: 0,
+                });
                 if (firstTransactionMonth === 11) {
                     firstTransactionMonth = 0;
                     firstTransactionYear++;
@@ -86,7 +100,7 @@ export const parseTransactionData = (
             let curMonth = todayDate.getMonth();
             let curYear = todayDate.getFullYear();
             [...Array(12)].forEach(() => {
-                newData.set(`${monthArr[curMonth]} ${curYear}`, 0);
+                newData.set(`${monthArr[curMonth]} ${curYear}`, { transactions: [], amount: 0 });
                 if (curMonth === 11) {
                     curMonth = 0;
                     curYear++;
@@ -96,79 +110,89 @@ export const parseTransactionData = (
             });
         } else if (date === 'month') {
             todayDate.setDate(todayDate.getDate() - 29);
-            [...Array(30)].forEach((nothing, index) => {
+            [...Array(30)].forEach(() => {
                 const curDay = todayDate.getDate();
-                if (index === 0) {
-                    newData.set(`${monthArr[todayDate.getMonth()]} ${curDay}`, 0);
-                } else {
-                    newData.set(curDay, 0);
-                }
+                newData.set(`${monthArr[todayDate.getMonth()]} ${curDay}`, {
+                    transactions: [],
+                    amount: 0,
+                });
                 todayDate.setDate(todayDate.getDate() + 1);
             });
         } else if (date === 'week') {
             todayDate.setDate(todayDate.getDate() - 6);
-            [...Array(7)].forEach((nothing, index) => {
+            [...Array(7)].forEach(() => {
                 const curDay = todayDate.getDate();
-                if (index === 0) {
-                    newData.set(`${monthArr[todayDate.getMonth()]} ${curDay}`, 0);
-                } else {
-                    newData.set(curDay, 0);
-                }
+                newData.set(`${monthArr[todayDate.getMonth()]} ${curDay}`, {
+                    transactions: [],
+                    amount: 0,
+                });
                 todayDate.setDate(todayDate.getDate() + 1);
             });
         }
     }
+    if (trend === 'net earnings') {
+        Array.from(newData.keys()).map(key => {
+            newData.set(key, { transactions: [], expenses: 0, income: 0 });
+        });
+    }
     transactions.forEach((transaction: Transaction) => {
+        const transactionDate = new Date(transaction.date);
+        let curKey;
         if (subtrend === 'date') {
-            const transactionDate = new Date(transaction.date);
             if (date === 'all time' || date === 'year') {
-                const curAmount =
-                    parseFloat(
-                        newData.get(
-                            `${
-                                monthArr[transactionDate.getMonth()]
-                            } ${transactionDate.getFullYear()}`
-                        )
-                    ) || 0;
-                newData.set(
-                    `${monthArr[transactionDate.getMonth()]} ${transactionDate.getFullYear()}`,
-                    (Math.round(curAmount + transaction.amount * -1) * 100) / 100
-                );
+                curKey = `${monthArr[transactionDate.getMonth()]} ${transactionDate.getFullYear()}`;
             } else {
-                const hasKey = newData.has(transactionDate.getDate());
-                let curAmount;
-                if (hasKey) {
-                    curAmount = parseFloat(newData.get(transactionDate.getDate())) || 0;
-                    newData.set(
-                        transactionDate.getDate(),
-                        Math.round((curAmount + transaction.amount * -1) * 100) / 100
-                    );
-                } else {
-                    curAmount = parseFloat(newData.get(newData.keys().next().value));
-                    newData.set(
-                        newData.keys().next().value,
-                        (Math.round(curAmount + transaction.amount * -1) * 100) / 100
-                    );
-                }
+                curKey = `${monthArr[transactionDate.getMonth()]} ${transactionDate.getDate()}`;
             }
         } else {
-            if (newData.has(transaction[subtrend]) && transaction[subtrend]) {
-                const curAmount = newData.get(transaction[subtrend]);
-                newData.set(
-                    transaction[subtrend],
-                    (Math.round(curAmount + transaction.amount * -1) * 100) / 100
-                );
-            } else if (transaction[subtrend]) {
-                newData.set(
-                    transaction[subtrend],
-                    (Math.round(transaction.amount * -1) * 100) / 100
-                );
+            curKey = transaction[subtrend];
+        }
+        if (curKey) {
+            if (trend === 'net earnings') {
+                const curData = newData.get(curKey);
+                const curExpenses = parseFloat(curData?.expenses) || 0;
+                const curIncome = parseFloat(curData?.income) || 0;
+                const curTransactions = curData?.transactions || [];
+                curTransactions.push(transaction);
+                if (transaction.type === 'expenses') {
+                    const newExpenses = (Math.round(curExpenses + transaction.amount) * 100) / 100;
+                    newData.set(curKey, {
+                        transactions: curTransactions,
+                        expenses: newExpenses,
+                        income: curIncome,
+                    });
+                } else if (transaction.type === 'income') {
+                    const newIncome = (Math.round(curIncome + transaction.amount * -1) * 100) / 100;
+                    newData.set(curKey, {
+                        transactions: curTransactions,
+                        expenses: curExpenses,
+                        income: newIncome,
+                    });
+                }
+            } else {
+                const curData = newData.get(curKey);
+                const curAmount = parseFloat(curData?.amount) || 0;
+                const curTransactions = curData?.transactions || [];
+                const newAmount = (Math.round(curAmount + transaction.amount * -1) * 100) / 100;
+                curTransactions.push(transaction);
+                newData.set(curKey, { transactions: curTransactions, amount: newAmount });
             }
         }
     });
+    if (trend === 'net earnings') {
+        const parsedData = Array.from(newData.keys()).map(databin => ({
+            id: databin,
+            expenses: newData.get(databin).expenses,
+            income: newData.get(databin).income,
+            transactions: newData.get(databin).transactions,
+        }));
+        console.log(parsedData);
+        return parsedData;
+    }
     const parsedData = Array.from(newData.keys()).map(databin => ({
         id: databin,
-        value: newData.get(databin),
+        value: newData.get(databin).amount,
+        transactions: newData.get(databin).transactions,
     }));
     if ((subtrend === 'category' || subtrend === 'merchant') && parsedData.length > 10) {
         const sortedData = parsedData.sort((a, b) => b.value - a.value);

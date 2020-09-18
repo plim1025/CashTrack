@@ -28,11 +28,12 @@ type Actions =
     | { type: 'SET_ACCOUNT_IDS'; accountIDs: string[] }
     | { type: 'SET_SELECTED_TRANSACTIONS'; selectedTransactions: Transaction[] }
     | { type: 'SET_DATA'; data: Data[] }
-    | { type: 'SHOW_VIEW_MODAL' }
+    | { type: 'SHOW_VIEW_MODAL'; title: string; transactions: Transaction[] }
     | { type: 'HIDE_VIEW_MODAL' };
 
 interface ReducerState {
     transactions: Transaction[];
+    accounts: Account[];
     categories: Category[];
     loading: boolean;
     trend: Trends;
@@ -42,7 +43,11 @@ interface ReducerState {
     accountIDs: string[];
     selectedTransactions: Transaction[];
     data: Data[];
-    viewModal: boolean;
+    viewModal: {
+        show: boolean;
+        title: string;
+        transactions: Transaction[];
+    };
 }
 
 const reducer = (state: ReducerState, action: Actions) => {
@@ -64,9 +69,12 @@ const reducer = (state: ReducerState, action: Actions) => {
         case 'SET_DATA':
             return { ...state, data: action.data };
         case 'SHOW_VIEW_MODAL':
-            return { ...state, viewModal: true };
+            return {
+                ...state,
+                viewModal: { show: true, title: action.title, transactions: action.transactions },
+            };
         case 'HIDE_VIEW_MODAL':
-            return { ...state, viewModal: false };
+            return { ...state, viewModal: { show: false, title: '', transactions: [] } };
         default:
             return state;
     }
@@ -76,6 +84,7 @@ const Trends: React.FC = () => {
     const { transactions, accounts, categories } = useContext(ResourcesContext);
     const [state, dispatch] = useReducer(reducer, {
         transactions: transactions.read(),
+        accounts: accounts.read(),
         categories: categories.read(),
         loading: false,
         trend: 'expenses',
@@ -85,7 +94,11 @@ const Trends: React.FC = () => {
         accountIDs: [],
         selectedTransactions: [],
         data: [],
-        viewModal: false,
+        viewModal: {
+            show: false,
+            title: '',
+            transactions: [],
+        },
     });
 
     useEffect(() => {
@@ -116,6 +129,8 @@ const Trends: React.FC = () => {
     useEffect(() => {
         const newData = parseTransactionData(
             state.selectedTransactions,
+            state.accounts,
+            state.trend,
             state.subtrend,
             state.date
         );
@@ -147,13 +162,26 @@ const Trends: React.FC = () => {
                     selectedAccountIDs={state.accountIDs}
                 />
                 <Chart
-                    chart={state.chart}
                     data={state.data}
-                    openViewModal={() => dispatch({ type: 'SHOW_VIEW_MODAL' })}
+                    chart={state.chart}
+                    trend={state.trend}
+                    subtrend={state.subtrend}
+                    openViewModal={(title: string, newTransactions: Transaction[]) =>
+                        dispatch({
+                            type: 'SHOW_VIEW_MODAL',
+                            title: title,
+                            transactions: newTransactions,
+                        })
+                    }
                 />
                 <TrendInfo transactions={state.selectedTransactions} />
             </Subwrapper>
-            <ViewModal show={state.viewModal} close={() => dispatch({ type: 'HIDE_VIEW_MODAL' })} />
+            <ViewModal
+                show={state.viewModal.show}
+                title={state.viewModal.title}
+                transactions={state.viewModal.transactions}
+                close={() => dispatch({ type: 'HIDE_VIEW_MODAL' })}
+            />
             <FallbackSpinner backdrop show={state.loading} />
         </Wrapper>
     );

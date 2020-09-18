@@ -14,7 +14,7 @@ import Buttons from '../components/Transactions/Buttons';
 import ErrorMessage from '../components/shared/ErrorMessage';
 import FallbackSpinner from '../components/shared/FallbackSpinner';
 import { Button } from 'react-bootstrap';
-import { v1 as uuidv4 } from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 
 // CONTEXT //
 import { ResourcesContext } from '../App';
@@ -183,7 +183,7 @@ const Transactions: React.FC<RouteComponentProps> = props => {
     }, [transactions, accounts, categories]);
 
     const handleCreateTransaction = async (newTransaction: Transaction) => {
-        const newID = uuidv4().substr(0, 12);
+        const newID = uuidv1().substr(0, 12);
         dispatch({ type: 'SET_LOADING', loading: true });
         await createTransaction({ ...newTransaction, _id: newID });
         const newTransactions = [

@@ -2,24 +2,79 @@
 import React from 'react';
 
 // COMPONENTS //
+import styled from 'styled-components';
 import { Modal, Table } from 'react-bootstrap';
+
+// TYPES //
+import { Transaction } from '../../types';
+
+// UTIL //
+import { moneyFormat } from '../shared/TransactionUtil';
 
 interface Props {
     show: boolean;
     close: () => void;
+    title: string;
+    transactions: Transaction[];
 }
 
 const ViewModal: React.FC<Props> = props => {
     return (
-        <Modal centered show={props.show} onHide={() => props.close()}>
+        <ModalWrapper centered show={props.show} onHide={() => props.close()}>
             <Modal.Header closeButton>
-                <h4>Transactions</h4>
+                <h4 className='w-100'>{props.title}</h4>
             </Modal.Header>
             <Modal.Body>
-                <Table bordered />
+                <TableWrapper bordered>
+                    <thead>
+                        <tr>
+                            <th style={{ width: 100 }}>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th style={{ width: 136 }}>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {props.transactions.map(transaction => (
+                            <tr key={transaction._id}>
+                                <td>{transaction.date}</td>
+                                <td>{transaction.description}</td>
+                                <td>{transaction.category}</td>
+                                <td>{moneyFormat(transaction.amount)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </TableWrapper>
             </Modal.Body>
-        </Modal>
+        </ModalWrapper>
     );
 };
+
+// STYLES //
+const ModalWrapper = styled(Modal)`
+    .modal-dialog {
+        max-width: none;
+        width: 600px;
+    }
+    .modal-content {
+        display: flex;
+        max-height: 700px;
+        padding-bottom: 10px;
+    }
+    .modal-body {
+        overflow-y: auto;
+    }
+`;
+
+const TableWrapper = styled(Table)`
+    font-size: 14px;
+    & td,
+    th {
+        overflow: hidden;
+        padding: 0.25rem 0.5rem !important;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+`;
 
 export default ViewModal;
