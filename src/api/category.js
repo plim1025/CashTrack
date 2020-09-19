@@ -67,11 +67,11 @@ router.put('/:id', async (req, res, next) => {
     }
 });
 
-router.delete('/:name', async (req, res, next) => {
+router.delete('/:id', async (req, res, next) => {
     try {
         if (req.user) {
-            const { name } = req.params;
-            const query = { userID: req.user._id, name: name };
+            const { id } = req.params;
+            const query = { userID: req.user._id, _id: id };
             await Category.deleteOne(query);
             res.sendStatus(200);
         } else {
