@@ -1,6 +1,6 @@
 import { Transaction, Account, Category, GroupedDropdownOption } from '../../types';
 
-export const createTransaction = async (transaction: Transaction): Promise<void> => {
+export const createTransaction = async (transaction: Transaction): Promise<string> => {
     try {
         const transactionInfo = JSON.stringify({
             _id: transaction._id,
@@ -20,7 +20,8 @@ export const createTransaction = async (transaction: Transaction): Promise<void>
         if (!response.ok) {
             throw Error('Bad response from server');
         }
-        return;
+        const { id } = await response.json();
+        return id;
     } catch (error) {
         throw Error(`Error creating transaction: ${error}`);
     }
@@ -28,14 +29,13 @@ export const createTransaction = async (transaction: Transaction): Promise<void>
 
 export const deleteTransactions = async (transactionIDs: string[]): Promise<void> => {
     try {
-        const transactionInfo = JSON.stringify(transactionIDs);
         const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: transactionInfo,
+            body: JSON.stringify({ transactionIDs: transactionIDs }),
         });
         if (!response.ok) {
             throw Error('Bad response from server');
@@ -47,22 +47,24 @@ export const deleteTransactions = async (transactionIDs: string[]): Promise<void
 
 export const updateTransaction = async (id: string, transaction: Transaction): Promise<void> => {
     try {
-        const transactionInfo = JSON.stringify({
-            description: transaction.description,
-            amount: transaction.amount,
-            category: transaction.category,
-            date: transaction.date,
-        });
-        const response = await fetch(`${process.env.BACKEND_URI}/api/transaction/${id}`, {
+        const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: transactionInfo,
+            body: JSON.stringify({
+                transaction: {
+                    description: transaction.description,
+                    amount: transaction.amount,
+                    category: transaction.category,
+                    date: transaction.date,
+                },
+                transactionIDs: [id],
+            }),
         });
         if (!response.ok) {
-            throw Error(`Bad response from server`);
+            throw Error('Bad response from server');
         }
     } catch (error) {
         throw Error(`Error updating transaction: ${error}`);
@@ -74,68 +76,38 @@ export const updateMultipleTransactions = async (
     transaction: Transaction
 ): Promise<void> => {
     try {
-        const transactionInfo = JSON.stringify({
-            transaction: {
-                description: transaction.description,
-                amount: transaction.amount,
-                category: transaction.category,
-                date: transaction.date,
-            },
-            transactionIDs: transactionIDs,
-        });
         const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: transactionInfo,
+            body: JSON.stringify({
+                transaction: {
+                    description: transaction.description,
+                    amount: transaction.amount,
+                    category: transaction.category,
+                    date: transaction.date,
+                },
+                transactionIDs: transactionIDs,
+            }),
         });
         if (!response.ok) {
-            throw Error(`Bad response from server`);
+            throw Error('Bad response from server');
         }
     } catch (error) {
         throw Error(`Error updating multiple transactions: ${error}`);
     }
 };
 
-export const addAndUpdateCategory = async (
-    name: string,
-    type: string,
-    oldName: string,
-    transactionIDs: string[]
-): Promise<void> => {
+export const createCategory = async (name: string, type: string): Promise<string> => {
     try {
-        if (oldName && transactionIDs) {
-            Promise.all([
-                fetch(`${process.env.BACKEND_URI}/api/category/${oldName}`, {
-                    method: 'DELETE',
-                    credentials: 'include',
-                }),
-                fetch(`${process.env.BACKEND_URI}/api/transaction`, {
-                    method: 'PUT',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        transactionIDs: transactionIDs,
-                        category: oldName,
-                        newCategory: name,
-                    }),
-                }),
-            ]).then(([deleteResponse, editResponse]) => {
-                if (!deleteResponse.ok || !editResponse.ok) {
-                    throw Error('Bad response from server');
-                }
-            });
-        }
         const response = await fetch(`${process.env.BACKEND_URI}/api/category`, {
             method: 'POST',
-            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify({
                 name: name,
                 type: type,
@@ -144,15 +116,57 @@ export const addAndUpdateCategory = async (
         if (!response.ok) {
             throw Error('Bad response from server');
         }
+        const { id } = await response.json();
+        return id;
     } catch (error) {
-        throw Error(`Error ${oldName ? 'editing' : 'adding'} transaction: ${error}`);
+        throw Error(`Error adding transaction: ${error}`);
     }
 };
 
-export const deleteCategory = async (name: string, transactionIDs: string[]): Promise<void> => {
+export const updateCategory = async (
+    id: string,
+    name: string,
+    type: string,
+    transactionIDs: string[]
+): Promise<void> => {
+    try {
+        Promise.all([
+            fetch(`${process.env.BACKEND_URI}/api/category/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    name: name,
+                    type: type,
+                }),
+            }),
+            fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    transaction: { category: name },
+                    transactionIDs: transactionIDs,
+                }),
+            }),
+        ]).then(([categoryResponse, transactionResponse]) => {
+            if (!categoryResponse.ok || !transactionResponse.ok) {
+                throw Error('Bad response from server');
+            }
+        });
+    } catch (error) {
+        throw Error(`Error editing transaction: ${error}`);
+    }
+};
+
+export const deleteCategory = async (id: string, transactionIDs: string[]): Promise<void> => {
     try {
         await Promise.all([
-            fetch(`${process.env.BACKEND_URI}/api/category/${name}`, {
+            fetch(`${process.env.BACKEND_URI}/api/category/${id}`, {
                 method: 'DELETE',
                 credentials: 'include',
             }),
@@ -164,7 +178,6 @@ export const deleteCategory = async (name: string, transactionIDs: string[]): Pr
                 },
                 body: JSON.stringify({
                     transactionIDs: transactionIDs,
-                    category: name,
                 }),
             }),
         ]).then(([deleteResponse, editResponse]) => {

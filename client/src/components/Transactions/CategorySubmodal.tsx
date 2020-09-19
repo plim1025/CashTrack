@@ -11,7 +11,7 @@ import Dropdown from '../shared/Dropdown';
 import { Category, Transaction } from '../../types';
 
 // UTIL //
-import { addAndUpdateCategory } from '../shared/TransactionUtil';
+import { createCategory, updateCategory } from '../shared/TransactionUtil';
 
 interface Props {
     setLoading: (loading: boolean) => void;
@@ -55,17 +55,15 @@ const CategoryModal: React.FC<Props> = props => {
             setError({ show: true, message: 'There is already a category with that name' });
         } else {
             props.setLoading(true);
-            await addAndUpdateCategory(
-                category.name,
-                category.type,
-                props.mode === 'edit' ? props.category.name : null,
-                props.mode === 'edit'
-                    ? props.transactions
-                          .filter(transaction => transaction.category === props.category.name)
-                          .map(transaction => transaction._id)
-                    : null
-            );
             if (props.mode === 'edit') {
+                await updateCategory(
+                    props.category._id,
+                    category.name,
+                    category.type,
+                    props.transactions
+                        .filter(transaction => transaction.category === props.category.name)
+                        .map(transaction => transaction._id)
+                );
                 props.setTransactions([
                     ...props.transactions
                         .filter(transaction => transaction.category === props.category.name)
@@ -81,7 +79,8 @@ const CategoryModal: React.FC<Props> = props => {
                     category,
                 ]);
             } else {
-                props.setCategories([...props.categories, category]);
+                const id = await createCategory(category.name, category.type);
+                props.setCategories([...props.categories, { ...category, _id: id }]);
             }
             props.setLoading(false);
             props.close();

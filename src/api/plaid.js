@@ -2,6 +2,7 @@ const { Router } = require('express');
 const plaid = require('plaid');
 const User = require('../models/User');
 const PlaidAccount = require('../models/PlaidAccount');
+const Transaction = require('../models/Transaction');
 const { getPresentDayFormatted, getTransactionCategory, getTransactionType } = require('./utils');
 require('dotenv').config();
 
@@ -42,14 +43,11 @@ router.post('/create_link_token', async (req, res, next) => {
 router.post('/set_account', async (req, res, next) => {
     try {
         if (req.user) {
-            const { publicToken, batchID, institution, accounts: newAccounts } = req.body;
+            const { publicToken, batchID, institution, accounts } = req.body;
             const { access_token, item_id } = await plaidClient.exchangePublicToken(publicToken);
-            let newAccountIDs = newAccounts.map(account => account.id);
-
-            const { accountIDs: oldAccountIDs } = await User.findById(req.user._id);
-            const plaidAccountQuery = { id: { $in: oldAccountIDs } };
+            let newAccountIDs = accounts.map(account => account.id);
+            const plaidAccountQuery = { userID: req.user._id };
             const oldAccounts = await PlaidAccount.find(plaidAccountQuery);
-
             let { accounts: balances } = await plaidClient.getBalance(access_token, {
                 account_ids: newAccountIDs,
             });
@@ -64,7 +62,7 @@ router.post('/set_account', async (req, res, next) => {
 
             let duplicateAccount = false;
             let oldBatchID;
-            newAccounts.forEach(newAccount => {
+            accounts.forEach(newAccount => {
                 oldAccounts.forEach(oldAccount => {
                     if (
                         newAccount.name === oldAccount.name &&
@@ -81,13 +79,14 @@ router.post('/set_account', async (req, res, next) => {
             });
 
             const plaidAccounts = [];
-            newAccounts.forEach(account => {
+            accounts.forEach(account => {
                 if (newAccountIDs.includes(account.id)) {
                     const accountBalance = balances.find(
                         balance => balance.accountID === account.id
                     );
                     const newPlaidAccount = new PlaidAccount({
                         id: account.id,
+                        userID: req.user._id,
                         batchID: duplicateAccount ? oldBatchID : batchID,
                         name: account.name,
                         institution: institution,
@@ -103,12 +102,7 @@ router.post('/set_account', async (req, res, next) => {
             await PlaidAccount.insertMany(plaidAccounts);
 
             const query = { _id: req.user._id };
-            const update = {
-                $set: { accessToken: access_token, itemID: item_id },
-                $push: {
-                    accountIDs: { $each: newAccountIDs },
-                },
-            };
+            const update = { $set: { accessToken: access_token, itemID: item_id } };
             await User.updateOne(query, update, { runValidators: true });
             res.sendStatus(200);
         } else {
@@ -122,24 +116,17 @@ router.post('/set_account', async (req, res, next) => {
     }
 });
 
-router.post('/logout', async (req, res, next) => {
+router.post('/logout/:batchID', async (req, res, next) => {
     try {
         if (req.user) {
-            const { batchID } = req.body;
-
+            const { batchID } = req.params;
             const plaidAccountQuery = { batchID: batchID };
-
             const deletedPlaidAccounts = await PlaidAccount.find(plaidAccountQuery);
-            await PlaidAccount.deleteMany(plaidAccountQuery);
             const deletedPlaidAccountIDs = deletedPlaidAccounts.map(account => account.id);
+            await PlaidAccount.deleteMany(plaidAccountQuery);
 
-            const userUpdate = {
-                $pull: {
-                    transactions: { accountID: { $in: deletedPlaidAccountIDs } },
-                    accountIDs: { $in: deletedPlaidAccountIDs },
-                },
-            };
-            await User.updateMany({}, userUpdate, { runValidators: true });
+            const transactionQuery = { accountID: { $in: deletedPlaidAccountIDs } };
+            await Transaction.deleteMany(transactionQuery);
             res.sendStatus(200);
         } else {
             throw Error('User not logged in.');
@@ -159,33 +146,34 @@ router.post('/refresh', async (req, res, next) => {
             throw error;
         }
         if (webhook_code === 'TRANSACTIONS_REMOVED') {
-            const update = {
-                $pull: { transactions: { transactionID: { $in: removed_transactions } } },
-            };
-            await User.updateMany({}, update, { runValidators: true });
+            const query = { transactionID: { $in: removed_transactions } };
+            await Transaction.deleteMany(query);
         } else if (
             (webhook_code === 'INITIAL_UPDATE' ||
                 webhook_code === 'HISTORICAL_UPDATE' ||
                 webhook_code === 'DEFAULT_UPDATE') &&
             new_transactions > 0
         ) {
-            const query = { itemID: item_id };
-            const { accessToken, transactions, removedTransactionIDs } = await User.findOne(query);
-            const presentDay = getPresentDayFormatted();
-            const oldTransactionIDs = transactions.map(transaction => transaction.transactionID);
+            const userQuery = { itemID: item_id };
+            const { accessToken, removedTransactionIDs, _id } = await User.findOne(userQuery);
+            const transactionQuery = { userID: _id };
+            const oldTransactions = await Transaction.find(transactionQuery);
+            const oldTransactionIDs = oldTransactions.map(transaction => transaction.transactionID);
             const newTransactions = await plaidClient.getAllTransactions(
                 accessToken,
                 '2000-01-01',
-                presentDay
+                getPresentDayFormatted()
             );
             const parsedTransactions = newTransactions.transactions
                 .filter(
                     transaction =>
                         oldTransactionIDs.indexOf(transaction.transaction_id) === -1 &&
+                        removedTransactionIDs.indexOf(transaction.transactionID) === -1 &&
                         !transaction.pending
                 )
                 .map(transaction => {
-                    return {
+                    return new Transaction({
+                        userID: _id,
                         transactionID: transaction.transaction_id,
                         accountID: transaction.account_id,
                         categoryID: transaction.category_id,
@@ -198,13 +186,9 @@ router.post('/refresh', async (req, res, next) => {
                         merchant: transaction.merchant_name,
                         type: getTransactionType(transaction.category_id, transaction.amount),
                         date: transaction.date,
-                    };
-                })
-                .filter(
-                    transaction => removedTransactionIDs.indexOf(transaction.transactionID) === -1
-                );
-            const update = { $push: { transactions: { $each: parsedTransactions } } };
-            await User.updateOne(query, update, { runValidators: true });
+                    });
+                });
+            await Transaction.insertMany(parsedTransactions);
         }
         res.sendStatus(200);
     } catch (error) {

@@ -3,11 +3,12 @@ import rootReducer from './redux/Reducers';
 // import { ThunkAction } from 'redux-thunk';
 
 export interface Transaction {
+    _id?: string;
+    userID?: string;
     date: Date | string;
     description: string;
     category: string;
     amount: number;
-    _id?: string;
     accountID?: string;
     transactionID?: string;
     categoryID?: string;
@@ -18,6 +19,7 @@ export interface Transaction {
 
 export interface Account {
     id: string;
+    userID?: string;
     name: string;
     institution: string;
     type: string;
@@ -29,6 +31,8 @@ export interface Account {
 }
 
 export interface Category {
+    _id?: string;
+    userID?: string;
     name: string;
     type: 'expenses' | 'income' | 'other';
 }

@@ -35,18 +35,16 @@ const parseCategories = (
                         style={{ cursor: 'pointer' }}
                     >
                         <CellText>{category.name}</CellText>
-                        <CellIcon>
-                            <svg viewBox='0 0 512 512'>
-                                <polygon points='51.2,353.28 0,512 158.72,460.8' />
-                                <rect
-                                    x='89.73'
-                                    y='169.097'
-                                    transform='matrix(0.7071 -0.7071 0.7071 0.7071 -95.8575 260.3719)'
-                                    width='353.277'
-                                    height='153.599'
-                                />
-                                <path d='M504.32,79.36L432.64,7.68c-10.24-10.24-25.6-10.24-35.84,0l-23.04,23.04l107.52,107.52l23.04-23.04 C514.56,104.96,514.56,89.6,504.32,79.36z' />
-                            </svg>
+                        <CellIcon viewBox='0 0 512 512'>
+                            <polygon points='51.2,353.28 0,512 158.72,460.8' />
+                            <rect
+                                x='89.73'
+                                y='169.097'
+                                transform='matrix(0.7071 -0.7071 0.7071 0.7071 -95.8575 260.3719)'
+                                width='353.277'
+                                height='153.599'
+                            />
+                            <path d='M504.32,79.36L432.64,7.68c-10.24-10.24-25.6-10.24-35.84,0l-23.04,23.04l107.52,107.52l23.04-23.04 C514.56,104.96,514.56,89.6,504.32,79.36z' />
                         </CellIcon>
                     </Cell>
                 );
@@ -144,8 +142,8 @@ const Cell = styled.div`
     height: 30px;
     min-height: 30px;
     padding: 0.25rem 0;
-    & :hover svg {
-        fill: '#000';
+    &:hover svg {
+        fill: #000;
     }
 `;
 
@@ -158,10 +156,10 @@ const CellText = styled.div`
     width: calc(100% - 20px);
 `;
 
-const CellIcon = styled.div`
+const CellIcon = styled.svg`
     fill: #fff;
-    height: 12;
-    width: 12;
+    height: 12px;
+    width: 12px;
 `;
 
 const ButtonWrapper = styled(Button)`

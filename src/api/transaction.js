@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const mongoose = require('mongoose');
+const Transaction = require('../models/Transaction');
 const User = require('../models/User');
 
 const router = Router();
@@ -7,8 +7,9 @@ const router = Router();
 router.get('/', async (req, res, next) => {
     try {
         if (req.user) {
-            const user = await User.findById(req.user._id);
-            res.json(user.transactions);
+            const query = { userID: req.user._id };
+            const transactions = await Transaction.find(query);
+            res.json(transactions);
         } else {
             throw Error('User not logged in.');
         }
@@ -20,51 +21,16 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
     try {
         if (req.user) {
-            const { description, amount, category, date, _id } = req.body;
-            const query = { _id: req.user._id };
-            const mongooseID = mongoose.Types.ObjectId(_id);
-            const update = {
-                $push: {
-                    transactions: {
-                        _id: mongooseID,
-                        description: description,
-                        amount: amount * -1,
-                        category: category,
-                        date: date,
-                    },
-                },
-            };
-            await User.updateOne(query, update, { runValidators: true });
-            res.sendStatus(200);
-        } else {
-            throw Error('User not logged in.');
-        }
-    } catch (error) {
-        if (error.name === 'ValidationError') {
-            res.status(422);
-        }
-        next(error);
-    }
-});
-
-router.put('/:id', async (req, res, next) => {
-    try {
-        if (req.user) {
-            const { id } = req.params;
             const { description, amount, category, date } = req.body;
-            const newDate = new Date(date);
-            newDate.setDate(newDate.getDate() - 1);
-            const query = { _id: req.user._id, 'transactions._id': id };
-            const update = {
-                $set: {
-                    'transactions.$.description': description,
-                    'transactions.$.amount': amount * -1,
-                    'transactions.$.category': category,
-                    'transactions.$.date': newDate,
-                },
-            };
-            await User.updateOne(query, update, { runValidators: true });
-            res.sendStatus(200);
+            const newCategory = new Transaction({
+                userID: req.user._id,
+                description: description,
+                amount: amount * -1,
+                category: category,
+                date: date,
+            });
+            await newCategory.save();
+            res.json({ id: newCategory._id });
         } else {
             throw Error('User not logged in.');
         }
@@ -80,39 +46,29 @@ router.put('/', async (req, res, next) => {
     try {
         if (req.user) {
             const { transactionIDs } = req.body;
-            let query;
             let update;
-            if (req.body.transaction) {
+            if (!req.body.transaction) {
+                update = { category: 'Uncategorized' };
+            } else if (
+                req.body.transaction.description &&
+                req.body.transaction.amount &&
+                req.body.transaction.category &&
+                req.body.transaction.date
+            ) {
                 const { description, amount, category, date } = req.body.transaction;
-                query = { _id: req.user._id };
+                const newDate = new Date(date);
+                newDate.setDate(newDate.getDate() - 1);
                 update = {
-                    $set: {
-                        'transactions.$[element].description': description,
-                        'transactions.$[element].amount': amount * -1,
-                        'transactions.$[element].category': category,
-                        'transactions.$[element].date': date,
-                    },
-                };
-            } else if (req.body.category && req.body.newCategory) {
-                query = { _id: req.user._id, 'transactions.category': req.body.category };
-                update = {
-                    $set: {
-                        'transactions.$[element].category': req.body.newCategory,
-                    },
+                    description: description,
+                    amount: amount * -1,
+                    category: category,
+                    date: newDate,
                 };
             } else {
-                query = { _id: req.user._id, 'transactions.category': req.body.category };
-                update = {
-                    $set: {
-                        'transactions.$[element].category': 'Uncategorized',
-                    },
-                };
+                update = { category: req.body.transaction.category };
             }
-            const arrayFilters = {
-                arrayFilters: [{ 'element._id': { $in: transactionIDs } }],
-                runValidators: true,
-            };
-            await User.updateMany(query, update, arrayFilters);
+            const query = { userID: req.user._id, _id: { $in: transactionIDs } };
+            await Transaction.updateMany(query, update, { runValidators: true });
             res.sendStatus(200);
         } else {
             throw Error('User not logged in.');
@@ -128,28 +84,15 @@ router.put('/', async (req, res, next) => {
 router.delete('/', async (req, res, next) => {
     try {
         if (req.user) {
-            const allTransactionIDs = req.body;
-            const query = { _id: req.user._id };
-            const { transactions } = await User.findOne(query);
-            const transactionIDs = transactions
-                .filter(
-                    transaction =>
-                        allTransactionIDs.indexOf(transaction._id.toString()) !== -1 &&
-                        transaction.transactionID
-                )
-                .map(transaction => transaction.transactionID);
-            let update;
-            if (transactionIDs.length) {
-                update = {
-                    $pull: { transactions: { _id: { $in: allTransactionIDs } } },
-                    $push: { removedTransactionIDs: { $each: transactionIDs } },
-                };
-            } else {
-                update = {
-                    $pull: { transactions: { _id: { $in: allTransactionIDs } } },
-                };
-            }
-            await User.updateOne(query, update, { runValidators: true });
+            const { transactionIDs } = req.body;
+            const deletionQuery = { userID: req.user._id, _id: { $in: transactionIDs } };
+            await Transaction.deleteMany(deletionQuery);
+
+            const appendingQuery = { _id: req.user._id };
+            const appendingUpdate = {
+                $push: { removedTransactionIDs: { $each: transactionIDs } },
+            };
+            await User.updateOne(appendingQuery, appendingUpdate, { runValidators: true });
             res.sendStatus(200);
         } else {
             throw Error('User not logged in.');

@@ -14,7 +14,6 @@ import Buttons from '../components/Transactions/Buttons';
 import ErrorMessage from '../components/shared/ErrorMessage';
 import FallbackSpinner from '../components/shared/FallbackSpinner';
 import { Button } from 'react-bootstrap';
-import { v1 as uuidv1 } from 'uuid';
 
 // CONTEXT //
 import { ResourcesContext } from '../App';
@@ -141,7 +140,8 @@ const Transactions: React.FC<RouteComponentProps> = props => {
         loading: false,
         transactions: transactions.read(),
         accounts: accounts.read(),
-        categories: categories.read(),
+        // eslint-disable-next-line prettier/prettier
+        categories: [...categories.read(), { name: 'Bank Fees', type: 'expenses' }, { name: 'Legal Fees', type: 'expenses' }, { name: 'Charitable Giving', type: 'expenses' }, { name: 'Medical', type: 'expenses' }, { name: 'Cash', type: 'expenses' }, { name: 'Check', type: 'expenses' }, { name: 'Education', type: 'expenses' }, { name: 'Membership Fee', type: 'expenses' }, { name: 'Service', type: 'expenses' }, { name: 'Utilities', type: 'expenses' }, { name: 'Postage/Shipping', type: 'expenses' }, { name: 'Restaurant', type: 'expenses' }, { name: 'Entertainment', type: 'expenses' }, { name: 'Loan', type: 'expenses' }, { name: 'Rent', type: 'expenses' }, { name: 'Home Maintenance/Improvement', type: 'expenses' }, { name: 'Automotive', type: 'expenses' }, { name: 'Electronic', type: 'expenses' }, { name: 'Insurance', type: 'expenses' }, { name: 'Business Expenditure', type: 'expenses' }, { name: 'Real Estate', type: 'expenses' }, { name: 'Personal Care', type: 'expenses' }, { name: 'Gas', type: 'expenses' }, { name: 'Subscription', type: 'expenses' }, { name: 'Travel', type: 'expenses' }, { name: 'Shopping', type: 'expenses' }, { name: 'Clothing', type: 'expenses' }, { name: 'Groceries', type: 'expenses' }, { name: 'Tax', type: 'expenses' }, { name: 'Subsidy', type: 'income' }, { name: 'Interest', type: 'income' }, { name: 'Deposit', type: 'income' }, { name: 'Payroll/Salary', type: 'income' }, { name: 'Cash', type: 'income' }, { name: 'Transfer', type: 'other' }, { name: 'Uncategorized', type: 'other' }],
         selectedTransactionIDs: [],
         selectedAccountID: 'All Accounts',
         transactionModal: {
@@ -179,16 +179,16 @@ const Transactions: React.FC<RouteComponentProps> = props => {
     useEffect(() => {
         dispatch({ type: 'SET_TRANSACTIONS', transactions: transactions.read() });
         dispatch({ type: 'SET_ACCOUNTS', accounts: accounts.read() });
-        dispatch({ type: 'SET_CATEGORIES', categories: categories.read() });
+        // eslint-disable-next-line prettier/prettier
+        dispatch({ type: 'SET_CATEGORIES', categories: [...categories.read(), { name: 'Bank Fees', type: 'expenses' }, { name: 'Legal Fees', type: 'expenses' }, { name: 'Charitable Giving', type: 'expenses' }, { name: 'Medical', type: 'expenses' }, { name: 'Cash', type: 'expenses' }, { name: 'Check', type: 'expenses' }, { name: 'Education', type: 'expenses' }, { name: 'Membership Fee', type: 'expenses' }, { name: 'Service', type: 'expenses' }, { name: 'Utilities', type: 'expenses' }, { name: 'Postage/Shipping', type: 'expenses' }, { name: 'Restaurant', type: 'expenses' }, { name: 'Entertainment', type: 'expenses' }, { name: 'Loan', type: 'expenses' }, { name: 'Rent', type: 'expenses' }, { name: 'Home Maintenance/Improvement', type: 'expenses' }, { name: 'Automotive', type: 'expenses' }, { name: 'Electronic', type: 'expenses' }, { name: 'Insurance', type: 'expenses' }, { name: 'Business Expenditure', type: 'expenses' }, { name: 'Real Estate', type: 'expenses' }, { name: 'Personal Care', type: 'expenses' }, { name: 'Gas', type: 'expenses' }, { name: 'Subscription', type: 'expenses' }, { name: 'Travel', type: 'expenses' }, { name: 'Shopping', type: 'expenses' }, { name: 'Clothing', type: 'expenses' }, { name: 'Groceries', type: 'expenses' }, { name: 'Tax', type: 'expenses' }, { name: 'Subsidy', type: 'income' }, { name: 'Interest', type: 'income' }, { name: 'Deposit', type: 'income' }, { name: 'Payroll/Salary', type: 'income' }, { name: 'Cash', type: 'income' }, { name: 'Transfer', type: 'other' }, { name: 'Uncategorized', type: 'other' }] });
     }, [transactions, accounts, categories]);
 
     const handleCreateTransaction = async (newTransaction: Transaction) => {
-        const newID = uuidv1().substr(0, 12);
         dispatch({ type: 'SET_LOADING', loading: true });
-        await createTransaction({ ...newTransaction, _id: newID });
+        const id = await createTransaction({ ...newTransaction });
         const newTransactions = [
             ...state.transactions,
-            { ...newTransaction, _id: newID, selected: true },
+            { ...newTransaction, _id: id, selected: true },
         ];
         dispatch({
             type: 'SET_TRANSACTIONS',

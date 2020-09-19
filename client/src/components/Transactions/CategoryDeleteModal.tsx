@@ -15,7 +15,7 @@ interface Props {
     setLoading: (loading: boolean) => void;
     toggled: boolean;
     close: () => void;
-    categoryName: string;
+    category: Category;
     categories: Category[];
     transactions: Transaction[];
     setCategories: (categories: Category[]) => void;
@@ -25,19 +25,19 @@ interface Props {
 const CategoryModal: React.FC<Props> = props => {
     const handleSubmit = async () => {
         const transactionIDsToModify = props.transactions
-            .filter(transaction => transaction.category === props.categoryName)
+            .filter(transaction => transaction.category === props.category.name)
             .map(transaction => transaction._id);
         props.setLoading(true);
-        await deleteCategory(props.categoryName, transactionIDsToModify);
+        await deleteCategory(props.category._id, transactionIDsToModify);
         props.setCategories(
-            props.categories.filter(category => category.name !== props.categoryName)
+            props.categories.filter(category => category.name !== props.category.name)
         );
         props.setTransactions([
             ...props.transactions
-                .filter(transaction => transaction.category === props.categoryName)
+                .filter(transaction => transaction.category === props.category.name)
                 .map(transaction => ({ ...transaction, category: 'Uncategorized' })),
             ...props.transactions.filter(
-                transaction => transaction.category !== props.categoryName
+                transaction => transaction.category !== props.category.name
             ),
         ]);
         props.setLoading(false);

@@ -8,6 +8,7 @@ const requiredString = {
 };
 
 const PlaidAccountSchema = new Schema({
+    userID: requiredString,
     id: requiredString,
     batchID: requiredString,
     name: requiredString,

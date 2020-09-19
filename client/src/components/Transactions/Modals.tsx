@@ -72,9 +72,7 @@ const Modals: React.FC<Props> = props => {
                 setLoading={props.setLoading}
                 toggled={props.categoryDeleteModal}
                 close={props.hideCategoryDeleteModal}
-                categoryName={
-                    props.categorySubmodal.category ? props.categorySubmodal.category.name : null
-                }
+                category={props.categorySubmodal.category ? props.categorySubmodal.category : null}
                 categories={props.categories}
                 transactions={props.transactions}
                 setCategories={props.setCategories}
