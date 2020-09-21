@@ -2,7 +2,6 @@
 import React from 'react';
 
 // COMPONENTS //
-import TransactionModal from './TransactionModal';
 import CategoryModal from './CategoryModal';
 import CategorySubmodal from './CategorySubmodal';
 import CategoryDeleteModal from './CategoryDeleteModal';
@@ -16,10 +15,6 @@ interface Props {
     categories: Category[];
     setTransactions: (transactions: Transaction[]) => void;
     setCategories: (categories: Category[]) => void;
-    transactionModal: {
-        show: boolean;
-        mode: string;
-    };
     categoryModal: boolean;
     categorySubmodal: {
         show: boolean;
@@ -27,38 +22,25 @@ interface Props {
         category: Category;
     };
     categoryDeleteModal: boolean;
-    openCategoryModal: () => void;
     openCategorySubmodal: (mode: string, category: Category) => void;
     openCategoryDeleteModal: () => void;
-    hideTransactionModal: () => void;
     hideCategoryModal: () => void;
     hideCategorySubmodal: () => void;
     hideCategoryDeleteModal: () => void;
-    handleCreateTransaction: (transaction: Transaction) => void;
-    handleEditMultipleTransactions: (transaction: Transaction) => void;
 }
 
-const Modals: React.FC<Props> = props => {
+const CategoryModals: React.FC<Props> = props => {
     return (
         <>
-            <TransactionModal
-                toggled={props.transactionModal.show}
-                mode={props.transactionModal.mode}
-                close={props.hideTransactionModal}
-                openCategory={props.openCategoryModal}
-                handleCreateTransaction={props.handleCreateTransaction}
-                handleEditMultipleTransactions={props.handleEditMultipleTransactions}
-                categories={props.categories}
-            />
             <CategoryModal
-                toggled={props.categoryModal}
+                show={props.categoryModal}
                 close={props.hideCategoryModal}
                 categories={props.categories}
                 openSubmodal={props.openCategorySubmodal}
             />
             <CategorySubmodal
                 setLoading={props.setLoading}
-                toggled={props.categorySubmodal.show}
+                show={props.categorySubmodal.show}
                 close={props.hideCategorySubmodal}
                 mode={props.categorySubmodal.mode}
                 category={props.categorySubmodal.category}
@@ -70,7 +52,7 @@ const Modals: React.FC<Props> = props => {
             />
             <CategoryDeleteModal
                 setLoading={props.setLoading}
-                toggled={props.categoryDeleteModal}
+                show={props.categoryDeleteModal}
                 close={props.hideCategoryDeleteModal}
                 category={props.categorySubmodal.category ? props.categorySubmodal.category : null}
                 categories={props.categories}
@@ -82,4 +64,4 @@ const Modals: React.FC<Props> = props => {
     );
 };
 
-export default Modals;
+export default CategoryModals;

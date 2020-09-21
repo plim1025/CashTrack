@@ -63,6 +63,9 @@ export const parseTransactionData = (
     subtrend: Subtrends,
     date: Dates
 ): Data[] => {
+    if (!transactions.length) {
+        return [];
+    }
     const newData = new Map();
     // eslint-disable-next-line prettier/prettier
     const monthArr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

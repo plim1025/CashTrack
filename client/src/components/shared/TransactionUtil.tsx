@@ -2,20 +2,18 @@ import { Transaction, Account, Category, GroupedDropdownOption } from '../../typ
 
 export const createTransaction = async (transaction: Transaction): Promise<string> => {
     try {
-        const transactionInfo = JSON.stringify({
-            _id: transaction._id,
-            description: transaction.description,
-            amount: transaction.amount,
-            category: transaction.category,
-            date: transaction.date,
-        });
         const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             credentials: 'include',
-            body: transactionInfo,
+            body: JSON.stringify({
+                description: transaction.description,
+                amount: transaction.amount,
+                category: transaction.category,
+                date: transaction.date,
+            }),
         });
         if (!response.ok) {
             throw Error('Bad response from server');

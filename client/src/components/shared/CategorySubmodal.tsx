@@ -4,18 +4,18 @@ import React, { useState, useEffect, useRef } from 'react';
 
 // COMPONENTS //
 import { Button, Modal, Form } from 'react-bootstrap';
-import ErrorMessage from '../shared/ErrorMessage';
-import Dropdown from '../shared/Dropdown';
+import ErrorMessage from './ErrorMessage';
+import Dropdown from './Dropdown';
 
 // TYPES //
 import { Category, Transaction } from '../../types';
 
 // UTIL //
-import { createCategory, updateCategory } from '../shared/TransactionUtil';
+import { createCategory, updateCategory } from './TransactionUtil';
 
 interface Props {
     setLoading: (loading: boolean) => void;
-    toggled: boolean;
+    show: boolean;
     close: () => void;
     mode: string;
     category?: Category;
@@ -32,19 +32,27 @@ const CategoryModal: React.FC<Props> = props => {
     const modalRef = useRef<HTMLInputElement>(null);
     const [error, setError] = useState({ show: false, message: '' });
     const [category, setCategory] = useState({
-        name: props.mode === 'edit' ? props.category.name : null,
-        type: props.mode === 'edit' ? props.category.type : null,
+        name: props.mode === 'edit' ? props.category.name : '',
+        type: props.mode === 'edit' ? props.category.type : '',
     });
 
     useEffect(() => {
-        if (!props.toggled) {
+        if (!props.show) {
             setCategory({ name: null, type: null });
-        } else if (props.toggled && props.mode === 'edit') {
+        } else if (props.show && props.mode === 'edit') {
             setCategory({ name: props.category.name, type: props.category.type });
         }
-    }, [props.toggled]);
+    }, [props.show]);
 
-    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    useEffect(() => {
+        window.onkeydown = (e: globalThis.KeyboardEvent) => {
+            if (e.key === 'Enter' && props.show) {
+                handleSubmit(e);
+            }
+        };
+    }, [category]);
+
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         if (!category.name || !category.type) {
             setError({ show: true, message: 'All fields must be filled in' });
@@ -83,7 +91,7 @@ const CategoryModal: React.FC<Props> = props => {
                 props.setCategories([...props.categories, { ...category, _id: id }]);
             }
             props.setLoading(false);
-            props.close();
+            handleClose();
             return;
         }
         if (errorTimeout) {
@@ -94,14 +102,23 @@ const CategoryModal: React.FC<Props> = props => {
         }, 3000);
     };
 
+    const handleClose = () => {
+        props.close();
+        setCategory({
+            name: '',
+            type: '',
+        });
+    };
+
     useEffect(() => {
         return () => {
             clearTimeout(errorTimeout);
         };
     }, []);
 
+    console.log(category);
     return (
-        <Modal centered show={props.toggled} onShow={() => modalRef.current.focus()}>
+        <Modal centered show={props.show} onShow={() => modalRef.current.focus()}>
             <Form>
                 <Modal.Body>
                     <Form.Group>
@@ -155,7 +172,7 @@ const CategoryModal: React.FC<Props> = props => {
                             Delete
                         </Button>
                     ) : null}
-                    <Button onClick={() => props.close()} size='sm' variant='secondary'>
+                    <Button onClick={handleClose} size='sm' variant='secondary'>
                         Cancel
                     </Button>
                     <Button onClick={handleSubmit} size='sm' type='submit' variant='primary'>

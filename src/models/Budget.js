@@ -9,17 +9,13 @@ const requiredString = {
 
 const BudgetSchema = new Schema({
     userID: requiredString,
-    type: {
-        type: String,
-        required: true,
-        enum: ['expenses', 'income', 'other'],
-    },
     frequency: {
         type: String,
         required: true,
         enum: ['year', 'month', 'week', 'day', 'one-time'],
     },
-    date: Date,
+    startDate: Date,
+    endDate: Date,
     amount: {
         type: Number,
         required: true,

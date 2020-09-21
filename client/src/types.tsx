@@ -14,7 +14,7 @@ export interface Transaction {
     categoryID?: string;
     merchant?: string;
     selected?: boolean;
-    type?: 'expenses' | 'income' | 'other';
+    type?: string;
 }
 
 export interface Account {
@@ -34,7 +34,18 @@ export interface Category {
     _id?: string;
     userID?: string;
     name: string;
-    type: 'expenses' | 'income' | 'other';
+    type: string;
+    selected?: boolean;
+}
+
+export interface Budget {
+    _id?: string;
+    userID?: string;
+    frequency: string;
+    startDate?: Date | string;
+    endDate?: Date | string;
+    amount: number;
+    categoryName: string;
 }
 
 export type RootState = ReturnType<typeof rootReducer>;

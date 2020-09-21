@@ -1,7 +1,7 @@
 // TYPES //
-import { Transaction, Account, Category } from '../../types';
+import { Transaction, Account, Category, Budget } from '../../types';
 
-const wrapPromise = (promise: any, promiseName: string) => {
+const wrapPromise = (promise: any) => {
     let status = 'loading';
     let result: any;
     const suspender = promise.then(
@@ -91,15 +91,32 @@ const fetchCategories = async () => {
     }
 };
 
+const fetchBudgets = async () => {
+    try {
+        const response = await fetch(`${process.env.BACKEND_URI}/api/budget`, {
+            credentials: 'include',
+        });
+        if (!response.ok) {
+            throw Error('Bad response from server');
+        }
+        const parsedResponse = await response.json();
+        return parsedResponse;
+    } catch (error) {
+        throw Error(`Error fetching budgets: ${error}`);
+    }
+};
+
 const createResource = (): {
     transactions: { read: () => Transaction[] };
     accounts: { read: () => Account[] };
     categories: { read: () => Category[] };
+    budgets: { read: () => Budget[] };
 } => {
     return {
-        transactions: wrapPromise(fetchTransactions(), 'transactions'),
-        accounts: wrapPromise(fetchAccounts(), 'accounts'),
-        categories: wrapPromise(fetchCategories(), 'categories'),
+        transactions: wrapPromise(fetchTransactions()),
+        accounts: wrapPromise(fetchAccounts()),
+        categories: wrapPromise(fetchCategories()),
+        budgets: wrapPromise(fetchBudgets()),
     };
 };
 

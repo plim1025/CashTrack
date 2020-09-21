@@ -10,7 +10,7 @@ import { Button, Modal } from 'react-bootstrap';
 import { Category } from '../../types';
 
 interface Props {
-    toggled: boolean;
+    show: boolean;
     close: () => void;
     categories: Category[];
     openSubmodal: (mode: string, category?: Category) => void;
@@ -59,7 +59,7 @@ const parseCategories = (
 
 const CategoryModal: React.FC<Props> = props => {
     return (
-        <ModalWrapper centered onHide={() => props.close()} show={props.toggled}>
+        <ModalWrapper centered onHide={() => props.close()} show={props.show}>
             <ModalHeaderWrapper closeButton>
                 <HeaderText>Manage Categories</HeaderText>
                 <ButtonWrapper onClick={() => props.openSubmodal('add')}>+ Category</ButtonWrapper>
@@ -128,6 +128,7 @@ const Table = styled.div`
 const Column = styled.div`
     display: flex;
     flex-direction: column;
+    margin: 0 5px;
     width: 33%;
 `;
 

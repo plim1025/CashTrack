@@ -14,7 +14,7 @@ import createResources from './components/shared/Resources';
 import FallbackSpinner from './components/shared/FallbackSpinner';
 
 // TYPES //
-import { RootState, Transaction, Account, Category } from './types';
+import { RootState, Transaction, Account, Category, Budget } from './types';
 
 // VIEWS //
 const Home = React.lazy(() => import(/* webpackChunkName: 'Home' */ './view/Home'));
@@ -30,6 +30,7 @@ interface ResourcesContextType {
     transactions: { read: () => Transaction[] };
     accounts: { read: () => Account[] };
     categories: { read: () => Category[] };
+    budgets: { read: () => Budget[] };
     refresh: (message?: string) => void;
     subpage: string;
     setSubpage: (subpage: string) => void;
@@ -40,6 +41,7 @@ export const ResourcesContext = createContext<ResourcesContextType>({
     transactions: null,
     accounts: null,
     categories: null,
+    budgets: null,
     refresh: null,
     subpage: null,
     setSubpage: null,
@@ -94,6 +96,7 @@ const App: React.FC<Props & RouteComponentProps> = props => {
                 transactions: resources?.transactions,
                 accounts: resources?.accounts,
                 categories: resources?.categories,
+                budgets: resources?.budgets,
                 refresh: (message?: string) => {
                     setResources(() => createResources());
                     if (message) {

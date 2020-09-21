@@ -9,11 +9,11 @@ import { Button, Modal } from 'react-bootstrap';
 import { Transaction, Category } from '../../types';
 
 // UTIL //
-import { deleteCategory } from '../shared/TransactionUtil';
+import { deleteCategory } from './TransactionUtil';
 
 interface Props {
     setLoading: (loading: boolean) => void;
-    toggled: boolean;
+    show: boolean;
     close: () => void;
     category: Category;
     categories: Category[];
@@ -45,7 +45,7 @@ const CategoryModal: React.FC<Props> = props => {
     };
 
     return (
-        <Modal centered show={props.toggled}>
+        <Modal centered show={props.show}>
             <Modal.Body>
                 <div>Are you sure you want to delete this category?</div>
                 <div style={{ marginTop: 10 }}>

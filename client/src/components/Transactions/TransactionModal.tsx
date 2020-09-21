@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
 import Dropdown from '../shared/Dropdown';
 import ErrorMessage from '../shared/ErrorMessage';
-import CategoryDropdownMenu from './CategoryDropdownMenu';
+import CategoryDropdownMenu from '../shared/CategoryDropdownMenu';
 
 // TYPES //
 import { Transaction, Category } from '../../types';
@@ -15,7 +15,7 @@ import { parseCategoryDropdownOptions } from '../shared/TransactionUtil';
 
 interface Props {
     mode: string;
-    toggled: boolean;
+    show: boolean;
     close: () => void;
     handleCreateTransaction: (transaction: Transaction) => void;
     handleEditMultipleTransactions: (transaction: Transaction) => void;
@@ -35,7 +35,15 @@ const TransactionModal: React.FC<Props> = props => {
     });
     const [error, setError] = useState({ show: false, message: '' });
 
-    const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    useEffect(() => {
+        window.onkeydown = (e: globalThis.KeyboardEvent) => {
+            if (e.key === 'Enter' && props.show) {
+                handleSubmit(e);
+            }
+        };
+    }, [props.show]);
+
+    const handleSubmit = (e: any) => {
         e.preventDefault();
         const parsedAmount = parseFloat(transaction.amount);
         if (!transaction.date) {
@@ -58,7 +66,7 @@ const TransactionModal: React.FC<Props> = props => {
             } else {
                 props.handleEditMultipleTransactions({ ...transaction, amount: parsedAmount });
             }
-            props.close();
+            handleClose();
             return;
         }
         if (errorTimeout) {
@@ -67,6 +75,16 @@ const TransactionModal: React.FC<Props> = props => {
         errorTimeout = setTimeout(() => {
             setError(prevError => ({ ...prevError, show: false }));
         }, 3000);
+    };
+
+    const handleClose = () => {
+        props.close();
+        setTransaction({
+            date: new Date().toISOString().slice(0, 10),
+            description: '',
+            category: '',
+            amount: '',
+        });
     };
 
     useEffect(() => {
@@ -79,8 +97,8 @@ const TransactionModal: React.FC<Props> = props => {
         <Modal
             centered
             onShow={() => modalRef.current.focus()}
-            onHide={() => props.close()}
-            show={props.toggled}
+            onHide={handleClose}
+            show={props.show}
         >
             <ErrorMessage error={error.show} errorMessage={error.message} />
             <Form>
@@ -112,10 +130,15 @@ const TransactionModal: React.FC<Props> = props => {
                             size='bg'
                             padded
                             options={parseCategoryDropdownOptions(props.categories)}
-                            defaultOption={{
-                                value: transaction.category,
-                                label: transaction.category,
-                            }}
+                            defaultOption={
+                                props.mode === 'edit'
+                                    ? {
+                                          value: transaction.category,
+                                          label: transaction.category,
+                                      }
+                                    : null
+                            }
+                            placeholder='Select Category...'
                             onChange={e =>
                                 setTransaction({
                                     ...transaction,
@@ -144,7 +167,7 @@ const TransactionModal: React.FC<Props> = props => {
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={() => props.close()} size='sm' variant='secondary'>
+                    <Button onClick={handleClose} size='sm' variant='secondary'>
                         Cancel
                     </Button>
                     <Button onClick={handleSubmit} size='sm' type='submit' variant='primary'>

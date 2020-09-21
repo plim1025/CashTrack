@@ -23,13 +23,16 @@ router.post('/', async (req, res, next) => {
             const { type, frequency, amount, categoryName } = req.body;
             let newBudget;
             if (frequency === 'one-time') {
-                const newDate = new Date(req.body.date);
-                newDate.setDate(newDate.getDate() - 1);
+                const newStartDate = new Date(req.body.startDate);
+                newStartDate.setDate(newStartDate.getDate() - 1);
+                const newEndDate = new Date(req.body.endDate);
+                newEndDate.setDate(newEndDate.getDate() - 1);
                 newBudget = new Budget({
                     userID: req.user._id,
                     type: type,
                     frequency: frequency,
-                    date: newDate,
+                    startDate: newStartDate,
+                    endDate: newEndDate,
                     amount: amount,
                     categoryName: categoryName,
                 });
@@ -43,7 +46,7 @@ router.post('/', async (req, res, next) => {
                 });
             }
             await newBudget.save();
-            res.sendStatus(200);
+            res.json({ id: newBudget._id });
         } else {
             throw Error('User not logged in.');
         }
@@ -63,12 +66,15 @@ router.put('/:id', async (req, res, next) => {
             const query = { userID: req.user._id, _id: id };
             let update;
             if (frequency === 'one-time') {
-                const newDate = new Date(req.body.date);
-                newDate.setDate(newDate.getDate() - 1);
+                const newStartDate = new Date(req.body.startDate);
+                newStartDate.setDate(newStartDate.getDate() - 1);
+                const newEndDate = new Date(req.body.endDate);
+                newEndDate.setDate(newEndDate.getDate() - 1);
                 update = {
                     type: type,
                     frequency: frequency,
-                    date: newDate,
+                    startDate: newStartDate,
+                    endDate: newEndDate,
                     amount: amount,
                     categoryName: categoryName,
                 };

@@ -9,7 +9,7 @@ import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit';
 // @ts-ignore
 import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
 import Dropdown from '../shared/Dropdown';
-import CategoryDropdownMenu from './CategoryDropdownMenu';
+import CategoryDropdownMenu from '../shared/CategoryDropdownMenu';
 
 // TYPES //
 import { Transaction, Category } from '../../types';

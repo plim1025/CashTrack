@@ -7,7 +7,8 @@ import { withRouter, RouteComponentProps } from 'react-router';
 // COMPONENTS //
 import styled from 'styled-components';
 import Table from '../components/Transactions/Table';
-import Modals from '../components/Transactions/Modals';
+import TransactionModal from '../components/Transactions/TransactionModal';
+import CategoryModals from '../components/shared/CategoryModals';
 import Sidebar from '../components/Transactions/Sidebar';
 import AccountInfo from '../components/Transactions/AccountInfo';
 import Buttons from '../components/Transactions/Buttons';
@@ -40,7 +41,7 @@ type Actions =
     | { type: 'HIDE_TRANSACTION_MODAL' }
     | { type: 'SHOW_CATEGORY_MODAL' }
     | { type: 'HIDE_CATEGORY_MODAL' }
-    | { type: 'SHOW_CATEGORY_SUBMODAL'; mode: string; category?: Category }
+    | { type: 'SHOW_CATEGORY_SUBMODAL'; mode: string; category: Category }
     | { type: 'HIDE_CATEGORY_SUBMODAL' }
     | { type: 'SHOW_CATEGORY_DELETE_MODAL' }
     | { type: 'HIDE_CATEGORY_DELETE_MODAL' }
@@ -185,7 +186,7 @@ const Transactions: React.FC<RouteComponentProps> = props => {
 
     const handleCreateTransaction = async (newTransaction: Transaction) => {
         dispatch({ type: 'SET_LOADING', loading: true });
-        const id = await createTransaction({ ...newTransaction });
+        const id = await createTransaction(newTransaction);
         const newTransactions = [
             ...state.transactions,
             { ...newTransaction, _id: id, selected: true },
@@ -299,7 +300,16 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                     openCategoryModal={() => dispatch({ type: 'SHOW_CATEGORY_MODAL' })}
                 />
             </SubWrapper>
-            <Modals
+            <TransactionModal
+                show={state.transactionModal.show}
+                mode={state.transactionModal.mode}
+                close={() => dispatch({ type: 'HIDE_TRANSACTION_MODAL' })}
+                openCategory={() => dispatch({ type: 'SHOW_CATEGORY_MODAL' })}
+                handleCreateTransaction={handleCreateTransaction}
+                handleEditMultipleTransactions={handleEditMultipleTransactions}
+                categories={state.categories}
+            />
+            <CategoryModals
                 setLoading={(loading: boolean) =>
                     dispatch({ type: 'SET_LOADING', loading: loading })
                 }
@@ -311,11 +321,9 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                 setCategories={(newCategories: Category[]) =>
                     dispatch({ type: 'SET_CATEGORIES', categories: newCategories })
                 }
-                transactionModal={state.transactionModal}
                 categoryModal={state.categoryModal}
                 categorySubmodal={state.categorySubmodal}
                 categoryDeleteModal={state.categoryDeleteModal}
-                openCategoryModal={() => dispatch({ type: 'SHOW_CATEGORY_MODAL' })}
                 openCategorySubmodal={(mode: string, category?: Category) =>
                     dispatch({
                         type: 'SHOW_CATEGORY_SUBMODAL',
@@ -324,12 +332,9 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                     })
                 }
                 openCategoryDeleteModal={() => dispatch({ type: 'SHOW_CATEGORY_DELETE_MODAL' })}
-                hideTransactionModal={() => dispatch({ type: 'HIDE_TRANSACTION_MODAL' })}
                 hideCategoryModal={() => dispatch({ type: 'HIDE_CATEGORY_MODAL' })}
                 hideCategorySubmodal={() => dispatch({ type: 'HIDE_CATEGORY_SUBMODAL' })}
                 hideCategoryDeleteModal={() => dispatch({ type: 'HIDE_CATEGORY_DELETE_MODAL' })}
-                handleCreateTransaction={handleCreateTransaction}
-                handleEditMultipleTransactions={handleEditMultipleTransactions}
             />
             <ErrorMessage error={state.error.show} errorMessage={state.error.message} />
             <FallbackSpinner backdrop show={state.loading} />
