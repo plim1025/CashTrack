@@ -11,7 +11,7 @@ import { ResourcesContext } from '../../App';
 const PlaidLinkButton: React.FC = () => {
     const [accountsInfo, setAccountsInfo] = useState({ token: '', metadata: null });
     const [accountsLoading, setAccountsLoading] = useState(false);
-    const [linkToken, setLinkToken] = useState('');
+    const [linkToken, setLinkToken] = useState(null);
     const { refresh } = useContext(ResourcesContext);
 
     useEffect(() => {

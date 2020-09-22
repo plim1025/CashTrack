@@ -23,7 +23,7 @@ interface Props {
     blurInputOnSelect?: boolean;
     placeholder?: string;
     controlShouldRenderValue?: boolean;
-    isOptionSelected?: (option: any) => boolean;
+    isOptionSelected?: (option: DropdownOption) => boolean;
     value?: DropdownOption[] | GroupedDropdownOption[];
     style?: React.CSSProperties;
 }

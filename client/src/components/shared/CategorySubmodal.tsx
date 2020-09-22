@@ -31,30 +31,13 @@ let errorTimeout: ReturnType<typeof setTimeout>;
 const CategoryModal: React.FC<Props> = props => {
     const modalRef = useRef<HTMLInputElement>(null);
     const [error, setError] = useState({ show: false, message: '' });
-    const [category, setCategory] = useState({
-        name: props.mode === 'edit' ? props.category.name : '',
-        type: props.mode === 'edit' ? props.category.type : '',
-    });
+    const [category, setCategory] = useState<Category>(
+        props.mode === 'edit' ? props.category : null
+    );
 
-    useEffect(() => {
-        if (!props.show) {
-            setCategory({ name: null, type: null });
-        } else if (props.show && props.mode === 'edit') {
-            setCategory({ name: props.category.name, type: props.category.type });
-        }
-    }, [props.show]);
-
-    useEffect(() => {
-        window.onkeydown = (e: globalThis.KeyboardEvent) => {
-            if (e.key === 'Enter' && props.show) {
-                handleSubmit(e);
-            }
-        };
-    }, [category]);
-
-    const handleSubmit = async (e: any) => {
+    const handleSubmit = async (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();
-        if (!category.name || !category.type) {
+        if (!category || !category.name || !category.type) {
             setError({ show: true, message: 'All fields must be filled in' });
         } else if (
             props.categories.find(item => item.name === category.name) &&
@@ -104,10 +87,7 @@ const CategoryModal: React.FC<Props> = props => {
 
     const handleClose = () => {
         props.close();
-        setCategory({
-            name: '',
-            type: '',
-        });
+        setCategory(null);
     };
 
     useEffect(() => {
@@ -116,7 +96,6 @@ const CategoryModal: React.FC<Props> = props => {
         };
     }, []);
 
-    console.log(category);
     return (
         <Modal centered show={props.show} onShow={() => modalRef.current.focus()}>
             <Form>
@@ -157,7 +136,7 @@ const CategoryModal: React.FC<Props> = props => {
                                       }
                                     : null
                             }
-                            onChange={(e: any) => setCategory({ ...category, type: e.value })}
+                            onChange={e => setCategory({ ...category, type: e.value })}
                         />
                     </Form.Group>
                 </Modal.Body>

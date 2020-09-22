@@ -3,23 +3,22 @@ import rootReducer from './redux/Reducers';
 // import { ThunkAction } from 'redux-thunk';
 
 export interface Transaction {
-    _id?: string;
-    userID?: string;
-    date: Date | string;
+    _id: string;
+    date: Date;
     description: string;
     category: string;
     amount: number;
-    accountID?: string;
-    transactionID?: string;
-    categoryID?: string;
-    merchant?: string;
+    accountID: string;
+    categoryID: string;
+    type: string;
     selected?: boolean;
-    type?: string;
+    transactionID?: string;
+    merchant?: string;
 }
 
 export interface Account {
     id: string;
-    userID?: string;
+    batchID: string;
     name: string;
     institution: string;
     type: string;
@@ -27,23 +26,21 @@ export interface Account {
     balance: number;
     available?: number;
     creditLimit?: number;
-    batchID?: string;
+    debt?: number;
 }
 
 export interface Category {
     _id?: string;
-    userID?: string;
     name: string;
     type: string;
     selected?: boolean;
 }
 
 export interface Budget {
-    _id?: string;
-    userID?: string;
+    _id: string;
     frequency: string;
-    startDate?: Date | string;
-    endDate?: Date | string;
+    startDate: Date;
+    endDate: Date;
     amount: number;
     categoryName: string;
 }
@@ -71,7 +68,7 @@ export interface Data {
 }
 
 export interface DropdownOption {
-    value: string;
+    value: string | Date;
     label: string;
     sublabel?: string;
 }
@@ -80,4 +77,11 @@ export interface GroupedDropdownOption {
     label: string;
     options: DropdownOption[];
     sublabel?: string;
+}
+
+export interface Resources {
+    transactions: { read: () => Transaction[] };
+    accounts: { read: () => Account[] };
+    categories: { read: () => Category[] };
+    budgets: { read: () => Budget[] };
 }

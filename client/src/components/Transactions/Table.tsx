@@ -28,8 +28,8 @@ import {
     validateDescription,
     formatAmount,
     validateAmount,
-    parseCategoryDropdownOptions,
 } from '../shared/TransactionUtil';
+import { parseCategoryDropdownOptions } from '../shared/SharedUtils';
 
 interface Props {
     transactions: Transaction[];
@@ -67,7 +67,7 @@ const Table: React.FC<Props> = props => {
             editCellClasses: 'transaction-table-edit-cell',
             sort: true,
             blurToSave: false,
-            editorRenderer: (editorProps: any, value: any) => (
+            editorRenderer: (editorProps: any, value: string) => (
                 <Dropdown
                     size='sm'
                     options={parseCategoryDropdownOptions(props.categories)}

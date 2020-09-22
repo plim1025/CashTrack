@@ -9,7 +9,7 @@ import { Modal, Table } from 'react-bootstrap';
 import { Transaction } from '../../types';
 
 // UTIL //
-import { moneyFormat } from '../shared/TransactionUtil';
+import { moneyFormat } from './SharedUtils';
 
 interface Props {
     show: boolean;

@@ -14,7 +14,7 @@ import createResources from './components/shared/Resources';
 import FallbackSpinner from './components/shared/FallbackSpinner';
 
 // TYPES //
-import { RootState, Transaction, Account, Category, Budget } from './types';
+import { RootState, Transaction, Account, Category, Budget, Resources } from './types';
 
 // VIEWS //
 const Home = React.lazy(() => import(/* webpackChunkName: 'Home' */ './view/Home'));
@@ -37,16 +37,7 @@ interface ResourcesContextType {
     logout: () => void;
 }
 
-export const ResourcesContext = createContext<ResourcesContextType>({
-    transactions: null,
-    accounts: null,
-    categories: null,
-    budgets: null,
-    refresh: null,
-    subpage: null,
-    setSubpage: null,
-    logout: null,
-});
+export const ResourcesContext = createContext<ResourcesContextType>(null);
 
 interface Props {
     subpage: string;
@@ -54,7 +45,7 @@ interface Props {
 
 const App: React.FC<Props & RouteComponentProps> = props => {
     const dispatch = useDispatch();
-    const [resources, setResources] = useState(null);
+    const [resources, setResources] = useState<Resources>(null);
     const [subpage, setSubpage] = useState(props.subpage);
     const [refreshMessage, setRefreshMessage] = useState('');
     const globalEmail = useSelector((redux: RootState) => redux.email);

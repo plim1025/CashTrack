@@ -12,8 +12,8 @@ import CategoryDropdownMenu from '../shared/CategoryDropdownMenu';
 import { Budget, Category } from '../../types';
 
 // UTILS //
-import { parseCategoryDropdownOptions } from '../shared/TransactionUtil';
-import { getFrequencyLabel } from '../shared/BudgetUtils';
+import { parseCategoryDropdownOptions } from '../shared/SharedUtils';
+import { getFrequencyLabel, generateDateMonths, getDefaultDateMonth } from '../shared/BudgetUtils';
 
 interface Props {
     show: boolean;
@@ -23,49 +23,39 @@ interface Props {
     openCategory: () => void;
     categories: Category[];
     handleCreateBudget: (budget: Budget) => void;
+    // handleDeleteBudget: (budgetID: string) => void;
+    monthDate: Date;
 }
 
 let errorTimeout: ReturnType<typeof setTimeout>;
 
 const BudgetModal: React.FC<Props> = props => {
-    const [budget, setBudget] = useState({
-        frequency: props.mode === 'edit' ? props.budget.frequency : '',
-        startDate:
-            props.mode === 'edit' && props.budget.frequency === 'one-time'
-                ? new Date(props.budget.startDate).toISOString().slice(0, 10)
-                : new Date().toISOString().slice(0, 10),
-        endDate:
-            props.mode === 'edit' && props.budget.frequency === 'one-time'
-                ? new Date(props.budget.endDate).toISOString().slice(0, 10)
-                : new Date().toISOString().slice(0, 10),
-        amount: props.mode === 'edit' ? props.budget.amount.toFixed(2) : '',
-        categoryName: props.mode === 'edit' ? props.budget.categoryName : '',
-    });
+    const [budget, setBudget] = useState<Budget>(props.mode === 'edit' ? props.budget : null);
     const [error, setError] = useState({ show: false, message: '' });
 
-    useEffect(() => {
-        window.onkeydown = (e: globalThis.KeyboardEvent) => {
-            if (e.key === 'Enter' && props.show) {
-                handleSubmit(e);
-            }
-        };
-    }, [props.show]);
-
-    const handleSubmit = (e: any) => {
+    const handleSubmit = (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();
-        const parsedAmount = parseFloat(budget.amount);
-        if (budget.frequency === 'one-time' && !budget.startDate && !budget.endDate) {
-            setError({ show: true, message: 'Invalid date' });
+        if (
+            !budget ||
+            !budget.frequency ||
+            !budget.amount ||
+            !budget.categoryName ||
+            !budget.startDate ||
+            !budget.endDate
+        ) {
+            setError({ show: true, message: 'All fields must be filled.' });
         } else if (budget.startDate > budget.endDate) {
             setError({ show: true, message: 'Start date must be before end date of purchase' });
-        } else if (!budget.frequency || !budget.amount || !budget.categoryName) {
-            setError({ show: true, message: 'All fields must be filled.' });
-        } else if (isNaN(parsedAmount)) {
+        } else if (isNaN(budget.amount)) {
             setError({ show: true, message: 'Amount should be numeric' });
-        } else if (parsedAmount > 1000000000) {
+        } else if (budget.amount > 1000000000) {
             setError({ show: true, message: 'Maximum amount is $1,000,000,000' });
         } else {
-            props.handleCreateBudget({ ...budget, amount: parsedAmount });
+            if (props.mode === 'add') {
+                // props.handleCreateBudget({ ...budget, amount: budget.amount });
+            } else {
+                // props.handleEditBudget({});
+            }
             handleClose();
             return;
         }
@@ -79,13 +69,7 @@ const BudgetModal: React.FC<Props> = props => {
 
     const handleClose = () => {
         props.close();
-        setBudget({
-            frequency: '',
-            startDate: new Date().toISOString().slice(0, 10),
-            endDate: new Date().toISOString().slice(0, 10),
-            amount: '',
-            categoryName: '',
-        });
+        setBudget(null);
     };
 
     return (
@@ -102,8 +86,8 @@ const BudgetModal: React.FC<Props> = props => {
                             defaultOption={
                                 props.mode === 'edit'
                                     ? {
-                                          value: budget.categoryName,
-                                          label: budget.categoryName,
+                                          value: props.budget.categoryName,
+                                          label: props.budget.categoryName,
                                       }
                                     : null
                             }
@@ -126,10 +110,11 @@ const BudgetModal: React.FC<Props> = props => {
                     <Form.Group>
                         <Form.Label>Amount</Form.Label>
                         <Form.Control
+                            defaultValue={props.mode === 'edit' ? props.budget.amount : null}
                             onChange={e =>
                                 setBudget({
                                     ...budget,
-                                    amount: e.target.value,
+                                    amount: parseFloat(e.target.value),
                                 })
                             }
                         />
@@ -170,37 +155,46 @@ const BudgetModal: React.FC<Props> = props => {
                                       }
                                     : null
                             }
-                            onChange={(e: any) => setBudget({ ...budget, frequency: e.value })}
+                            onChange={e => setBudget({ ...budget, frequency: e.value })}
                         />
                     </Form.Group>
-                    {budget.frequency === 'one-time' ? (
-                        <DateWrapper>
-                            <Form.Group>
-                                <Form.Label>Start Saving</Form.Label>
-                                <Form.Control
-                                    className='form-control editor edit-date'
-                                    defaultValue={budget.startDate}
-                                    onChange={e =>
-                                        setBudget({ ...budget, startDate: e.target.value })
-                                    }
-                                    type='date'
-                                />
-                            </Form.Group>
-                            <Form.Group>
-                                <Form.Label>Purchase Date</Form.Label>
-                                <Form.Control
-                                    className='form-control editor edit-date'
-                                    defaultValue={budget.endDate}
-                                    onChange={e =>
-                                        setBudget({ ...budget, endDate: e.target.value })
-                                    }
-                                    type='date'
-                                />
-                            </Form.Group>
-                        </DateWrapper>
-                    ) : null}
+                    <DateWrapper>
+                        <Form.Group>
+                            <Form.Label>Start Month</Form.Label>
+                            <Dropdown
+                                size='bg'
+                                padded
+                                options={generateDateMonths(props.monthDate)}
+                                placeholder='Select date...'
+                                defaultOption={getDefaultDateMonth(
+                                    props.monthDate,
+                                    props.mode,
+                                    'start'
+                                )}
+                                onChange={e => setBudget({ ...budget, startDate: e.value })}
+                            />
+                        </Form.Group>
+                        <Form.Group>
+                            <Form.Label>End Month</Form.Label>
+                            <Dropdown
+                                size='bg'
+                                padded
+                                options={generateDateMonths(props.monthDate)}
+                                placeholder='Select date...'
+                                defaultOption={getDefaultDateMonth(
+                                    props.monthDate,
+                                    props.mode,
+                                    'end'
+                                )}
+                                onChange={e => setBudget({ ...budget, endDate: e.value })}
+                            />
+                        </Form.Group>
+                    </DateWrapper>
                 </Modal.Body>
                 <Modal.Footer>
+                    <Button onClick={() => handleSubmit} size='sm' variant='danger'>
+                        Delete
+                    </Button>
                     <Button onClick={handleClose} size='sm' variant='secondary'>
                         Cancel
                     </Button>
@@ -215,6 +209,9 @@ const BudgetModal: React.FC<Props> = props => {
 
 const DateWrapper = styled.div`
     display: flex;
+    & > div {
+        width: 50%;
+    }
     & div:first-child {
         margin-right: 10px;
     }

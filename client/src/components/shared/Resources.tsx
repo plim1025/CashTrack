@@ -1,5 +1,5 @@
 // TYPES //
-import { Transaction, Account, Category, Budget } from '../../types';
+import { Transaction, Resources } from '../../types';
 
 const wrapPromise = (promise: any) => {
     let status = 'loading';
@@ -66,11 +66,7 @@ const fetchAccounts = async () => {
             throw Error('Bad response from server');
         }
         const parsedResponse = await response.json();
-        if (parsedResponse.length) {
-            const typedResponse = parsedResponse.map(({ batchID, ...account }: Account) => account);
-            return typedResponse;
-        }
-        return [];
+        return parsedResponse;
     } catch (error) {
         throw Error(`Error fetching accounts: ${error}`);
     }
@@ -106,12 +102,7 @@ const fetchBudgets = async () => {
     }
 };
 
-const createResource = (): {
-    transactions: { read: () => Transaction[] };
-    accounts: { read: () => Account[] };
-    categories: { read: () => Category[] };
-    budgets: { read: () => Budget[] };
-} => {
+const createResource = (): Resources => {
     return {
         transactions: wrapPromise(fetchTransactions()),
         accounts: wrapPromise(fetchAccounts()),

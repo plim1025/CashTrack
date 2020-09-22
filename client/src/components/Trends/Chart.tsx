@@ -11,7 +11,7 @@ import { ResponsivePie } from '@nivo/pie';
 import { Charts, Transaction, Trends, Subtrends } from '../../types';
 
 // UTILS //
-import { moneyFormat } from '../shared/TransactionUtil';
+import { moneyFormat } from '../shared/SharedUtils';
 
 interface Props {
     chart: Charts;

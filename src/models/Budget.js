@@ -7,6 +7,11 @@ const requiredString = {
     required: true,
 };
 
+const requiredDate = {
+    type: Date,
+    required: true,
+};
+
 const BudgetSchema = new Schema({
     userID: requiredString,
     frequency: {
@@ -14,8 +19,8 @@ const BudgetSchema = new Schema({
         required: true,
         enum: ['year', 'month', 'week', 'day', 'one-time'],
     },
-    startDate: Date,
-    endDate: Date,
+    startDate: requiredDate,
+    endDate: requiredDate,
     amount: {
         type: Number,
         required: true,

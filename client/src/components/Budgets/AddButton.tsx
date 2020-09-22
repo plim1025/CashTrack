@@ -16,20 +16,16 @@ const AddButton: React.FC<Props> = props => {
 const ButtonWrapper = styled(Button)`
     height: 40px;
     justify-content: center;
-    @media (max-width: 750px) {
-        width: 60px;
-    }
+    margin: 10px auto;
     &&& {
         align-items: center;
         display: flex;
         font-weight: 700;
         line-height: inherit;
-        margin: 20px;
         padding-left: 0.375rem;
         padding-right: 0.375rem;
-        white-space: nowrap;
-        width: calc(25% - 40px);
     }
+    width: 120px;
 `;
 
 export default AddButton;

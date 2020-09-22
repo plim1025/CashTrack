@@ -24,7 +24,7 @@ const Register: React.FC<RouteComponentProps> = props => {
     const [error, setError] = useState({ show: false, type: '', message: '' });
     const [loading, setLoading] = useState(false);
 
-    const register = async (e: any) => {
+    const register = async (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();
         if (!email || !password) {
             setError({ show: true, type: 'danger', message: 'All fields must be filled in.' });

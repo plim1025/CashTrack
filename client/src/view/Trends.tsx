@@ -7,7 +7,7 @@ import Chart from '../components/Trends/Chart';
 import Filters from '../components/Trends/Filters';
 import Sidebar from '../components/Trends/Sidebar';
 import FallbackSpinner from '../components/shared/FallbackSpinner';
-import ViewModal from '../components/Trends/ViewModal';
+import ViewModal from '../components/shared/ViewModal';
 
 // CONTEXT //
 import { ResourcesContext } from '../App';

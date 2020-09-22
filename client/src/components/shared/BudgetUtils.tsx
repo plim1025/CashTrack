@@ -1,4 +1,4 @@
-import { Budget, Transaction } from '../../types';
+import { Budget, DropdownOption } from '../../types';
 
 export const getFrequencyLabel = (frequency: string): string => {
     switch (frequency) {
@@ -82,4 +82,64 @@ export const parseTotalBudget = (budget: Budget, totalSpent: number, monthDate: 
         totalBudget = budget.amount / monthsToSave;
     }
     return totalBudget;
+};
+
+export const generateDateMonths = (monthDate: Date): DropdownOption[] => {
+    const year = monthDate.getFullYear();
+    return [
+        { label: `Jan ${year}`, value: new Date(year, 0, 0) },
+        { label: `Feb ${year}`, value: new Date(year, 1, 0) },
+        { label: `Mar ${year}`, value: new Date(year, 2, 0) },
+        { label: `Apr ${year}`, value: new Date(year, 3, 0) },
+        { label: `May ${year}`, value: new Date(year, 4, 0) },
+        { label: `Jun ${year}`, value: new Date(year, 5, 0) },
+        { label: `Jul ${year}`, value: new Date(year, 6, 0) },
+        { label: `Aug ${year}`, value: new Date(year, 7, 0) },
+        { label: `Sep ${year}`, value: new Date(year, 8, 0) },
+        { label: `Oct ${year}`, value: new Date(year, 9, 0) },
+        { label: `Nov ${year}`, value: new Date(year, 10, 0) },
+        { label: `Dec ${year}`, value: new Date(year, 11, 0) },
+        { label: 'Forever', value: new Date(9999) },
+    ];
+};
+
+export const getDefaultDateMonth = (
+    monthDate: Date,
+    mode: string,
+    startOrEnd: 'start' | 'end'
+): DropdownOption => {
+    const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+    ];
+    let editMonth;
+    let editYear;
+    if (mode === 'edit') {
+        editMonth = monthDate.getMonth();
+        editYear = monthDate.getFullYear();
+    } else {
+        editMonth = new Date().getMonth();
+        editYear = new Date().getFullYear();
+    }
+    if (startOrEnd === 'end') {
+        editMonth++;
+    }
+    if (editMonth === 12) {
+        editYear++;
+        editMonth = 0;
+    }
+    return {
+        label: `${months[editMonth]} ${editYear}`,
+        value: new Date(editMonth),
+    };
 };

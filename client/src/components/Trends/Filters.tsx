@@ -7,7 +7,7 @@ import { components } from 'react-select';
 import Dropdown from '../shared/Dropdown';
 
 // TYPES //
-import { Trends, Subtrends, Charts, Dates, Account } from '../../types';
+import { Trends, Subtrends, Charts, Dates, Account, DropdownOption } from '../../types';
 
 interface Props {
     trend: Trends;
@@ -40,7 +40,7 @@ const Filters: React.FC<Props> = props => {
     const isSelectAllSelected = () =>
         selectedAccountIDsRef.current.length === props.accounts.length;
 
-    const handleAccountSelect = (selectedAccounts: any, info: any) => {
+    const handleAccountSelect = (selectedAccounts: DropdownOption[], info: any) => {
         const { action, option, removedValue } = info;
         if (action === 'select-option' && option.value === allAccountsOption.value) {
             props.setAccounts(props.accounts.map(account => account.id));
@@ -117,7 +117,7 @@ const Filters: React.FC<Props> = props => {
                         style={{ width: 200, margin: '0 10px', minWidth: 200 }}
                         size='sm'
                         options={[allAccountsOption, ...accountOptions]}
-                        isOptionSelected={(option: any) =>
+                        isOptionSelected={(option: DropdownOption) =>
                             selectedAccountIDsRef.current.some(value => value === option.value) ||
                             isSelectAllSelected()
                         }

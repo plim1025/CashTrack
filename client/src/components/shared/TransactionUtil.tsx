@@ -1,4 +1,4 @@
-import { Transaction, Account, Category, GroupedDropdownOption } from '../../types';
+import { Transaction, Account } from '../../types';
 
 export const createTransaction = async (transaction: Transaction): Promise<string> => {
     try {
@@ -188,39 +188,7 @@ export const deleteCategory = async (id: string, transactionIDs: string[]): Prom
     }
 };
 
-export const moneyFormat = (money: number | string | Date): string => {
-    if (typeof money === 'number') {
-        if (money < 0) {
-            return `-$${Math.abs(money)
-                .toFixed(2)
-                .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-        }
-        return `$${money.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-    }
-    if (typeof money === 'string') {
-        const moneyNum = parseFloat(money);
-        if (moneyNum < 0) {
-            return `-$${Math.abs(moneyNum)
-                .toFixed(2)
-                .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-        }
-        return `$${moneyNum.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-    }
-    return 'Error, cannot parse money from date';
-};
-
-export const parseAccountInfo = (
-    accounts: Account[],
-    selectedAccountID: string
-): {
-    institution: string;
-    name: string;
-    balance: number;
-    debt: number;
-    available: number;
-    creditLimit: number;
-    type: string;
-} => {
+export const parseAccountInfo = (accounts: Account[], selectedAccountID: string): Account => {
     if (selectedAccountID === 'All Accounts') {
         const totalBalance = accounts
             .map((account: Account) =>
@@ -237,6 +205,7 @@ export const parseAccountInfo = (
             )
             .reduce((total: number, debt: number) => total + debt);
         return {
+            id: 'All Accounts',
             institution: 'All Accounts',
             name: `${accounts.length} accounts`,
             balance: totalBalance,
@@ -244,6 +213,8 @@ export const parseAccountInfo = (
             available: null,
             creditLimit: null,
             type: null,
+            mask: null,
+            batchID: null,
         };
     }
     const selectedAccount = accounts.find((account: Account) => account.id === selectedAccountID);
@@ -254,6 +225,8 @@ export const parseAccountInfo = (
         available = selectedAccount.available;
     }
     return {
+        id: selectedAccount.id,
+        batchID: selectedAccount.batchID,
         institution: selectedAccount.institution,
         name: selectedAccount.name,
         balance: selectedAccount.balance,
@@ -261,6 +234,7 @@ export const parseAccountInfo = (
         available: available,
         creditLimit: selectedAccount.creditLimit || null,
         type: selectedAccount.type,
+        mask: selectedAccount.mask,
     };
 };
 
@@ -274,7 +248,7 @@ export const sortDate = (a: string, b: string, order: string): number => {
     return Date.parse(b) - Date.parse(a);
 };
 
-export const validateDate = (newValue: any): { valid: boolean; message?: string } => {
+export const validateDate = (newValue: string): { valid: boolean; message?: string } => {
     if (!newValue) {
         return {
             valid: false,
@@ -289,7 +263,7 @@ export const formatDescription = (cell: string): string => {
     return cell;
 };
 
-export const validateDescription = (newValue: any): { valid: boolean; message?: string } => {
+export const validateDescription = (newValue: string): { valid: boolean; message?: string } => {
     if (!newValue) {
         return {
             valid: false,
@@ -319,28 +293,4 @@ export const validateAmount = (newValue: any): { valid: boolean; message?: strin
         };
     }
     return { valid: true };
-};
-
-const parseCategoryGroup = (categories: Category[], type: string) => {
-    return categories
-        .filter(category => category.type === type)
-        .map(category => ({ value: category.name, label: category.name }))
-        .sort((a, b) => (a.value.toUpperCase() > b.value.toUpperCase() ? 0 : -1));
-};
-
-export const parseCategoryDropdownOptions = (categories: Category[]): GroupedDropdownOption[] => {
-    return [
-        {
-            label: 'expenses',
-            options: parseCategoryGroup(categories, 'expenses'),
-        },
-        {
-            label: 'income',
-            options: parseCategoryGroup(categories, 'income'),
-        },
-        {
-            label: 'other',
-            options: parseCategoryGroup(categories, 'other'),
-        },
-    ];
 };

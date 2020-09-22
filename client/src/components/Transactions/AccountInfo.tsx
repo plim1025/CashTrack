@@ -9,7 +9,8 @@ import { Card } from 'react-bootstrap';
 import { Account } from '../../types';
 
 // UTIL //
-import { moneyFormat, parseAccountInfo } from '../shared/TransactionUtil';
+import { moneyFormat } from '../shared/SharedUtils';
+import { parseAccountInfo } from '../shared/TransactionUtil';
 
 interface Props {
     accounts: Account[];
@@ -17,15 +18,7 @@ interface Props {
 }
 
 const AccountInfo: React.FC<Props> = props => {
-    const [curAccount, setCurAccount] = useState({
-        institution: '',
-        name: '',
-        balance: 0,
-        debt: 0,
-        available: 0,
-        creditLimit: 0,
-        type: '',
-    });
+    const [curAccount, setCurAccount] = useState<Account>(null);
 
     useEffect(() => {
         const accountInfo = parseAccountInfo(props.accounts, props.selectedAccountID);
@@ -35,11 +28,11 @@ const AccountInfo: React.FC<Props> = props => {
     return (
         <Card>
             <Card.Body>
-                <CardTitleWrapper>{curAccount.institution}</CardTitleWrapper>
-                <CardSubtitleWrapper>{curAccount.name}</CardSubtitleWrapper>
+                <CardTitleWrapper>{curAccount ? curAccount.institution : null}</CardTitleWrapper>
+                <CardSubtitleWrapper>{curAccount ? curAccount.name : null}</CardSubtitleWrapper>
             </Card.Body>
             <Wrapper>
-                {curAccount.balance !== null ? (
+                {curAccount && curAccount.balance !== null ? (
                     <Item>
                         <Title>
                             {props.selectedAccountID === 'All Accounts'
@@ -49,7 +42,7 @@ const AccountInfo: React.FC<Props> = props => {
                         <Money>{moneyFormat(curAccount.balance)}</Money>
                     </Item>
                 ) : null}
-                {curAccount.available !== null ? (
+                {curAccount && curAccount.available !== null ? (
                     <Item>
                         <Title>
                             {curAccount.type === 'credit' ? 'Available Credit' : 'Available'}
@@ -57,13 +50,13 @@ const AccountInfo: React.FC<Props> = props => {
                         <Money>{moneyFormat(curAccount.available)}</Money>
                     </Item>
                 ) : null}
-                {curAccount.debt !== null ? (
+                {curAccount && curAccount.debt !== null ? (
                     <Item>
                         <Title>Total Debt</Title>
                         <Money>{moneyFormat(curAccount.debt)}</Money>
                     </Item>
                 ) : null}
-                {curAccount.creditLimit !== null ? (
+                {curAccount && curAccount.creditLimit !== null ? (
                     <Item>
                         <Title>Credit Limit</Title>
                         <Money>{moneyFormat(curAccount.creditLimit)}</Money>

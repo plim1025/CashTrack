@@ -206,7 +206,13 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                 const oldTransactionInfo = state.transactions.find(
                     (oldTransaction: Transaction) => oldTransaction._id === transaction._id
                 );
-                return { ...oldTransactionInfo, ...newTransaction };
+                return {
+                    ...oldTransactionInfo,
+                    date: newTransaction.date,
+                    description: newTransaction.description,
+                    category: newTransaction.category,
+                    amount: newTransaction.amount,
+                };
             }
             return transaction;
         });

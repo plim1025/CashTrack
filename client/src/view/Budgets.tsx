@@ -1,3 +1,5 @@
+// /* eslint-disable react/jsx-one-expression-per-line */
+// /* eslint-disable prettier/prettier */
 // REACT //
 import React, { useReducer, useContext, useEffect } from 'react';
 
@@ -7,6 +9,7 @@ import AddButton from '../components/Budgets/AddButton';
 import BudgetModal from '../components/Budgets/BudgetModal';
 import CategoryModals from '../components/shared/CategoryModals';
 import BudgetList from '../components/Budgets/BudgetList';
+import MonthCarousel from '../components/Budgets/MonthCarousel';
 
 // CONTEXT //
 import { ResourcesContext } from '../App';
@@ -22,8 +25,7 @@ type Actions =
     | { type: 'SET_TRANSACTIONS'; transactions: Transaction[] }
     | { type: 'SET_CATEGORIES'; categories: Category[] }
     | { type: 'SET_BUDGETS'; budgets: Budget[] }
-    | { type: 'INCREASE_MONTH_DATE' }
-    | { type: 'DECREASE_MONTH_DATE' }
+    | { type: 'SET_MONTH_DATE'; date: Date }
     | { type: 'SHOW_BUDGET_ADD_MODAL' }
     | { type: 'SHOW_BUDGET_EDIT_MODAL'; budget: Budget }
     | { type: 'HIDE_BUDGET_MODAL' }
@@ -39,7 +41,7 @@ interface ReducerState {
     transactions: Transaction[];
     categories: Category[];
     budgets: Budget[];
-    monthDate: Date | number;
+    monthDate: Date;
     budgetModal: {
         show: boolean;
         mode: string;
@@ -64,16 +66,12 @@ const reducer = (state: ReducerState, action: Actions) => {
             return { ...state, categories: action.categories };
         case 'SET_BUDGETS':
             return { ...state, budgets: action.budgets };
-        case 'INCREASE_MONTH_DATE':
-            const increaseDate = new Date(state.monthDate);
-            return { ...state, monthDate: increaseDate.setDate(increaseDate.getMonth() + 1) };
-        case 'DECREASE_MONTH_DATE':
-            const decreaseDate = new Date(state.monthDate);
-            return { ...state, monthDate: decreaseDate.setDate(decreaseDate.getMonth() + 1) };
+        case 'SET_MONTH_DATE':
+            return { ...state, monthDate: action.date };
         case 'SHOW_BUDGET_ADD_MODAL':
             return { ...state, budgetModal: { ...state.budgetModal, show: true, mode: 'add' } };
         case 'SHOW_BUDGET_EDIT_MODAL':
-            return { ...state, budgetModal: { ...state.budgetModal, show: true, mode: 'edit' } };
+            return { ...state, budgetModal: { show: true, mode: 'edit', budget: action.budget } };
         case 'HIDE_BUDGET_MODAL':
             return { ...state, budgetModal: { ...state.budgetModal, show: false } };
         case 'SHOW_CATEGORY_MODAL':
@@ -154,15 +152,26 @@ const Budgets: React.FC = () => {
     };
 
     return (
-        <>
-            <AddButton openAddModal={() => dispatch({ type: 'SHOW_BUDGET_ADD_MODAL' })} />
+        <Wrapper>
+            <SubWrapper>
+                <AddButton openAddModal={() => dispatch({ type: 'SHOW_BUDGET_ADD_MODAL' })} />
+                <MonthCarousel
+                    monthDate={state.monthDate}
+                    setMonthDate={(monthDate: Date) =>
+                        dispatch({ type: 'SET_MONTH_DATE', date: monthDate })
+                    }
+                />
+            </SubWrapper>
+            {/* <Title>Budgets for {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][state.monthDate.getMonth()]} {state.monthDate.getFullYear()}</Title> */}
             <BudgetList
                 budgets={state.budgets}
                 transactions={state.transactions}
                 categories={state.categories}
                 monthDate={state.monthDate}
+                openEditModal={(newBudget: Budget) =>
+                    dispatch({ type: 'SHOW_BUDGET_EDIT_MODAL', budget: newBudget })
+                }
             />
-
             <BudgetModal
                 show={state.budgetModal.show}
                 mode={state.budgetModal.mode}
@@ -171,6 +180,7 @@ const Budgets: React.FC = () => {
                 openCategory={() => dispatch({ type: 'SHOW_CATEGORY_MODAL' })}
                 categories={state.categories.filter(category => category.selected)}
                 handleCreateBudget={handleCreateBudget}
+                monthDate={state.monthDate}
             />
             <CategoryModals
                 setLoading={(loading: boolean) =>
@@ -199,8 +209,28 @@ const Budgets: React.FC = () => {
                 hideCategorySubmodal={() => dispatch({ type: 'HIDE_CATEGORY_SUBMODAL' })}
                 hideCategoryDeleteModal={() => dispatch({ type: 'HIDE_CATEGORY_DELETE_MODAL' })}
             />
-        </>
+        </Wrapper>
     );
 };
+
+const Wrapper = styled.div`
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+`;
+
+const SubWrapper = styled.div`
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 20px 0;
+    max-width: 800px;
+    width: 100%;
+`;
+
+const Title = styled.div`
+    font-size: 1.25rem;
+    font-weight: 700;
+`;
 
 export default Budgets;

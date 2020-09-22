@@ -11,7 +11,7 @@ import CategoryDropdownMenu from '../shared/CategoryDropdownMenu';
 import { Transaction, Category } from '../../types';
 
 // UTILS //
-import { parseCategoryDropdownOptions } from '../shared/TransactionUtil';
+import { DateString, parseCategoryDropdownOptions } from '../shared/SharedUtils';
 
 interface Props {
     mode: string;
@@ -27,44 +27,37 @@ let errorTimeout: ReturnType<typeof setTimeout>;
 
 const TransactionModal: React.FC<Props> = props => {
     const modalRef = useRef<HTMLInputElement>(null);
-    const [transaction, setTransaction] = useState({
-        date: new Date().toISOString().slice(0, 10),
-        description: '',
-        category: '',
-        amount: '',
+    const [transaction, setTransaction] = useState<Transaction>({
+        date: new Date(),
+        _id: null,
+        description: null,
+        category: null,
+        amount: null,
+        accountID: null,
+        categoryID: null,
+        type: null,
     });
     const [error, setError] = useState({ show: false, message: '' });
 
-    useEffect(() => {
-        window.onkeydown = (e: globalThis.KeyboardEvent) => {
-            if (e.key === 'Enter' && props.show) {
-                handleSubmit(e);
-            }
-        };
-    }, [props.show]);
-
-    const handleSubmit = (e: any) => {
+    const handleSubmit = (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();
-        const parsedAmount = parseFloat(transaction.amount);
-        if (!transaction.date) {
-            setError({ show: true, message: 'Invalid date' });
-        } else if (!transaction.description || !transaction.category || !transaction.amount) {
+        if (
+            !transaction ||
+            !transaction.date ||
+            !transaction.description ||
+            !transaction.category ||
+            transaction.amount == null
+        ) {
             setError({ show: true, message: 'All fields must be filled.' });
-        } else if (isNaN(parsedAmount)) {
+        } else if (isNaN(transaction.amount)) {
             setError({ show: true, message: 'Amount should be numeric' });
-        } else if (parsedAmount > 1000000000) {
+        } else if (transaction.amount > 1000000000) {
             setError({ show: true, message: 'Maximum amount is $1,000,000,000' });
         } else {
-            setTransaction({
-                date: new Date().toISOString().slice(0, 10),
-                description: '',
-                category: '',
-                amount: '',
-            });
             if (props.mode === 'add') {
-                props.handleCreateTransaction({ ...transaction, amount: parsedAmount });
+                props.handleCreateTransaction(transaction);
             } else {
-                props.handleEditMultipleTransactions({ ...transaction, amount: parsedAmount });
+                props.handleEditMultipleTransactions(transaction);
             }
             handleClose();
             return;
@@ -80,10 +73,14 @@ const TransactionModal: React.FC<Props> = props => {
     const handleClose = () => {
         props.close();
         setTransaction({
-            date: new Date().toISOString().slice(0, 10),
-            description: '',
-            category: '',
-            amount: '',
+            date: new Date(),
+            _id: null,
+            description: null,
+            category: null,
+            amount: null,
+            accountID: null,
+            categoryID: null,
+            type: null,
         });
     };
 
@@ -93,6 +90,7 @@ const TransactionModal: React.FC<Props> = props => {
         };
     }, []);
 
+    console.log(transaction);
     return (
         <Modal
             centered
@@ -107,8 +105,10 @@ const TransactionModal: React.FC<Props> = props => {
                         <Form.Label>Date</Form.Label>
                         <Form.Control
                             className='form-control editor edit-date'
-                            defaultValue={transaction.date}
-                            onChange={e => setTransaction({ ...transaction, date: e.target.value })}
+                            defaultValue={DateString()}
+                            onChange={e =>
+                                setTransaction({ ...transaction, date: new Date(e.target.value) })
+                            }
                             type='date'
                         />
                     </Form.Group>
@@ -130,14 +130,6 @@ const TransactionModal: React.FC<Props> = props => {
                             size='bg'
                             padded
                             options={parseCategoryDropdownOptions(props.categories)}
-                            defaultOption={
-                                props.mode === 'edit'
-                                    ? {
-                                          value: transaction.category,
-                                          label: transaction.category,
-                                      }
-                                    : null
-                            }
                             placeholder='Select Category...'
                             onChange={e =>
                                 setTransaction({
@@ -160,7 +152,7 @@ const TransactionModal: React.FC<Props> = props => {
                             onChange={e =>
                                 setTransaction({
                                     ...transaction,
-                                    amount: e.target.value,
+                                    amount: parseFloat(e.target.value),
                                 })
                             }
                         />
