@@ -9,6 +9,7 @@ import { Modal, Table } from 'react-bootstrap';
 import { Transaction } from '../../types';
 
 // UTIL //
+import { formatDate, formatDescription } from '../Transactions/TransactionUtil';
 import { moneyFormat } from './SharedUtils';
 
 interface Props {
@@ -38,10 +39,10 @@ const ViewModal: React.FC<Props> = props => {
                         <tbody>
                             {props.transactions.map(transaction => (
                                 <tr key={transaction._id}>
-                                    <td>{transaction.date}</td>
-                                    <td>{transaction.description}</td>
+                                    <td>{formatDate(transaction.date)}</td>
+                                    <td>{formatDescription(transaction.description)}</td>
                                     <td>{transaction.category}</td>
-                                    <td>{moneyFormat(transaction.amount)}</td>
+                                    <td>{moneyFormat(transaction.amount.toString())}</td>
                                 </tr>
                             ))}
                         </tbody>

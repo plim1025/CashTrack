@@ -16,7 +16,7 @@ import { ResourcesContext } from '../App';
 import { Transaction, Account, Trends, Subtrends, Charts, Dates, Data } from '../types';
 
 // UTIL //
-import { parseSelectedTransactions, parseTransactionData } from '../components/shared/TrendUtil';
+import { parseSelectedTransactions, parseTransactionData } from '../components/Trends/TrendUtil';
 
 type Actions =
     | { type: 'SET_LOADING'; loading: boolean }

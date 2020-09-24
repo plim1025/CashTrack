@@ -27,7 +27,7 @@ import {
     createTransaction,
     updateTransactions,
     deleteTransactions,
-} from '../components/shared/TransactionUtil';
+} from '../components/Transactions/TransactionUtil';
 
 type Actions =
     | { type: 'SET_LOADING'; loading: boolean }

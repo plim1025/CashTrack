@@ -10,7 +10,7 @@ import { Account } from '../../types';
 
 // UTIL //
 import { moneyFormat } from '../shared/SharedUtils';
-import { parseAccountInfo } from '../shared/TransactionUtil';
+import { parseAccountInfo } from './TransactionUtil';
 
 interface Props {
     accounts: Account[];

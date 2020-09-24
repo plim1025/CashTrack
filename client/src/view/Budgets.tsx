@@ -11,6 +11,7 @@ import CategoryModals from '../components/shared/CategoryModals';
 import BudgetList from '../components/Budgets/BudgetList';
 import MonthCarousel from '../components/Budgets/MonthCarousel';
 import FallbackSpinner from '../components/shared/FallbackSpinner';
+import TotalCard from '../components/Budgets/TotalCard';
 
 // CONTEXT //
 import { ResourcesContext } from '../App';
@@ -19,7 +20,7 @@ import { ResourcesContext } from '../App';
 import { Category, Budget } from '../types';
 
 // UTILS //
-import { createBudget, updateBudget, deleteBudget } from '../components/shared/BudgetUtils';
+import { createBudget, updateBudget, deleteBudget } from '../components/Budgets/BudgetUtils';
 
 type Actions =
     | { type: 'SET_LOADING'; loading: boolean }
@@ -173,12 +174,26 @@ const Budgets: React.FC = () => {
                         new Date(budget.startDate) <= state.monthDate &&
                         new Date(budget.endDate) > state.monthDate
                 )}
-                transactions={transactions}
+                transactions={transactions.filter(
+                    transaction =>
+                        new Date(transaction.date).getFullYear() ===
+                            state.monthDate.getFullYear() &&
+                        new Date(transaction.date).getMonth() === state.monthDate.getMonth()
+                )}
                 categories={categories}
                 monthDate={state.monthDate}
                 openEditModal={(newBudget: Budget) =>
                     dispatch({ type: 'SHOW_BUDGET_EDIT_MODAL', budget: newBudget })
                 }
+            />
+            <TotalCard
+                budgets={budgets.filter(
+                    budget =>
+                        new Date(budget.startDate) <= state.monthDate &&
+                        new Date(budget.endDate) > state.monthDate
+                )}
+                categories={categories}
+                monthDate={state.monthDate}
             />
             <BudgetModal
                 show={state.budgetModal.show}

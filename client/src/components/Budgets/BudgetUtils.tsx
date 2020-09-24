@@ -82,7 +82,7 @@ export const deleteBudget = async (budgetID: string): Promise<void> => {
     }
 };
 
-export const parseTotalBudget = (budget: Budget, totalSpent: number, monthDate: Date): number => {
+export const parseTotalBudget = (budget: Budget, monthDate: Date): number => {
     let totalBudget;
     if (budget.frequency === 'day') {
         const daysInMonth = new Date(

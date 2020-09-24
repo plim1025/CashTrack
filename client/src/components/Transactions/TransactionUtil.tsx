@@ -161,12 +161,6 @@ export const validateDescription = (newValue: string): { valid: boolean; message
     return { valid: true };
 };
 
-export const formatAmount = (cell: string): string => {
-    const parsedCell = parseFloat(cell);
-    if (parsedCell < 0) return `-$${Math.abs(parsedCell).toFixed(2)}`;
-    return `$${parsedCell.toFixed(2)}`;
-};
-
 export const validateAmount = (newValue: any): { valid: boolean; message?: string } => {
     if (isNaN(newValue) || !newValue) {
         return {

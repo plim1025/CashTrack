@@ -13,7 +13,7 @@ import { Budget, Category } from '../../types';
 
 // UTILS //
 import { parseCategoryDropdownOptions } from '../shared/SharedUtils';
-import { getFrequencyLabel, generateDateMonths, getDefaultDateMonth } from '../shared/BudgetUtils';
+import { getFrequencyLabel, generateDateMonths, getDefaultDateMonth } from './BudgetUtils';
 
 interface Props {
     show: boolean;
@@ -66,6 +66,8 @@ const BudgetModal: React.FC<Props> = props => {
             setError({ show: true, message: 'Start date must be before end date of purchase' });
         } else if (isNaN(budget.amount)) {
             setError({ show: true, message: 'Amount should be numeric' });
+        } else if (budget.amount < 0) {
+            setError({ show: true, message: 'Budget cannot be less than $0' });
         } else if (budget.amount > 1000000000) {
             setError({ show: true, message: 'Maximum amount is $1,000,000,000' });
         } else {
@@ -97,11 +99,11 @@ const BudgetModal: React.FC<Props> = props => {
         });
     };
 
-    // useEffect(() => {
-    //     return () => {
-    //         clearTimeout(errorTimeout);
-    //     };
-    // }, []);
+    useEffect(() => {
+        return () => {
+            clearTimeout(errorTimeout);
+        };
+    }, []);
 
     return (
         <Modal centered onHide={handleClose} show={props.show}>

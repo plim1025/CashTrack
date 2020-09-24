@@ -28,11 +28,10 @@ import {
     validateDate,
     formatDescription,
     validateDescription,
-    formatAmount,
     validateAmount,
     updateTransactions,
-} from '../shared/TransactionUtil';
-import { parseCategoryDropdownOptions } from '../shared/SharedUtils';
+} from './TransactionUtil';
+import { moneyFormat, parseCategoryDropdownOptions } from '../shared/SharedUtils';
 
 interface Props {
     selectedTransactionIDs: string[];
@@ -59,9 +58,7 @@ const Table: React.FC<Props> = props => {
             const searchedTransactions = transactions.filter(
                 transaction =>
                     transaction.selected &&
-                    (formatAmount(transaction.amount.toString())
-                        .toLowerCase()
-                        .includes(parsedSearch) ||
+                    (moneyFormat(transaction.amount).toLowerCase().includes(parsedSearch) ||
                         transaction.category.toLowerCase().includes(parsedSearch) ||
                         formatDate(transaction.date).includes(parsedSearch) ||
                         formatDescription(transaction.description)
@@ -119,7 +116,7 @@ const Table: React.FC<Props> = props => {
             text: 'Amount',
             dataField: 'amount',
             editCellClasses: 'transaction-table-edit-cell',
-            formatter: formatAmount,
+            formatter: moneyFormat,
             sort: true,
             validator: validateAmount,
         },
