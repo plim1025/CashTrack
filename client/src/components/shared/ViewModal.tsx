@@ -25,26 +25,30 @@ const ViewModal: React.FC<Props> = props => {
                 <h4 className='w-100'>{props.title}</h4>
             </Modal.Header>
             <Modal.Body>
-                <TableWrapper bordered>
-                    <thead>
-                        <tr>
-                            <th style={{ width: 100 }}>Date</th>
-                            <th>Description</th>
-                            <th>Category</th>
-                            <th style={{ width: 136 }}>Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {props.transactions.map(transaction => (
-                            <tr key={transaction._id}>
-                                <td>{transaction.date}</td>
-                                <td>{transaction.description}</td>
-                                <td>{transaction.category}</td>
-                                <td>{moneyFormat(transaction.amount)}</td>
+                {props.transactions.length ? (
+                    <TableWrapper bordered>
+                        <thead>
+                            <tr>
+                                <th style={{ width: 100 }}>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th style={{ width: 136 }}>Amount</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </TableWrapper>
+                        </thead>
+                        <tbody>
+                            {props.transactions.map(transaction => (
+                                <tr key={transaction._id}>
+                                    <td>{transaction.date}</td>
+                                    <td>{transaction.description}</td>
+                                    <td>{transaction.category}</td>
+                                    <td>{moneyFormat(transaction.amount)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </TableWrapper>
+                ) : (
+                    <div>No transactions in this time period</div>
+                )}
             </Modal.Body>
         </ModalWrapper>
     );

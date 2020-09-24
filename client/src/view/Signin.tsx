@@ -32,16 +32,15 @@ const Signin: React.FC<RouteComponentProps> = props => {
         if (!email || !password) {
             setError({ show: true, message: 'All fields must be filled in' });
         } else {
+            setLoading(true);
             try {
-                setLoading(true);
-                const signinInfo = JSON.stringify({ email: email, password: password });
                 const response = await fetch(`${process.env.BACKEND_URI}/api/user/signin`, {
                     method: 'POST',
                     credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: signinInfo,
+                    body: JSON.stringify({ email: email, password: password }),
                 });
                 const parsedResponse = await response.json();
                 if (rememberMe) {
@@ -49,11 +48,11 @@ const Signin: React.FC<RouteComponentProps> = props => {
                 } else {
                     sessionStorage.setItem('email', email);
                 }
-                setLoading(false);
-                props.history.push('/home');
             } catch {
                 setError({ show: true, message: 'Email and password do not match' });
             }
+            setLoading(false);
+            props.history.push('/home');
         }
         if (errorTimeout) {
             clearTimeout(errorTimeout);

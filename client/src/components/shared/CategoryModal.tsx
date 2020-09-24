@@ -1,10 +1,13 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 // REACT //
-import React from 'react';
+import React, { useContext } from 'react';
 
 // COMPONENTS //
 import styled from 'styled-components';
 import { Button, Modal } from 'react-bootstrap';
+
+// CONTEXT //
+import { ResourcesContext } from '../../App';
 
 // TYPES //
 import { Category } from '../../types';
@@ -12,7 +15,6 @@ import { Category } from '../../types';
 interface Props {
     show: boolean;
     close: () => void;
-    categories: Category[];
     openSubmodal: (mode: string, category?: Category) => void;
 }
 
@@ -58,6 +60,8 @@ const parseCategories = (
 };
 
 const CategoryModal: React.FC<Props> = props => {
+    const { categories } = useContext(ResourcesContext);
+
     return (
         <ModalWrapper centered onHide={() => props.close()} show={props.show}>
             <ModalHeaderWrapper closeButton>
@@ -67,19 +71,19 @@ const CategoryModal: React.FC<Props> = props => {
             <Table>
                 <Column>
                     <ColumnHeader>Expense</ColumnHeader>
-                    {parseCategories(props.categories, 'expenses', (category: Category) =>
+                    {parseCategories(categories, 'expenses', (category: Category) =>
                         props.openSubmodal('edit', category)
                     )}
                 </Column>
                 <Column>
                     <ColumnHeader>Income</ColumnHeader>
-                    {parseCategories(props.categories, 'income', (category: Category) =>
+                    {parseCategories(categories, 'income', (category: Category) =>
                         props.openSubmodal('edit', category)
                     )}
                 </Column>
                 <Column>
                     <ColumnHeader>Other</ColumnHeader>
-                    {parseCategories(props.categories, 'other', (category: Category) =>
+                    {parseCategories(categories, 'other', (category: Category) =>
                         props.openSubmodal('edit', category)
                     )}
                 </Column>

@@ -1,5 +1,5 @@
 // REACT //
-import React, { useState, useEffect, KeyboardEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // COMPONENTS //
 import styled from 'styled-components';
@@ -23,22 +23,40 @@ interface Props {
     openCategory: () => void;
     categories: Category[];
     handleCreateBudget: (budget: Budget) => void;
-    // handleDeleteBudget: (budgetID: string) => void;
+    handleEditBudget: (budgetID: string, budget: Budget) => void;
+    handleDeleteBudget: (budgetID: string) => void;
     monthDate: Date;
 }
 
 let errorTimeout: ReturnType<typeof setTimeout>;
 
 const BudgetModal: React.FC<Props> = props => {
-    const [budget, setBudget] = useState<Budget>(props.mode === 'edit' ? props.budget : null);
+    const [budget, setBudget] = useState<Budget>(null);
     const [error, setError] = useState({ show: false, message: '' });
+
+    useEffect(() => {
+        if (props.show) {
+            if (props.mode === 'edit') {
+                setBudget(props.budget);
+            } else {
+                setBudget({
+                    _id: null,
+                    frequency: null,
+                    startDate: getDefaultDateMonth(props.monthDate, props.mode, 'start').value,
+                    endDate: getDefaultDateMonth(props.monthDate, props.mode, 'end').value,
+                    amount: null,
+                    categoryName: null,
+                });
+            }
+        }
+    }, [props.show]);
 
     const handleSubmit = (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();
         if (
             !budget ||
             !budget.frequency ||
-            !budget.amount ||
+            budget.amount == null ||
             !budget.categoryName ||
             !budget.startDate ||
             !budget.endDate
@@ -52,9 +70,9 @@ const BudgetModal: React.FC<Props> = props => {
             setError({ show: true, message: 'Maximum amount is $1,000,000,000' });
         } else {
             if (props.mode === 'add') {
-                // props.handleCreateBudget({ ...budget, amount: budget.amount });
+                props.handleCreateBudget(budget);
             } else {
-                // props.handleEditBudget({});
+                props.handleEditBudget(props.budget._id, budget);
             }
             handleClose();
             return;
@@ -69,8 +87,21 @@ const BudgetModal: React.FC<Props> = props => {
 
     const handleClose = () => {
         props.close();
-        setBudget(null);
+        setBudget({
+            _id: null,
+            frequency: null,
+            startDate: getDefaultDateMonth(props.monthDate, props.mode, 'start').value,
+            endDate: getDefaultDateMonth(props.monthDate, props.mode, 'end').value,
+            amount: null,
+            categoryName: null,
+        });
     };
+
+    // useEffect(() => {
+    //     return () => {
+    //         clearTimeout(errorTimeout);
+    //     };
+    // }, []);
 
     return (
         <Modal centered onHide={handleClose} show={props.show}>
@@ -192,9 +223,19 @@ const BudgetModal: React.FC<Props> = props => {
                     </DateWrapper>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={() => handleSubmit} size='sm' variant='danger'>
-                        Delete
-                    </Button>
+                    {props.mode === 'edit' ? (
+                        <Button
+                            onClick={() => {
+                                props.handleDeleteBudget(props.budget._id);
+                                props.close();
+                            }}
+                            style={{ marginRight: 'auto' }}
+                            size='sm'
+                            variant='danger'
+                        >
+                            Delete
+                        </Button>
+                    ) : null}
                     <Button onClick={handleClose} size='sm' variant='secondary'>
                         Cancel
                     </Button>

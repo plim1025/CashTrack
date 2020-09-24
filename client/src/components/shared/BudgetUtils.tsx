@@ -16,7 +16,7 @@ export const getFrequencyLabel = (frequency: string): string => {
     }
 };
 
-export const createBudget = async (budget: Budget): Promise<string> => {
+export const createBudget = async (budget: Budget): Promise<Budget> => {
     try {
         const response = await fetch(`${process.env.BACKEND_URI}/api/budget`, {
             method: 'POST',
@@ -35,10 +35,50 @@ export const createBudget = async (budget: Budget): Promise<string> => {
         if (!response.ok) {
             throw Error('Bad response from server');
         }
-        const { id } = await response.json();
-        return id;
+        const newBudget = await response.json();
+        return newBudget;
     } catch (error) {
         throw Error(`Error creating budget: ${error}`);
+    }
+};
+
+export const updateBudget = async (budgetID: string, budget: Budget): Promise<Budget> => {
+    try {
+        const response = await fetch(`${process.env.BACKEND_URI}/api/budget/${budgetID}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                frequency: budget.frequency,
+                amount: budget.amount,
+                categoryName: budget.categoryName,
+                startDate: budget.startDate,
+                endDate: budget.endDate,
+            }),
+        });
+        if (!response.ok) {
+            throw Error('Bad response from server');
+        }
+        const newResponse = await response.json();
+        return newResponse;
+    } catch (error) {
+        throw Error(`Error deleting budget: ${error}`);
+    }
+};
+
+export const deleteBudget = async (budgetID: string): Promise<void> => {
+    try {
+        const response = await fetch(`${process.env.BACKEND_URI}/api/budget/${budgetID}`, {
+            method: 'DELETE',
+            credentials: 'include',
+        });
+        if (!response.ok) {
+            throw Error('Bad response from server');
+        }
+    } catch (error) {
+        throw Error(`Error deleting budget: ${error}`);
     }
 };
 
@@ -87,18 +127,18 @@ export const parseTotalBudget = (budget: Budget, totalSpent: number, monthDate: 
 export const generateDateMonths = (monthDate: Date): DropdownOption[] => {
     const year = monthDate.getFullYear();
     return [
-        { label: `Jan ${year}`, value: new Date(year, 0, 0) },
-        { label: `Feb ${year}`, value: new Date(year, 1, 0) },
-        { label: `Mar ${year}`, value: new Date(year, 2, 0) },
-        { label: `Apr ${year}`, value: new Date(year, 3, 0) },
-        { label: `May ${year}`, value: new Date(year, 4, 0) },
-        { label: `Jun ${year}`, value: new Date(year, 5, 0) },
-        { label: `Jul ${year}`, value: new Date(year, 6, 0) },
-        { label: `Aug ${year}`, value: new Date(year, 7, 0) },
-        { label: `Sep ${year}`, value: new Date(year, 8, 0) },
-        { label: `Oct ${year}`, value: new Date(year, 9, 0) },
-        { label: `Nov ${year}`, value: new Date(year, 10, 0) },
-        { label: `Dec ${year}`, value: new Date(year, 11, 0) },
+        { label: `Jan ${year}`, value: new Date(year, 0, 1) },
+        { label: `Feb ${year}`, value: new Date(year, 1, 1) },
+        { label: `Mar ${year}`, value: new Date(year, 2, 1) },
+        { label: `Apr ${year}`, value: new Date(year, 3, 1) },
+        { label: `May ${year}`, value: new Date(year, 4, 1) },
+        { label: `Jun ${year}`, value: new Date(year, 5, 1) },
+        { label: `Jul ${year}`, value: new Date(year, 6, 1) },
+        { label: `Aug ${year}`, value: new Date(year, 7, 1) },
+        { label: `Sep ${year}`, value: new Date(year, 8, 1) },
+        { label: `Oct ${year}`, value: new Date(year, 9, 1) },
+        { label: `Nov ${year}`, value: new Date(year, 10, 1) },
+        { label: `Dec ${year}`, value: new Date(year, 11, 1) },
         { label: 'Forever', value: new Date(9999) },
     ];
 };
@@ -140,6 +180,6 @@ export const getDefaultDateMonth = (
     }
     return {
         label: `${months[editMonth]} ${editYear}`,
-        value: new Date(editMonth),
+        value: new Date(editYear, editMonth),
     };
 };

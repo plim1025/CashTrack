@@ -1,17 +1,20 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 // REACT //
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 
 // COMPONENTS //
 import { Button, Modal, Form } from 'react-bootstrap';
 import ErrorMessage from './ErrorMessage';
 import Dropdown from './Dropdown';
 
+// CONTEXT //
+import { ResourcesContext } from '../../App';
+
 // TYPES //
-import { Category, Transaction } from '../../types';
+import { Category } from '../../types';
 
 // UTIL //
-import { createCategory, updateCategory } from './TransactionUtil';
+import { createCategory, updateCategory } from './SharedUtils';
 
 interface Props {
     setLoading: (loading: boolean) => void;
@@ -19,59 +22,60 @@ interface Props {
     close: () => void;
     mode: string;
     category?: Category;
-    categories: Category[];
-    transactions: Transaction[];
-    setCategories: (categories: Category[]) => void;
-    setTransactions: (transactions: Transaction[]) => void;
     openDeleteModal: () => void;
 }
 
 let errorTimeout: ReturnType<typeof setTimeout>;
 
 const CategoryModal: React.FC<Props> = props => {
+    const { transactions, setTransactions, categories, setCategories } = useContext(
+        ResourcesContext
+    );
     const modalRef = useRef<HTMLInputElement>(null);
     const [error, setError] = useState({ show: false, message: '' });
-    const [category, setCategory] = useState<Category>(
-        props.mode === 'edit' ? props.category : null
-    );
+    const [category, setCategory] = useState<Category>(null);
+
+    useEffect(() => {
+        if (props.show && props.mode === 'edit') {
+            setCategory(props.category);
+        }
+    }, [props.show]);
 
     const handleSubmit = async (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();
         if (!category || !category.name || !category.type) {
             setError({ show: true, message: 'All fields must be filled in' });
         } else if (
-            props.categories.find(item => item.name === category.name) &&
+            categories.find(item => item.name === category.name) &&
             (props.mode === 'add' || props.category.name !== category.name)
         ) {
             setError({ show: true, message: 'There is already a category with that name' });
         } else {
             props.setLoading(true);
             if (props.mode === 'edit') {
-                await updateCategory(
+                const updatedCategory = await updateCategory(
                     props.category._id,
                     category.name,
                     category.type,
-                    props.transactions
+                    transactions
                         .filter(transaction => transaction.category === props.category.name)
                         .map(transaction => transaction._id)
                 );
-                props.setTransactions([
-                    ...props.transactions
+                setTransactions([
+                    ...transactions
                         .filter(transaction => transaction.category === props.category.name)
                         .map(transaction => ({ ...transaction, category: category.name })),
-                    ...props.transactions.filter(
+                    ...transactions.filter(
                         transaction => transaction.category !== props.category.name
                     ),
                 ]);
-                props.setCategories([
-                    ...props.categories.filter(
-                        (item: Category) => item.name !== props.category.name
-                    ),
-                    category,
+                setCategories([
+                    ...categories.filter(item => item.name !== props.category.name),
+                    updatedCategory,
                 ]);
             } else {
-                const id = await createCategory(category.name, category.type);
-                props.setCategories([...props.categories, { ...category, _id: id }]);
+                const newCategory = await createCategory(category.name, category.type);
+                setCategories([...categories, newCategory]);
             }
             props.setLoading(false);
             handleClose();

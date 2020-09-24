@@ -13,7 +13,7 @@ import ViewModal from '../components/shared/ViewModal';
 import { ResourcesContext } from '../App';
 
 // TYPES //
-import { Transaction, Account, Category, Trends, Subtrends, Charts, Dates, Data } from '../types';
+import { Transaction, Account, Trends, Subtrends, Charts, Dates, Data } from '../types';
 
 // UTIL //
 import { parseSelectedTransactions, parseTransactionData } from '../components/shared/TrendUtil';
@@ -31,9 +31,6 @@ type Actions =
     | { type: 'HIDE_VIEW_MODAL' };
 
 interface ReducerState {
-    transactions: Transaction[];
-    accounts: Account[];
-    categories: Category[];
     loading: boolean;
     trend: Trends;
     subtrend: Subtrends;
@@ -82,10 +79,6 @@ const reducer = (state: ReducerState, action: Actions) => {
 const Trends: React.FC = () => {
     const { transactions, accounts, categories } = useContext(ResourcesContext);
     const [state, dispatch] = useReducer(reducer, {
-        transactions: transactions.read(),
-        accounts: accounts.read(),
-        // eslint-disable-next-line prettier/prettier
-        categories: [...categories.read(), { name: 'Bank Fees', type: 'expenses' }, { name: 'Legal Fees', type: 'expenses' }, { name: 'Charitable Giving', type: 'expenses' }, { name: 'Medical', type: 'expenses' }, { name: 'Cash', type: 'expenses' }, { name: 'Check', type: 'expenses' }, { name: 'Education', type: 'expenses' }, { name: 'Membership Fee', type: 'expenses' }, { name: 'Service', type: 'expenses' }, { name: 'Utilities', type: 'expenses' }, { name: 'Postage/Shipping', type: 'expenses' }, { name: 'Restaurant', type: 'expenses' }, { name: 'Entertainment', type: 'expenses' }, { name: 'Loan', type: 'expenses' }, { name: 'Rent', type: 'expenses' }, { name: 'Home Maintenance/Improvement', type: 'expenses' }, { name: 'Automotive', type: 'expenses' }, { name: 'Electronic', type: 'expenses' }, { name: 'Insurance', type: 'expenses' }, { name: 'Business Expenditure', type: 'expenses' }, { name: 'Real Estate', type: 'expenses' }, { name: 'Personal Care', type: 'expenses' }, { name: 'Gas', type: 'expenses' }, { name: 'Subscription', type: 'expenses' }, { name: 'Travel', type: 'expenses' }, { name: 'Shopping', type: 'expenses' }, { name: 'Clothing', type: 'expenses' }, { name: 'Groceries', type: 'expenses' }, { name: 'Tax', type: 'expenses' }, { name: 'Subsidy', type: 'income' }, { name: 'Interest', type: 'income' }, { name: 'Deposit', type: 'income' }, { name: 'Payroll/Salary', type: 'income' }, { name: 'Cash', type: 'income' }, { name: 'Transfer', type: 'other' }, { name: 'Investment', type: 'other' }, { name: 'Savings', type: 'other' }, { name: 'Retirement', type: 'other' }, { name: 'Uncategorized', type: 'other' }],
         loading: false,
         trend: 'expenses',
         subtrend: 'date',
@@ -102,14 +95,14 @@ const Trends: React.FC = () => {
     });
 
     useEffect(() => {
-        const fetchedAccountIDs = accounts.read().map((account: Account) => account.id);
+        const fetchedAccountIDs = accounts.map((account: Account) => account.id);
         dispatch({ type: 'SET_ACCOUNT_IDS', accountIDs: fetchedAccountIDs });
     }, []);
 
     useEffect(() => {
         const newSelectedTransactions = parseSelectedTransactions(
-            state.transactions,
-            state.categories,
+            transactions,
+            categories,
             state.trend,
             state.date,
             state.accountIDs
@@ -129,7 +122,7 @@ const Trends: React.FC = () => {
     useEffect(() => {
         const newData = parseTransactionData(
             state.selectedTransactions,
-            state.accounts,
+            accounts,
             state.trend,
             state.subtrend,
             state.date
@@ -152,7 +145,7 @@ const Trends: React.FC = () => {
                     trend={state.trend}
                     subtrend={state.subtrend}
                     chart={state.chart}
-                    accounts={accounts.read()}
+                    accounts={accounts}
                     date={state.date}
                     setAccounts={(accountIDs: string[]) =>
                         dispatch({ type: 'SET_ACCOUNT_IDS', accountIDs: accountIDs })

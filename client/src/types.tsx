@@ -9,8 +9,8 @@ export interface Transaction {
     category: string;
     amount: number;
     accountID: string;
-    categoryID: string;
-    type: string;
+    categoryID?: string;
+    type?: string;
     selected?: boolean;
     transactionID?: string;
     merchant?: string;
@@ -68,7 +68,7 @@ export interface Data {
 }
 
 export interface DropdownOption {
-    value: string | Date;
+    value: any;
     label: string;
     sublabel?: string;
 }
@@ -77,11 +77,4 @@ export interface GroupedDropdownOption {
     label: string;
     options: DropdownOption[];
     sublabel?: string;
-}
-
-export interface Resources {
-    transactions: { read: () => Transaction[] };
-    accounts: { read: () => Account[] };
-    categories: { read: () => Category[] };
-    budgets: { read: () => Budget[] };
 }

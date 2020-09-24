@@ -12,11 +12,11 @@ import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import { RootState } from '../../types';
 
 // CONTEXT //
-import { ResourcesContext } from '../../App';
+import { HeaderContext } from '../../App';
 
 const Header: React.FC = () => {
     const reduxEmail = useSelector((redux: RootState) => redux.email);
-    const { subpage, setSubpage, logout } = useContext(ResourcesContext);
+    const { subpage, setSubpage, logout } = useContext(HeaderContext);
 
     const changeLink = (newSubpage: string) => {
         setSubpage(newSubpage);

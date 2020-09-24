@@ -1,6 +1,6 @@
 import { Transaction, Account } from '../../types';
 
-export const createTransaction = async (transaction: Transaction): Promise<string> => {
+export const createTransaction = async (transaction: Transaction): Promise<Transaction> => {
     try {
         const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
             method: 'POST',
@@ -18,8 +18,8 @@ export const createTransaction = async (transaction: Transaction): Promise<strin
         if (!response.ok) {
             throw Error('Bad response from server');
         }
-        const { id } = await response.json();
-        return id;
+        const newTransaction = await response.json();
+        return newTransaction;
     } catch (error) {
         throw Error(`Error creating transaction: ${error}`);
     }
@@ -43,36 +43,10 @@ export const deleteTransactions = async (transactionIDs: string[]): Promise<void
     }
 };
 
-export const updateTransaction = async (id: string, transaction: Transaction): Promise<void> => {
-    try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                transaction: {
-                    description: transaction.description,
-                    amount: transaction.amount,
-                    category: transaction.category,
-                    date: transaction.date,
-                },
-                transactionIDs: [id],
-            }),
-        });
-        if (!response.ok) {
-            throw Error('Bad response from server');
-        }
-    } catch (error) {
-        throw Error(`Error updating transaction: ${error}`);
-    }
-};
-
-export const updateMultipleTransactions = async (
+export const updateTransactions = async (
     transactionIDs: string[],
     transaction: Transaction
-): Promise<void> => {
+): Promise<Transaction[]> => {
     try {
         const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
             method: 'PUT',
@@ -93,98 +67,10 @@ export const updateMultipleTransactions = async (
         if (!response.ok) {
             throw Error('Bad response from server');
         }
+        const newTransactions = await response.json();
+        return newTransactions;
     } catch (error) {
         throw Error(`Error updating multiple transactions: ${error}`);
-    }
-};
-
-export const createCategory = async (name: string, type: string): Promise<string> => {
-    try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/category`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-                name: name,
-                type: type,
-            }),
-        });
-        if (!response.ok) {
-            throw Error('Bad response from server');
-        }
-        const { id } = await response.json();
-        return id;
-    } catch (error) {
-        throw Error(`Error adding transaction: ${error}`);
-    }
-};
-
-export const updateCategory = async (
-    id: string,
-    name: string,
-    type: string,
-    transactionIDs: string[]
-): Promise<void> => {
-    try {
-        Promise.all([
-            fetch(`${process.env.BACKEND_URI}/api/category/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    name: name,
-                    type: type,
-                }),
-            }),
-            fetch(`${process.env.BACKEND_URI}/api/transaction`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    transaction: { category: name },
-                    transactionIDs: transactionIDs,
-                }),
-            }),
-        ]).then(([categoryResponse, transactionResponse]) => {
-            if (!categoryResponse.ok || !transactionResponse.ok) {
-                throw Error('Bad response from server');
-            }
-        });
-    } catch (error) {
-        throw Error(`Error editing transaction: ${error}`);
-    }
-};
-
-export const deleteCategory = async (id: string, transactionIDs: string[]): Promise<void> => {
-    try {
-        await Promise.all([
-            fetch(`${process.env.BACKEND_URI}/api/category/${id}`, {
-                method: 'DELETE',
-                credentials: 'include',
-            }),
-            fetch(`${process.env.BACKEND_URI}/api/transaction`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    transactionIDs: transactionIDs,
-                }),
-            }),
-        ]).then(([deleteResponse, editResponse]) => {
-            if (!deleteResponse.ok || !editResponse.ok) {
-                throw Error('Bad response from server');
-            }
-        });
-    } catch (error) {
-        throw Error(`Error deleting transaction: ${error}`);
     }
 };
 
@@ -240,7 +126,9 @@ export const parseAccountInfo = (accounts: Account[], selectedAccountID: string)
 
 export const formatDate = (cell: Date): string => {
     const date = new Date(cell);
-    return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
+    return `${date.getUTCMonth() + 1 < 10 ? 0 : ''}${date.getUTCMonth() + 1}/${
+        date.getUTCDate() < 10 ? 0 : ''
+    }${date.getUTCDate()}/${date.getUTCFullYear()}`;
 };
 
 export const sortDate = (a: string, b: string, order: string): number => {

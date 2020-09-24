@@ -12,12 +12,19 @@ const TransactionSchema = new Schema({
     transactionID: String,
     accountID: String,
     description: requiredString,
-    amount: requiredString,
+    amount: {
+        type: Number,
+        required: true,
+    },
     category: requiredString,
     merchant: String,
     date: {
         type: Date,
         required: true,
+    },
+    selected: {
+        type: Boolean,
+        require: true,
     },
 });
 

@@ -12,7 +12,7 @@ interface Props {
 
 const MonthCarousel: React.FC<Props> = props => {
     const handleSelectMonth = (index: number) => {
-        const newMonthDate = new Date(props.monthDate.getFullYear(), index + 1, 0);
+        const newMonthDate = new Date(props.monthDate.getFullYear(), index, 1);
         props.setMonthDate(newMonthDate);
     };
 

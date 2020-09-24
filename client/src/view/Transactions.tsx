@@ -17,23 +17,20 @@ import FallbackSpinner from '../components/shared/FallbackSpinner';
 import { Button } from 'react-bootstrap';
 
 // CONTEXT //
-import { ResourcesContext } from '../App';
+import { ResourcesContext, HeaderContext } from '../App';
 
 // TYPES //
-import { Transaction, Account, Category } from '../types';
+import { Transaction, Category } from '../types';
 
 // UTIL //
 import {
     createTransaction,
-    updateMultipleTransactions,
+    updateTransactions,
     deleteTransactions,
 } from '../components/shared/TransactionUtil';
 
 type Actions =
     | { type: 'SET_LOADING'; loading: boolean }
-    | { type: 'SET_TRANSACTIONS'; transactions: Transaction[] }
-    | { type: 'SET_ACCOUNTS'; accounts: Account[] }
-    | { type: 'SET_CATEGORIES'; categories: Category[] }
     | { type: 'SET_SELECTED_TRANSACTION_IDS'; ids: string[] }
     | { type: 'SET_SELECTED_ACCOUNT_ID'; id: string }
     | { type: 'SHOW_TRANSACTION_ADD_MODAL' }
@@ -50,9 +47,6 @@ type Actions =
 
 interface ReducerState {
     loading: boolean;
-    transactions: Transaction[];
-    accounts: Account[];
-    categories: Category[];
     selectedTransactionIDs: string[];
     selectedAccountID: string;
     transactionModal: {
@@ -76,12 +70,6 @@ const reducer = (state: ReducerState, action: Actions) => {
     switch (action.type) {
         case 'SET_LOADING':
             return { ...state, loading: action.loading };
-        case 'SET_TRANSACTIONS':
-            return { ...state, transactions: action.transactions };
-        case 'SET_ACCOUNTS':
-            return { ...state, accounts: action.accounts };
-        case 'SET_CATEGORIES':
-            return { ...state, categories: action.categories };
         case 'SET_SELECTED_TRANSACTION_IDS':
             return { ...state, selectedTransactionIDs: action.ids };
         case 'SET_SELECTED_ACCOUNT_ID':
@@ -136,13 +124,11 @@ const reducer = (state: ReducerState, action: Actions) => {
 let errorTimeout: ReturnType<typeof setTimeout>;
 
 const Transactions: React.FC<RouteComponentProps> = props => {
-    const { transactions, accounts, categories, setSubpage } = useContext(ResourcesContext);
+    const { transactions, setTransactions, accounts } = useContext(ResourcesContext);
+    const { setSubpage } = useContext(HeaderContext);
+
     const [state, dispatch] = useReducer(reducer, {
         loading: false,
-        transactions: transactions.read(),
-        accounts: accounts.read(),
-        // eslint-disable-next-line prettier/prettier
-        categories: [...categories.read(), { name: 'Bank Fees', type: 'expenses' }, { name: 'Legal Fees', type: 'expenses' }, { name: 'Charitable Giving', type: 'expenses' }, { name: 'Medical', type: 'expenses' }, { name: 'Cash', type: 'expenses' }, { name: 'Check', type: 'expenses' }, { name: 'Education', type: 'expenses' }, { name: 'Membership Fee', type: 'expenses' }, { name: 'Service', type: 'expenses' }, { name: 'Utilities', type: 'expenses' }, { name: 'Postage/Shipping', type: 'expenses' }, { name: 'Restaurant', type: 'expenses' }, { name: 'Entertainment', type: 'expenses' }, { name: 'Loan', type: 'expenses' }, { name: 'Rent', type: 'expenses' }, { name: 'Home Maintenance/Improvement', type: 'expenses' }, { name: 'Automotive', type: 'expenses' }, { name: 'Electronic', type: 'expenses' }, { name: 'Insurance', type: 'expenses' }, { name: 'Business Expenditure', type: 'expenses' }, { name: 'Real Estate', type: 'expenses' }, { name: 'Personal Care', type: 'expenses' }, { name: 'Gas', type: 'expenses' }, { name: 'Subscription', type: 'expenses' }, { name: 'Travel', type: 'expenses' }, { name: 'Shopping', type: 'expenses' }, { name: 'Clothing', type: 'expenses' }, { name: 'Groceries', type: 'expenses' }, { name: 'Tax', type: 'expenses' }, { name: 'Subsidy', type: 'income' }, { name: 'Interest', type: 'income' }, { name: 'Deposit', type: 'income' }, { name: 'Payroll/Salary', type: 'income' }, { name: 'Cash', type: 'income' }, { name: 'Transfer', type: 'other' }, { name: 'Investment', type: 'other' }, { name: 'Savings', type: 'other' }, { name: 'Retirement', type: 'other' }, { name: 'Uncategorized', type: 'other' }],
         selectedTransactionIDs: [],
         selectedAccountID: 'All Accounts',
         transactionModal: {
@@ -163,8 +149,8 @@ const Transactions: React.FC<RouteComponentProps> = props => {
     });
 
     useEffect(() => {
-        if (state.transactions) {
-            const filteredTransactions = state.transactions.map((transaction: Transaction) => {
+        if (transactions) {
+            const filteredTransactions = transactions.map(transaction => {
                 if (
                     transaction.accountID === state.selectedAccountID ||
                     state.selectedAccountID === 'All Accounts'
@@ -173,50 +159,32 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                 }
                 return { ...transaction, selected: false };
             });
-            dispatch({ type: 'SET_TRANSACTIONS', transactions: filteredTransactions });
+            setTransactions(filteredTransactions);
         }
     }, [state.selectedAccountID]);
 
-    useEffect(() => {
-        dispatch({ type: 'SET_TRANSACTIONS', transactions: transactions.read() });
-        dispatch({ type: 'SET_ACCOUNTS', accounts: accounts.read() });
-        // eslint-disable-next-line prettier/prettier
-        dispatch({ type: 'SET_CATEGORIES', categories: [...categories.read(), { name: 'Bank Fees', type: 'expenses' }, { name: 'Legal Fees', type: 'expenses' }, { name: 'Charitable Giving', type: 'expenses' }, { name: 'Medical', type: 'expenses' }, { name: 'Cash', type: 'expenses' }, { name: 'Check', type: 'expenses' }, { name: 'Education', type: 'expenses' }, { name: 'Membership Fee', type: 'expenses' }, { name: 'Service', type: 'expenses' }, { name: 'Utilities', type: 'expenses' }, { name: 'Postage/Shipping', type: 'expenses' }, { name: 'Restaurant', type: 'expenses' }, { name: 'Entertainment', type: 'expenses' }, { name: 'Loan', type: 'expenses' }, { name: 'Rent', type: 'expenses' }, { name: 'Home Maintenance/Improvement', type: 'expenses' }, { name: 'Automotive', type: 'expenses' }, { name: 'Electronic', type: 'expenses' }, { name: 'Insurance', type: 'expenses' }, { name: 'Business Expenditure', type: 'expenses' }, { name: 'Real Estate', type: 'expenses' }, { name: 'Personal Care', type: 'expenses' }, { name: 'Gas', type: 'expenses' }, { name: 'Subscription', type: 'expenses' }, { name: 'Travel', type: 'expenses' }, { name: 'Shopping', type: 'expenses' }, { name: 'Clothing', type: 'expenses' }, { name: 'Groceries', type: 'expenses' }, { name: 'Tax', type: 'expenses' }, { name: 'Subsidy', type: 'income' }, { name: 'Interest', type: 'income' }, { name: 'Deposit', type: 'income' }, { name: 'Payroll/Salary', type: 'income' }, { name: 'Cash', type: 'income' }, { name: 'Transfer', type: 'other' }, { name: 'Investment', type: 'other' }, { name: 'Savings', type: 'other' }, { name: 'Retirement', type: 'other' }, { name: 'Uncategorized', type: 'other' }] });
-    }, [transactions, accounts, categories]);
-
     const handleCreateTransaction = async (newTransaction: Transaction) => {
         dispatch({ type: 'SET_LOADING', loading: true });
-        const id = await createTransaction(newTransaction);
-        const newTransactions = [
-            ...state.transactions,
-            { ...newTransaction, _id: id, selected: true },
-        ];
-        dispatch({
-            type: 'SET_TRANSACTIONS',
-            transactions: newTransactions,
-        });
+        const createdTransaction = await createTransaction(newTransaction);
+        const newTransactions = [...transactions, createdTransaction];
+        setTransactions(newTransactions);
         dispatch({ type: 'SET_LOADING', loading: false });
     };
 
     const handleEditMultipleTransactions = async (newTransaction: Transaction) => {
         dispatch({ type: 'SET_LOADING', loading: true });
-        await updateMultipleTransactions(state.selectedTransactionIDs, newTransaction);
-        const newTransactions = state.transactions.map((transaction: Transaction) => {
-            if (state.selectedTransactionIDs.indexOf(transaction._id) !== -1) {
-                const oldTransactionInfo = state.transactions.find(
-                    (oldTransaction: Transaction) => oldTransaction._id === transaction._id
-                );
-                return {
-                    ...oldTransactionInfo,
-                    date: newTransaction.date,
-                    description: newTransaction.description,
-                    category: newTransaction.category,
-                    amount: newTransaction.amount,
-                };
-            }
-            return transaction;
-        });
-        dispatch({ type: 'SET_TRANSACTIONS', transactions: newTransactions });
+        const updatedTransactions = await updateTransactions(
+            state.selectedTransactionIDs,
+            newTransaction
+        );
+        const updatedTransactionIDs = updatedTransactions.map(transaction => transaction._id);
+        const newTransactions = [
+            ...updatedTransactions,
+            ...transactions.filter(
+                transaction => updatedTransactionIDs.indexOf(transaction._id) === -1
+            ),
+        ];
+        setTransactions(newTransactions);
         dispatch({ type: 'SET_SELECTED_TRANSACTION_IDS', ids: [] });
         dispatch({ type: 'SET_LOADING', loading: false });
     };
@@ -231,11 +199,10 @@ const Transactions: React.FC<RouteComponentProps> = props => {
         } else {
             dispatch({ type: 'SET_LOADING', loading: true });
             await deleteTransactions(state.selectedTransactionIDs);
-            const newTransactions = state.transactions.filter(
-                (transaction: Transaction) =>
-                    state.selectedTransactionIDs.indexOf(transaction._id) === -1
+            const newTransactions = transactions.filter(
+                transaction => state.selectedTransactionIDs.indexOf(transaction._id) === -1
             );
-            dispatch({ type: 'SET_TRANSACTIONS', transactions: newTransactions });
+            setTransactions(newTransactions);
             dispatch({ type: 'SET_SELECTED_TRANSACTION_IDS', ids: [] });
             dispatch({ type: 'SET_LOADING', loading: false });
         }
@@ -262,25 +229,22 @@ const Transactions: React.FC<RouteComponentProps> = props => {
     return (
         <Wrapper>
             <Sidebar
-                accounts={state.accounts}
+                accounts={accounts}
                 selectedAccountID={state.selectedAccountID}
                 setSelectedAccountID={(id: string) =>
                     dispatch({ type: 'SET_SELECTED_ACCOUNT_ID', id: id })
                 }
             />
             <SubWrapper>
-                {state.accounts.length ? (
-                    <AccountInfo
-                        accounts={state.accounts}
-                        selectedAccountID={state.selectedAccountID}
-                    />
+                {accounts.length ? (
+                    <AccountInfo accounts={accounts} selectedAccountID={state.selectedAccountID} />
                 ) : null}
                 <Buttons
                     showModal={() => dispatch({ type: 'SHOW_TRANSACTION_ADD_MODAL' })}
                     handleEditButton={handleEditButton}
                     handleDeleteButton={handleDeleteMultipleTransactions}
                 />
-                {!state.accounts.length ? (
+                {!accounts.length ? (
                     <NoTransactionsText>
                         <span>No accounts added.</span>
                         <Button
@@ -295,10 +259,6 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                     </NoTransactionsText>
                 ) : null}
                 <Table
-                    transactions={state.transactions.filter(
-                        (transaction: Transaction) => transaction.selected
-                    )}
-                    categories={state.categories}
                     selectedTransactionIDs={state.selectedTransactionIDs}
                     setSelectedTransactionIDs={(ids: string[]) =>
                         dispatch({ type: 'SET_SELECTED_TRANSACTION_IDS', ids: ids })
@@ -313,19 +273,10 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                 openCategory={() => dispatch({ type: 'SHOW_CATEGORY_MODAL' })}
                 handleCreateTransaction={handleCreateTransaction}
                 handleEditMultipleTransactions={handleEditMultipleTransactions}
-                categories={state.categories}
             />
             <CategoryModals
                 setLoading={(loading: boolean) =>
                     dispatch({ type: 'SET_LOADING', loading: loading })
-                }
-                transactions={state.transactions}
-                categories={state.categories}
-                setTransactions={(newTransactions: Transaction[]) => {
-                    dispatch({ type: 'SET_TRANSACTIONS', transactions: newTransactions });
-                }}
-                setCategories={(newCategories: Category[]) =>
-                    dispatch({ type: 'SET_CATEGORIES', categories: newCategories })
                 }
                 categoryModal={state.categoryModal}
                 categorySubmodal={state.categorySubmodal}

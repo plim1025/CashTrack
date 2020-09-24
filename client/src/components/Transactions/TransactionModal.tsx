@@ -1,5 +1,5 @@
 // REACT //
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 
 // COMPONENTS //
 import { Button, Form, Modal } from 'react-bootstrap';
@@ -7,8 +7,11 @@ import Dropdown from '../shared/Dropdown';
 import ErrorMessage from '../shared/ErrorMessage';
 import CategoryDropdownMenu from '../shared/CategoryDropdownMenu';
 
+// CONTEXT //
+import { ResourcesContext } from '../../App';
+
 // TYPES //
-import { Transaction, Category } from '../../types';
+import { Transaction } from '../../types';
 
 // UTILS //
 import { DateString, parseCategoryDropdownOptions } from '../shared/SharedUtils';
@@ -19,13 +22,13 @@ interface Props {
     close: () => void;
     handleCreateTransaction: (transaction: Transaction) => void;
     handleEditMultipleTransactions: (transaction: Transaction) => void;
-    categories: Category[];
     openCategory: () => void;
 }
 
 let errorTimeout: ReturnType<typeof setTimeout>;
 
 const TransactionModal: React.FC<Props> = props => {
+    const { categories } = useContext(ResourcesContext);
     const modalRef = useRef<HTMLInputElement>(null);
     const [transaction, setTransaction] = useState<Transaction>({
         date: new Date(),
@@ -90,7 +93,6 @@ const TransactionModal: React.FC<Props> = props => {
         };
     }, []);
 
-    console.log(transaction);
     return (
         <Modal
             centered
@@ -129,7 +131,7 @@ const TransactionModal: React.FC<Props> = props => {
                         <Dropdown
                             size='bg'
                             padded
-                            options={parseCategoryDropdownOptions(props.categories)}
+                            options={parseCategoryDropdownOptions(categories)}
                             placeholder='Select Category...'
                             onChange={e =>
                                 setTransaction({

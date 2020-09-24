@@ -178,7 +178,7 @@ router.post('/refresh', async (req, res, next) => {
                         accountID: transaction.account_id,
                         categoryID: transaction.category_id,
                         description: transaction.name,
-                        amount: transaction.amount,
+                        amount: transaction.amount * -1,
                         category: getTransactionCategory(
                             transaction.category_id,
                             transaction.amount
@@ -186,6 +186,7 @@ router.post('/refresh', async (req, res, next) => {
                         merchant: transaction.merchant_name,
                         type: getTransactionType(transaction.category_id, transaction.amount),
                         date: transaction.date,
+                        selected: true,
                     });
                 });
             await Transaction.insertMany(parsedTransactions);

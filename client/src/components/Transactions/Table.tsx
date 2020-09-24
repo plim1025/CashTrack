@@ -1,18 +1,21 @@
 // REACT //
-import React from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 // COMPONENTS //
 import styled from 'styled-components';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
-import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit';
 // @ts-ignore
 import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
 import Dropdown from '../shared/Dropdown';
 import CategoryDropdownMenu from '../shared/CategoryDropdownMenu';
+import { Form } from 'react-bootstrap';
+
+// CONTEXT //
+import { ResourcesContext } from '../../App';
 
 // TYPES //
-import { Transaction, Category } from '../../types';
+import { Transaction } from '../../types';
 
 // STYLES //
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
@@ -20,7 +23,6 @@ import 'react-bootstrap-table2-paginator/dist/react-bootstrap-table2-paginator.m
 
 // UTILS //
 import {
-    updateTransaction,
     formatDate,
     sortDate,
     validateDate,
@@ -28,18 +30,48 @@ import {
     validateDescription,
     formatAmount,
     validateAmount,
+    updateTransactions,
 } from '../shared/TransactionUtil';
 import { parseCategoryDropdownOptions } from '../shared/SharedUtils';
 
 interface Props {
-    transactions: Transaction[];
-    categories: Category[];
     selectedTransactionIDs: string[];
     setSelectedTransactionIDs: (selectedTransactionIDs: string[]) => void;
     openCategoryModal: () => void;
 }
 
 const Table: React.FC<Props> = props => {
+    const { transactions, categories, setTransactions } = useContext(ResourcesContext);
+    const [filteredTransactions, setFilteredTransactions] = useState(
+        transactions.filter(transaction => transaction.selected)
+    );
+    const [search, setSearch] = useState('');
+
+    useEffect(() => {
+        setFilteredTransactions(transactions.filter(transaction => transaction.selected));
+    }, [transactions]);
+
+    useEffect(() => {
+        if (!search) {
+            setFilteredTransactions(transactions.filter(transaction => transaction.selected));
+        } else {
+            const parsedSearch = search.toLowerCase();
+            const searchedTransactions = transactions.filter(
+                transaction =>
+                    transaction.selected &&
+                    (formatAmount(transaction.amount.toString())
+                        .toLowerCase()
+                        .includes(parsedSearch) ||
+                        transaction.category.toLowerCase().includes(parsedSearch) ||
+                        formatDate(transaction.date).includes(parsedSearch) ||
+                        formatDescription(transaction.description)
+                            .toLowerCase()
+                            .includes(parsedSearch))
+            );
+            setFilteredTransactions(searchedTransactions);
+        }
+    }, [search]);
+
     const tableColumns = [
         {
             text: 'Date',
@@ -70,7 +102,7 @@ const Table: React.FC<Props> = props => {
             editorRenderer: (editorProps: any, value: string) => (
                 <Dropdown
                     size='sm'
-                    options={parseCategoryDropdownOptions(props.categories)}
+                    options={parseCategoryDropdownOptions(categories)}
                     defaultOption={{ label: value, value: value }}
                     onChange={category => editorProps.onUpdate(category.value)}
                     onUpdate={editorProps.onUpdate}
@@ -95,96 +127,124 @@ const Table: React.FC<Props> = props => {
 
     return (
         <BootstrapTableWrapper>
-            <ToolkitProvider
+            <FormWrapper inline>
+                <Form.Control
+                    onChange={e => setSearch(e.target.value)}
+                    type='text'
+                    placeholder='Search'
+                />
+            </FormWrapper>
+            <BootstrapTable
                 bootstrap4
                 keyField='_id'
-                data={props.transactions}
+                data={filteredTransactions}
                 columns={tableColumns}
-                search
-            >
-                {toolkitProps => (
-                    <>
-                        <Search.SearchBar {...toolkitProps.searchProps} />
-                        <BootstrapTable
-                            {...toolkitProps.baseProps}
-                            id='transaction-table'
-                            headerClasses='transaction-table-header'
-                            bodyClasses='transaction-table-body'
-                            defaultSortDirection='asc'
-                            defaultSorted={[{ dataField: 'date', order: 'desc' }]}
-                            selectRow={{
-                                mode: 'checkbox',
-                                selected: props.selectedTransactionIDs,
-                                onSelect: (row, isSelect) => {
-                                    if (isSelect) {
-                                        props.setSelectedTransactionIDs([
-                                            ...props.selectedTransactionIDs,
-                                            row._id,
-                                        ]);
-                                    } else {
-                                        props.setSelectedTransactionIDs(
-                                            props.selectedTransactionIDs.filter(
-                                                transaction => transaction !== row._id
-                                            )
-                                        );
-                                    }
-                                },
-                                onSelectAll: (isSelect, rows) => {
-                                    if (isSelect) {
-                                        props.setSelectedTransactionIDs(
-                                            rows.map(transaction => transaction._id)
-                                        );
-                                    } else {
-                                        props.setSelectedTransactionIDs([]);
-                                    }
-                                },
-                            }}
-                            pagination={paginationFactory({
-                                paginationSize: 4,
-                                sizePerPageList: [
-                                    {
-                                        text: '25',
-                                        value: 25,
-                                    },
-                                    {
-                                        text: '50',
-                                        value: 50,
-                                    },
-                                    {
-                                        text: '100',
-                                        value: 100,
-                                    },
-                                    {
-                                        text: 'All',
-                                        value: props.transactions ? props.transactions.length : 0,
-                                    },
-                                ],
-                            })}
-                            cellEdit={cellEditFactory({
-                                mode: 'click',
-                                blurToSave: true,
-                                afterSaveCell: (
-                                    oldValue: any,
-                                    newValue: any,
-                                    item: Transaction,
-                                    itemType: {
-                                        dataField: 'date' | 'description' | 'category' | 'amount';
-                                    }
-                                ) => {
-                                    const transaction = {
-                                        ...item,
-                                        [itemType.dataField]: newValue,
-                                    };
-                                    updateTransaction(item._id, transaction);
-                                },
-                            })}
-                        />
-                    </>
-                )}
-            </ToolkitProvider>
+                id='transaction-table'
+                headerClasses='transaction-table-header'
+                bodyClasses='transaction-table-body'
+                defaultSortDirection='asc'
+                defaultSorted={[{ dataField: 'date', order: 'desc' }]}
+                selectRow={{
+                    mode: 'checkbox',
+                    selected: props.selectedTransactionIDs,
+                    onSelect: (row: any, isSelect) => {
+                        if (isSelect) {
+                            props.setSelectedTransactionIDs([
+                                ...props.selectedTransactionIDs,
+                                row._id,
+                            ]);
+                        } else {
+                            props.setSelectedTransactionIDs(
+                                props.selectedTransactionIDs.filter(
+                                    transaction => transaction !== row._id
+                                )
+                            );
+                        }
+                    },
+                    onSelectAll: (isSelect, rows: any) => {
+                        if (isSelect) {
+                            props.setSelectedTransactionIDs(
+                                rows.map((transaction: Transaction) => transaction._id)
+                            );
+                        } else {
+                            props.setSelectedTransactionIDs([]);
+                        }
+                    },
+                }}
+                pagination={paginationFactory({
+                    paginationSize: 4,
+                    sizePerPageList: [
+                        {
+                            text: '25',
+                            value: 25,
+                        },
+                        {
+                            text: '50',
+                            value: 50,
+                        },
+                        {
+                            text: '100',
+                            value: 100,
+                        },
+                        {
+                            text: 'All',
+                            value: filteredTransactions ? filteredTransactions.length : 0,
+                        },
+                    ],
+                })}
+                cellEdit={cellEditFactory({
+                    mode: 'click',
+                    blurToSave: true,
+                    afterSaveCell: async (
+                        oldValue: any,
+                        newValue: any,
+                        item: Transaction,
+                        itemType: {
+                            dataField: 'date' | 'description' | 'category' | 'amount';
+                        }
+                    ) => {
+                        let valueChanged = false;
+                        if (itemType.dataField === 'date') {
+                            const oldDate = new Date(oldValue);
+                            const newDate = new Date(newValue);
+                            oldDate.setHours(0, 0, 0, 0);
+                            newDate.setHours(0, 0, 0, 0);
+                            newDate.setDate(newDate.getDate() + 1);
+                            if (oldDate.getTime() !== newDate.getTime()) {
+                                valueChanged = true;
+                            }
+                        } else {
+                            if (oldValue.toString() !== newValue.toString()) {
+                                valueChanged = true;
+                            }
+                        }
+                        if (valueChanged) {
+                            const newTransaction = {
+                                ...item,
+                                [itemType.dataField]:
+                                    itemType.dataField === 'amount'
+                                        ? parseFloat(newValue)
+                                        : newValue,
+                            };
+                            setTransactions([
+                                ...transactions.filter(transaction => transaction._id !== item._id),
+                                newTransaction,
+                            ]);
+                            await updateTransactions([item._id], newTransaction);
+                        }
+                    },
+                })}
+            />
         </BootstrapTableWrapper>
     );
 };
+
+const FormWrapper = styled(Form)`
+    &&& input {
+        width: 100%;
+    }
+    margin-bottom: 10px;
+`;
 
 const BootstrapTableWrapper = styled.div`
     #transaction-table {

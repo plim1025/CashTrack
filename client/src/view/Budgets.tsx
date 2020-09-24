@@ -1,5 +1,5 @@
-// /* eslint-disable react/jsx-one-expression-per-line */
-// /* eslint-disable prettier/prettier */
+/* eslint-disable react/jsx-one-expression-per-line */
+/* eslint-disable prettier/prettier */
 // REACT //
 import React, { useReducer, useContext, useEffect } from 'react';
 
@@ -10,21 +10,19 @@ import BudgetModal from '../components/Budgets/BudgetModal';
 import CategoryModals from '../components/shared/CategoryModals';
 import BudgetList from '../components/Budgets/BudgetList';
 import MonthCarousel from '../components/Budgets/MonthCarousel';
+import FallbackSpinner from '../components/shared/FallbackSpinner';
 
 // CONTEXT //
 import { ResourcesContext } from '../App';
 
 // TYPES //
-import { Transaction, Category, Budget } from '../types';
+import { Category, Budget } from '../types';
 
 // UTILS //
-import { createBudget } from '../components/shared/BudgetUtils';
+import { createBudget, updateBudget, deleteBudget } from '../components/shared/BudgetUtils';
 
 type Actions =
     | { type: 'SET_LOADING'; loading: boolean }
-    | { type: 'SET_TRANSACTIONS'; transactions: Transaction[] }
-    | { type: 'SET_CATEGORIES'; categories: Category[] }
-    | { type: 'SET_BUDGETS'; budgets: Budget[] }
     | { type: 'SET_MONTH_DATE'; date: Date }
     | { type: 'SHOW_BUDGET_ADD_MODAL' }
     | { type: 'SHOW_BUDGET_EDIT_MODAL'; budget: Budget }
@@ -38,9 +36,6 @@ type Actions =
 
 interface ReducerState {
     loading: boolean;
-    transactions: Transaction[];
-    categories: Category[];
-    budgets: Budget[];
     monthDate: Date;
     budgetModal: {
         show: boolean;
@@ -60,12 +55,6 @@ const reducer = (state: ReducerState, action: Actions) => {
     switch (action.type) {
         case 'SET_LOADING':
             return { ...state, loading: action.loading };
-        case 'SET_TRANSACTIONS':
-            return { ...state, transactions: action.transactions };
-        case 'SET_CATEGORIES':
-            return { ...state, categories: action.categories };
-        case 'SET_BUDGETS':
-            return { ...state, budgets: action.budgets };
         case 'SET_MONTH_DATE':
             return { ...state, monthDate: action.date };
         case 'SHOW_BUDGET_ADD_MODAL':
@@ -112,14 +101,13 @@ const reducer = (state: ReducerState, action: Actions) => {
 };
 
 const Budgets: React.FC = () => {
-    const { transactions, categories, budgets } = useContext(ResourcesContext);
+    const { transactions, categories, setCategories, budgets, setBudgets } = useContext(
+        ResourcesContext
+    );
+
     const [state, dispatch] = useReducer(reducer, {
         loading: false,
-        transactions: transactions.read(),
-        // eslint-disable-next-line prettier/prettier
-        categories: [...categories.read(), { name: 'Bank Fees', type: 'expenses' }, { name: 'Legal Fees', type: 'expenses' }, { name: 'Charitable Giving', type: 'expenses' }, { name: 'Medical', type: 'expenses' }, { name: 'Cash', type: 'expenses' }, { name: 'Check', type: 'expenses' }, { name: 'Education', type: 'expenses' }, { name: 'Membership Fee', type: 'expenses' }, { name: 'Service', type: 'expenses' }, { name: 'Utilities', type: 'expenses' }, { name: 'Postage/Shipping', type: 'expenses' }, { name: 'Restaurant', type: 'expenses' }, { name: 'Entertainment', type: 'expenses' }, { name: 'Loan', type: 'expenses' }, { name: 'Rent', type: 'expenses' }, { name: 'Home Maintenance/Improvement', type: 'expenses' }, { name: 'Automotive', type: 'expenses' }, { name: 'Electronic', type: 'expenses' }, { name: 'Insurance', type: 'expenses' }, { name: 'Business Expenditure', type: 'expenses' }, { name: 'Real Estate', type: 'expenses' }, { name: 'Personal Care', type: 'expenses' }, { name: 'Gas', type: 'expenses' }, { name: 'Subscription', type: 'expenses' }, { name: 'Travel', type: 'expenses' }, { name: 'Shopping', type: 'expenses' }, { name: 'Clothing', type: 'expenses' }, { name: 'Groceries', type: 'expenses' }, { name: 'Tax', type: 'expenses' }, { name: 'Subsidy', type: 'income' }, { name: 'Interest', type: 'income' }, { name: 'Deposit', type: 'income' }, { name: 'Payroll/Salary', type: 'income' }, { name: 'Cash', type: 'income' }, { name: 'Transfer', type: 'other' }, { name: 'Investment', type: 'other' }, { name: 'Savings', type: 'other' }, { name: 'Retirement', type: 'other' }, { name: 'Uncategorized', type: 'other' }],
-        budgets: budgets.read(),
-        monthDate: new Date(),
+        monthDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
         budgetModal: {
             show: false,
             mode: '',
@@ -135,19 +123,35 @@ const Budgets: React.FC = () => {
     });
 
     useEffect(() => {
-        const budgetCategories = state.budgets.map(budget => budget.categoryName);
-        const filteredDuplicateCategories = state.categories.map(category => ({
+        const budgetCategories = budgets.map(budget => budget.categoryName);
+        const filteredDuplicateCategories = categories.map(category => ({
             ...category,
             selected: budgetCategories.indexOf(category.name) === -1,
         }));
-        dispatch({ type: 'SET_CATEGORIES', categories: filteredDuplicateCategories });
-    }, []);
+        setCategories(filteredDuplicateCategories);
+    }, [budgets]);
 
     const handleCreateBudget = async (newBudget: Budget) => {
         dispatch({ type: 'SET_LOADING', loading: true });
-        const id = await createBudget(newBudget);
-        const newBudgets = [...state.budgets, { ...newBudget, _id: id }];
-        dispatch({ type: 'SET_BUDGETS', budgets: newBudgets });
+        const createdBudget = await createBudget(newBudget);
+        const newBudgets = [...budgets, createdBudget];
+        setBudgets(newBudgets);
+        dispatch({ type: 'SET_LOADING', loading: false });
+    };
+
+    const handleEditBudget = async (budgetID: string, newBudget: Budget) => {
+        dispatch({ type: 'SET_LOADING', loading: true });
+        const updatedBudget = await updateBudget(budgetID, newBudget);
+        const newBudgets = [...budgets.filter(budget => budget._id !== budgetID), updatedBudget];
+        setBudgets(newBudgets);
+        dispatch({ type: 'SET_LOADING', loading: false });
+    };
+
+    const handleDeleteBudget = async (budgetID: string) => {
+        dispatch({ type: 'SET_LOADING', loading: true });
+        await deleteBudget(budgetID);
+        const newBudgets = budgets.filter(budget => budget._id !== budgetID);
+        setBudgets(newBudgets);
         dispatch({ type: 'SET_LOADING', loading: false });
     };
 
@@ -162,11 +166,15 @@ const Budgets: React.FC = () => {
                     }
                 />
             </SubWrapper>
-            {/* <Title>Budgets for {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][state.monthDate.getMonth()]} {state.monthDate.getFullYear()}</Title> */}
+            <Title>Budgets for {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][state.monthDate.getMonth()]} {state.monthDate.getFullYear()}</Title>
             <BudgetList
-                budgets={state.budgets}
-                transactions={state.transactions}
-                categories={state.categories}
+                budgets={budgets.filter(
+                    budget =>
+                        new Date(budget.startDate) <= state.monthDate &&
+                        new Date(budget.endDate) > state.monthDate
+                )}
+                transactions={transactions}
+                categories={categories}
                 monthDate={state.monthDate}
                 openEditModal={(newBudget: Budget) =>
                     dispatch({ type: 'SHOW_BUDGET_EDIT_MODAL', budget: newBudget })
@@ -178,21 +186,15 @@ const Budgets: React.FC = () => {
                 budget={state.budgetModal.budget}
                 close={() => dispatch({ type: 'HIDE_BUDGET_MODAL' })}
                 openCategory={() => dispatch({ type: 'SHOW_CATEGORY_MODAL' })}
-                categories={state.categories.filter(category => category.selected)}
-                handleCreateBudget={handleCreateBudget}
+                categories={categories.filter(category => category.selected)}
                 monthDate={state.monthDate}
+                handleCreateBudget={handleCreateBudget}
+                handleEditBudget={handleEditBudget}
+                handleDeleteBudget={handleDeleteBudget}
             />
             <CategoryModals
                 setLoading={(loading: boolean) =>
                     dispatch({ type: 'SET_LOADING', loading: loading })
-                }
-                transactions={state.transactions}
-                categories={state.categories}
-                setTransactions={(newTransactions: Transaction[]) => {
-                    dispatch({ type: 'SET_TRANSACTIONS', transactions: newTransactions });
-                }}
-                setCategories={(newCategories: Category[]) =>
-                    dispatch({ type: 'SET_CATEGORIES', categories: newCategories })
                 }
                 categoryModal={state.categoryModal}
                 categorySubmodal={state.categorySubmodal}
@@ -209,6 +211,7 @@ const Budgets: React.FC = () => {
                 hideCategorySubmodal={() => dispatch({ type: 'HIDE_CATEGORY_SUBMODAL' })}
                 hideCategoryDeleteModal={() => dispatch({ type: 'HIDE_CATEGORY_DELETE_MODAL' })}
             />
+            <FallbackSpinner backdrop show={state.loading} />
         </Wrapper>
     );
 };

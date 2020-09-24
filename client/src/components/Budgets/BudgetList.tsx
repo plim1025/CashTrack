@@ -24,6 +24,7 @@ interface Props {
 const BudgetList: React.FC<Props> = props => {
     const [viewModal, setViewModal] = useState({ show: false, transactions: [], title: '' });
 
+    // console.log(viewModal.transactions);
     return (
         <>
             {props.budgets.length ? (
@@ -132,6 +133,7 @@ const BudgetCategory = styled.div`
 `;
 
 const ProgressBarWrapper = styled(ProgressBar)`
+    background-image: linear-gradient(45deg, #d0d0d0, #dcdcdc);
     cursor: pointer;
     width: 80%;
     &:hover {

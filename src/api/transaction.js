@@ -25,12 +25,13 @@ router.post('/', async (req, res, next) => {
             const newCategory = new Transaction({
                 userID: req.user._id,
                 description: description,
-                amount: amount * -1,
+                amount: amount,
                 category: category,
                 date: date,
+                selected: true,
             });
             await newCategory.save();
-            res.json({ id: newCategory._id });
+            res.json(newCategory);
         } else {
             throw Error('User not logged in.');
         }
@@ -56,20 +57,19 @@ router.put('/', async (req, res, next) => {
                 req.body.transaction.date
             ) {
                 const { description, amount, category, date } = req.body.transaction;
-                const newDate = new Date(date);
-                newDate.setDate(newDate.getDate() - 1);
                 update = {
                     description: description,
-                    amount: amount * -1,
+                    amount: amount,
                     category: category,
-                    date: newDate,
+                    date: date,
                 };
             } else {
                 update = { category: req.body.transaction.category };
             }
             const query = { userID: req.user._id, _id: { $in: transactionIDs } };
             await Transaction.updateMany(query, update, { runValidators: true });
-            res.sendStatus(200);
+            const updatedTransactions = await Transaction.find(query);
+            res.json(updatedTransactions);
         } else {
             throw Error('User not logged in.');
         }

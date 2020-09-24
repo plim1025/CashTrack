@@ -1,44 +1,43 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 // REACT //
-import React from 'react';
+import React, { useContext } from 'react';
 
 // COMPONENTS //
 import { Button, Modal } from 'react-bootstrap';
 
+// CONTEXT //
+import { ResourcesContext } from '../../App';
+
 // TYPES //
-import { Transaction, Category } from '../../types';
+import { Category } from '../../types';
 
 // UTIL //
-import { deleteCategory } from './TransactionUtil';
+import { deleteCategory } from './SharedUtils';
 
 interface Props {
     setLoading: (loading: boolean) => void;
     show: boolean;
     close: () => void;
     category: Category;
-    categories: Category[];
-    transactions: Transaction[];
-    setCategories: (categories: Category[]) => void;
-    setTransactions: (transactions: Transaction[]) => void;
 }
 
 const CategoryModal: React.FC<Props> = props => {
+    const { transactions, setTransactions, categories, setCategories } = useContext(
+        ResourcesContext
+    );
+
     const handleSubmit = async () => {
-        const transactionIDsToModify = props.transactions
+        const transactionIDsToModify = transactions
             .filter(transaction => transaction.category === props.category.name)
             .map(transaction => transaction._id);
         props.setLoading(true);
         await deleteCategory(props.category._id, transactionIDsToModify);
-        props.setCategories(
-            props.categories.filter(category => category.name !== props.category.name)
-        );
-        props.setTransactions([
-            ...props.transactions
+        setCategories(categories.filter(category => category.name !== props.category.name));
+        setTransactions([
+            ...transactions
                 .filter(transaction => transaction.category === props.category.name)
                 .map(transaction => ({ ...transaction, category: 'Uncategorized' })),
-            ...props.transactions.filter(
-                transaction => transaction.category !== props.category.name
-            ),
+            ...transactions.filter(transaction => transaction.category !== props.category.name),
         ]);
         props.setLoading(false);
         props.close();

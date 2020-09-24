@@ -29,27 +29,26 @@ const Register: React.FC<RouteComponentProps> = props => {
         if (!email || !password) {
             setError({ show: true, type: 'danger', message: 'All fields must be filled in.' });
         } else {
+            setLoading(true);
             try {
-                setLoading(true);
-                const registrationInfo = JSON.stringify({ email: email, password: password });
                 const response = await fetch(`${process.env.BACKEND_URI}/api/user`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: registrationInfo,
+                    body: JSON.stringify({ email: email, password: password }),
                 });
                 const parsedResponse = await response.json();
                 if (parsedResponse.error) {
                     setError({ show: true, type: 'danger', message: parsedResponse.error });
-                } else {
-                    setLoading(false);
-                    setError({ show: true, type: 'success', message: 'Account created. ' });
                     return;
                 }
             } catch {
                 setError({ show: true, type: 'danger', message: 'Error in creating account.' });
             }
+            setLoading(false);
+            setError({ show: true, type: 'success', message: 'Account created. ' });
+            return;
         }
         if (errorTimeout) {
             clearTimeout(errorTimeout);

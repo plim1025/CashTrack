@@ -34,7 +34,7 @@ router.post('/', async (req, res, next) => {
                     type: type,
                 });
                 await newCategory.save();
-                res.json({ id: newCategory._id });
+                res.json(newCategory);
             }
         } else {
             throw Error('User not logged in.');
@@ -55,7 +55,8 @@ router.put('/:id', async (req, res, next) => {
             const query = { userID: req.user._id, _id: id };
             const update = { name: name, type: type };
             await Category.updateOne(query, update, { runValidators: true });
-            res.sendStatus(200);
+            const updatedCategory = await Category.findOne(query);
+            res.json(updatedCategory);
         } else {
             throw Error('User not logged in.');
         }
