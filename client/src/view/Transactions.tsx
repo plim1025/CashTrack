@@ -14,7 +14,7 @@ import AccountInfo from '../components/Transactions/AccountInfo';
 import Buttons from '../components/Transactions/Buttons';
 import ErrorMessage from '../components/shared/ErrorMessage';
 import FallbackSpinner from '../components/shared/FallbackSpinner';
-import { Button } from 'react-bootstrap';
+import Button from '../components/shared/Button';
 
 // CONTEXT //
 import { ResourcesContext, HeaderContext } from '../App';
@@ -248,14 +248,13 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                     <NoTransactionsText>
                         <span>No accounts added.</span>
                         <Button
+                            child='Link an account.'
                             variant='link'
                             onClick={() => {
                                 props.history.push('/accounts');
                                 setSubpage('accounts');
                             }}
-                        >
-                            Link an account.
-                        </Button>
+                        />
                     </NoTransactionsText>
                 ) : null}
                 <Table
@@ -315,6 +314,7 @@ const NoTransactionsText = styled.div`
     align-items: center;
     display: flex;
     justify-content: center;
+    margin: 20px 0;
     opacity: 0.75;
 `;
 

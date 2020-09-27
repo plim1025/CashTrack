@@ -9,7 +9,8 @@ import { useSelector } from 'react-redux';
 
 // COMPONENTS //
 import styled from 'styled-components';
-import { Button, Card, Form, Spinner } from 'react-bootstrap';
+import { Card, Form, Spinner } from 'react-bootstrap';
+import Button from '../components/shared/Button';
 import ErrorMessage from '../components/shared/ErrorMessage';
 
 // TYPES //
@@ -41,6 +42,7 @@ const Register: React.FC<RouteComponentProps> = props => {
                 const parsedResponse = await response.json();
                 if (parsedResponse.error) {
                     setError({ show: true, type: 'danger', message: parsedResponse.error });
+                    setLoading(false);
                     return;
                 }
             } catch {
@@ -94,13 +96,26 @@ const Register: React.FC<RouteComponentProps> = props => {
                     </Form.Group>
                     <SignIn>
                         <span>Already have an account?</span>
-                        <Button onClick={() => props.history.push('/signin')} variant='link'>
-                            Sign In
-                        </Button>
+                        <Button
+                            child='Sign In'
+                            onClick={() => props.history.push('/signin')}
+                            variant='link'
+                        />
                     </SignIn>
-                    <ButtonWrapper onClick={register} variant='primary' type='submit' block>
-                        {loading ? <Spinner as='span' animation='border' size='sm' /> : 'Register'}
-                    </ButtonWrapper>
+                    <Button
+                        child={
+                            loading ? (
+                                <Spinner as='span' animation='border' size='sm' />
+                            ) : (
+                                'Register'
+                            )
+                        }
+                        onClick={register}
+                        variant='primary'
+                        submit
+                        block
+                        style={{ height: 40 }}
+                    />
                 </Form>
             </CardWrapper>
         </Wrapper>
@@ -141,15 +156,6 @@ const SignIn = styled.div`
     align-items: center;
     display: flex;
     margin-bottom: 1rem;
-`;
-
-const ButtonWrapper = styled(Button)`
-    align-items: center;
-    height: 47px;
-    justify-content: center;
-    &&& {
-        display: flex;
-    }
 `;
 
 export default Register;

@@ -41,6 +41,7 @@ const MonthCarousel: React.FC<Props> = props => {
     );
 };
 
+// STYLES //
 const Wrapper = styled.div`
     display: flex;
     margin: 10px auto;

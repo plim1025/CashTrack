@@ -4,7 +4,8 @@ import React, { useContext } from 'react';
 
 // COMPONENTS //
 import styled from 'styled-components';
-import { Button, Modal } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
+import Button from './Button';
 
 // CONTEXT //
 import { ResourcesContext } from '../../App';
@@ -66,7 +67,11 @@ const CategoryModal: React.FC<Props> = props => {
         <ModalWrapper centered onHide={() => props.close()} show={props.show}>
             <ModalHeaderWrapper closeButton>
                 <HeaderText>Manage Categories</HeaderText>
-                <ButtonWrapper onClick={() => props.openSubmodal('add')}>+ Category</ButtonWrapper>
+                <Button
+                    child='+ Category'
+                    onClick={() => props.openSubmodal('add')}
+                    style={{ marginLeft: 'auto' }}
+                />
             </ModalHeaderWrapper>
             <Table>
                 <Column>
@@ -118,7 +123,7 @@ const ModalHeaderWrapper = styled(Modal.Header)`
 `;
 
 const HeaderText = styled.div`
-    font-size: 24px;
+    font-size: 1.25rem;
     font-weight: 700;
 `;
 
@@ -153,7 +158,7 @@ const Cell = styled.div`
 `;
 
 const CellText = styled.div`
-    font-size: 14px;
+    font-size: 16px;
     margin-right: 8px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -165,11 +170,6 @@ const CellIcon = styled.svg`
     fill: #fff;
     height: 12px;
     width: 12px;
-`;
-
-const ButtonWrapper = styled(Button)`
-    font-weight: 700;
-    margin-left: auto;
 `;
 
 export default CategoryModal;

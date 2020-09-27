@@ -14,6 +14,7 @@ const PlaidAccountSchema = new Schema({
     name: requiredString,
     institution: requiredString,
     type: requiredString,
+    subtype: requiredString,
     mask: requiredString,
     balance: {
         type: Number,
@@ -21,6 +22,14 @@ const PlaidAccountSchema = new Schema({
     },
     available: Number,
     creditLimit: Number,
+    lastUpdated: {
+        type: Date,
+        required: true,
+    },
+    hidden: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const PlaidAccount = mongoose.model('PlaidAccount', PlaidAccountSchema);

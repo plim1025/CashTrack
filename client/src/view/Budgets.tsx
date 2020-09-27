@@ -105,7 +105,6 @@ const Budgets: React.FC = () => {
     const { transactions, categories, setCategories, budgets, setBudgets } = useContext(
         ResourcesContext
     );
-
     const [state, dispatch] = useReducer(reducer, {
         loading: false,
         monthDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
@@ -231,6 +230,7 @@ const Budgets: React.FC = () => {
     );
 };
 
+// STYLES //
 const Wrapper = styled.div`
     align-items: center;
     display: flex;

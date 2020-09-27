@@ -81,7 +81,7 @@ const AccountTitle = styled.div`
 `;
 
 const AccountSubtitle = styled.div`
-    font-size: 14px;
+    font-size: 12px;
     opacity: 0.75;
 `;
 

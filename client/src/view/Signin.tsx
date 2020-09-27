@@ -10,8 +10,9 @@ import { loadEmail } from '../redux/Actions';
 
 // COMPONENTS //
 import styled from 'styled-components';
-import { Button, Card, Form, Spinner } from 'react-bootstrap';
+import { Card, Form, Spinner } from 'react-bootstrap';
 import ErrorMessage from '../components/shared/ErrorMessage';
+import Button from '../components/shared/Button';
 
 // TYPES //
 import { RootState } from '../types';
@@ -100,13 +101,22 @@ const Signin: React.FC<RouteComponentProps> = props => {
                     </Form.Group>
                     <Register>
                         <span>New to CashTrack?</span>
-                        <Button onClick={() => props.history.push('/register')} variant='link'>
-                            Register
-                        </Button>
+                        <Button
+                            child='Register'
+                            onClick={() => props.history.push('/register')}
+                            variant='link'
+                        />
                     </Register>
-                    <ButtonWrapper onClick={signin} variant='primary' type='submit' block>
-                        {loading ? <Spinner as='span' animation='border' size='sm' /> : 'Sign In'}
-                    </ButtonWrapper>
+                    <Button
+                        child={
+                            loading ? <Spinner as='span' animation='border' size='sm' /> : 'Sign In'
+                        }
+                        onClick={signin}
+                        variant='primary'
+                        submit
+                        block
+                        style={{ height: 40 }}
+                    />
                 </Form>
             </CardWrapper>
         </Wrapper>
@@ -144,18 +154,9 @@ const LogoText = styled.text`
 `;
 
 const Register = styled.div`
-    align-items: 'center';
-    display: 'flex';
-    margin-bottom: 1rem;
-`;
-
-const ButtonWrapper = styled(Button)`
     align-items: center;
-    height: 47px;
-    justify-content: center;
-    &&& {
-        display: flex;
-    }
+    display: flex;
+    margin-bottom: 1rem;
 `;
 
 export default withRouter(Signin);

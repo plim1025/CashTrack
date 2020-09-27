@@ -135,7 +135,7 @@ const Header = styled.div`
     font-size: 16px;
     font-weight: 700;
     padding: 10px;
-    padding-bottom: 5px;
+    padding-bottom: 4px;
 `;
 
 const Subheader = styled(({ trend, subtrend, curTrend, curSubtrend, ...rest }) => (
@@ -155,8 +155,8 @@ const Subheader = styled(({ trend, subtrend, curTrend, curSubtrend, ...rest }) =
         color: ${({ trend, subtrend, curTrend, curSubtrend }) =>
             (trend !== curTrend || subtrend !== curSubtrend) && '#007bff'};
     }
-    font-size: 14px;
-    padding: 5px 30px;
+    font-size: 16px;
+    padding: 4px 30px;
 `;
 
 export default Sidebar;

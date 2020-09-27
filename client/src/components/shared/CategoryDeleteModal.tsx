@@ -3,7 +3,8 @@
 import React, { useContext } from 'react';
 
 // COMPONENTS //
-import { Button, Modal } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
+import Button from './Button';
 
 // CONTEXT //
 import { ResourcesContext } from '../../App';
@@ -52,13 +53,14 @@ const CategoryModal: React.FC<Props> = props => {
                 </div>
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={() => props.close()} variant='secondary' size='sm'>
-                    Cancel
-                </Button>
+                <Button
+                    child='Cancel'
+                    onClick={() => props.close()}
+                    variant='secondary'
+                    size='sm'
+                />
                 <br />
-                <Button onClick={handleSubmit} variant='danger' size='sm'>
-                    Delete
-                </Button>
+                <Button child='Delete' onClick={handleSubmit} variant='danger' size='sm' />
             </Modal.Footer>
         </Modal>
     );

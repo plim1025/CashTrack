@@ -99,8 +99,11 @@ export const parseAccountInfo = (accounts: Account[], selectedAccountID: string)
             available: null,
             creditLimit: null,
             type: null,
+            subtype: null,
             mask: null,
             batchID: null,
+            lastUpdated: null,
+            hidden: null,
         };
     }
     const selectedAccount = accounts.find((account: Account) => account.id === selectedAccountID);
@@ -120,7 +123,10 @@ export const parseAccountInfo = (accounts: Account[], selectedAccountID: string)
         available: available,
         creditLimit: selectedAccount.creditLimit || null,
         type: selectedAccount.type,
+        subtype: selectedAccount.subtype,
         mask: selectedAccount.mask,
+        lastUpdated: selectedAccount.lastUpdated,
+        hidden: selectedAccount.hidden,
     };
 };
 

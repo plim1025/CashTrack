@@ -10,7 +10,7 @@ router.get('/', async (req, res, next) => {
             const budgets = await Budget.find(query);
             res.json(budgets);
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         next(error);
@@ -33,7 +33,7 @@ router.post('/', async (req, res, next) => {
             await newBudget.save();
             res.json(newBudget);
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -61,7 +61,7 @@ router.put('/:id', async (req, res, next) => {
             const newBudget = await Budget.findOne(query);
             res.json(newBudget);
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -79,7 +79,7 @@ router.delete('/:id', async (req, res, next) => {
             await Budget.deleteOne(query);
             res.sendStatus(200);
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {

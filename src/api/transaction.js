@@ -11,7 +11,7 @@ router.get('/', async (req, res, next) => {
             const transactions = await Transaction.find(query);
             res.json(transactions);
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         next(error);
@@ -33,7 +33,7 @@ router.post('/', async (req, res, next) => {
             await newCategory.save();
             res.json(newCategory);
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -71,7 +71,7 @@ router.put('/', async (req, res, next) => {
             const updatedTransactions = await Transaction.find(query);
             res.json(updatedTransactions);
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -95,7 +95,7 @@ router.delete('/', async (req, res, next) => {
             await User.updateOne(appendingQuery, appendingUpdate, { runValidators: true });
             res.sendStatus(200);
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {

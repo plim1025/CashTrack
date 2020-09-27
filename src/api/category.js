@@ -10,7 +10,7 @@ router.get('/', async (req, res, next) => {
             const categories = await Category.find(query);
             res.json(categories);
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         next(error);
@@ -24,7 +24,45 @@ router.post('/', async (req, res, next) => {
             const query = { userID: req.user._id };
             const categories = await Category.find(query);
             // eslint-disable-next-line prettier/prettier
-            const duplicate = [...categories || [], { name: 'Bank Fees', type: 'expenses' }, { name: 'Legal Fees', type: 'expenses' }, { name: 'Charitable Giving', type: 'expenses' }, { name: 'Medical', type: 'expenses' }, { name: 'Cash', type: 'expenses' }, { name: 'Check', type: 'expenses' }, { name: 'Education', type: 'expenses' }, { name: 'Membership Fee', type: 'expenses' }, { name: 'Service', type: 'expenses' }, { name: 'Utilities', type: 'expenses' }, { name: 'Postage/Shipping', type: 'expenses' }, { name: 'Restaurant', type: 'expenses' }, { name: 'Entertainment', type: 'expenses' }, { name: 'Loan', type: 'expenses' }, { name: 'Rent', type: 'expenses' }, { name: 'Home Maintenance/Improvement', type: 'expenses' }, { name: 'Automotive', type: 'expenses' }, { name: 'Electronic', type: 'expenses' }, { name: 'Insurance', type: 'expenses' }, { name: 'Business Expenditure', type: 'expenses' }, { name: 'Real Estate', type: 'expenses' }, { name: 'Personal Care', type: 'expenses' }, { name: 'Gas', type: 'expenses' }, { name: 'Subscription', type: 'expenses' }, { name: 'Travel', type: 'expenses' }, { name: 'Shopping', type: 'expenses' }, { name: 'Clothing', type: 'expenses' }, { name: 'Groceries', type: 'expenses' }, { name: 'Tax', type: 'expenses' }, { name: 'Subsidy', type: 'income' }, { name: 'Interest', type: 'income' }, { name: 'Deposit', type: 'income' }, { name: 'Payroll/Salary', type: 'income' }, { name: 'Cash', type: 'income' }, { name: 'Transfer', type: 'other' }, { name: 'Uncategorized', type: 'other' }].find(category => category.name === name);
+            const duplicate = [
+                ...(categories || []),
+                { name: 'Bank Fees', type: 'expenses' },
+                { name: 'Legal Fees', type: 'expenses' },
+                { name: 'Charitable Giving', type: 'expenses' },
+                { name: 'Medical', type: 'expenses' },
+                { name: 'Cash', type: 'expenses' },
+                { name: 'Check', type: 'expenses' },
+                { name: 'Education', type: 'expenses' },
+                { name: 'Membership Fee', type: 'expenses' },
+                { name: 'Service', type: 'expenses' },
+                { name: 'Utilities', type: 'expenses' },
+                { name: 'Postage/Shipping', type: 'expenses' },
+                { name: 'Restaurant', type: 'expenses' },
+                { name: 'Entertainment', type: 'expenses' },
+                { name: 'Loan', type: 'expenses' },
+                { name: 'Rent', type: 'expenses' },
+                { name: 'Home Maintenance/Improvement', type: 'expenses' },
+                { name: 'Automotive', type: 'expenses' },
+                { name: 'Electronic', type: 'expenses' },
+                { name: 'Insurance', type: 'expenses' },
+                { name: 'Business Expenditure', type: 'expenses' },
+                { name: 'Real Estate', type: 'expenses' },
+                { name: 'Personal Care', type: 'expenses' },
+                { name: 'Gas', type: 'expenses' },
+                { name: 'Subscription', type: 'expenses' },
+                { name: 'Travel', type: 'expenses' },
+                { name: 'Shopping', type: 'expenses' },
+                { name: 'Clothing', type: 'expenses' },
+                { name: 'Groceries', type: 'expenses' },
+                { name: 'Tax', type: 'expenses' },
+                { name: 'Subsidy', type: 'income' },
+                { name: 'Interest', type: 'income' },
+                { name: 'Deposit', type: 'income' },
+                { name: 'Payroll/Salary', type: 'income' },
+                { name: 'Cash', type: 'income' },
+                { name: 'Transfer', type: 'other' },
+                { name: 'Uncategorized', type: 'other' },
+            ].find(category => category.name === name);
             if (duplicate) {
                 res.json({ message: 'Category name already exists' });
             } else {
@@ -37,7 +75,7 @@ router.post('/', async (req, res, next) => {
                 res.json(newCategory);
             }
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -58,7 +96,7 @@ router.put('/:id', async (req, res, next) => {
             const updatedCategory = await Category.findOne(query);
             res.json(updatedCategory);
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -76,7 +114,7 @@ router.delete('/:id', async (req, res, next) => {
             await Category.deleteOne(query);
             res.sendStatus(200);
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {

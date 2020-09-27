@@ -34,38 +34,34 @@ const Header: React.FC = () => {
             <Navbar.Toggle />
             <Navbar.Collapse>
                 <Nav>
-                    <NavLinkWrapper
+                    <Nav.Link
                         onClick={() => changeLink('home')}
-                        subpage='home'
-                        curSubpage={subpage}
                         eventKey='1'
+                        style={{ color: subpage === 'home' ? '#fff' : null }}
                     >
                         Home
-                    </NavLinkWrapper>
-                    <NavLinkWrapper
+                    </Nav.Link>
+                    <Nav.Link
                         onClick={() => changeLink('transactions')}
-                        subpage='transactions'
-                        curSubpage={subpage}
                         eventKey='2'
+                        style={{ color: subpage === 'transactions' ? '#fff' : null }}
                     >
                         Transactions
-                    </NavLinkWrapper>
-                    <NavLinkWrapper
+                    </Nav.Link>
+                    <Nav.Link
                         onClick={() => changeLink('trends')}
-                        subpage='trends'
-                        curSubpage={subpage}
                         eventKey='3'
+                        style={{ color: subpage === 'trends' ? '#fff' : null }}
                     >
                         Trends
-                    </NavLinkWrapper>
-                    <NavLinkWrapper
+                    </Nav.Link>
+                    <Nav.Link
                         onClick={() => changeLink('budgets')}
-                        subpage='budgets'
-                        curSubpage={subpage}
                         eventKey='4'
+                        style={{ color: subpage === 'budgets' ? '#fff' : null }}
                     >
                         Budgets
-                    </NavLinkWrapper>
+                    </Nav.Link>
                 </Nav>
                 <NavWrapper>
                     <NavDropdown
@@ -75,7 +71,7 @@ const Header: React.FC = () => {
                         <NavDropdown.Item onClick={() => changeLink('accounts')} eventKey='5'>
                             Accounts
                         </NavDropdown.Item>
-                        <NavDropdown.Item onClick={() => changeLink('accounts')} eventKey='6'>
+                        <NavDropdown.Item onClick={() => changeLink('settings')} eventKey='6'>
                             Settings
                         </NavDropdown.Item>
                     </NavDropdown>
@@ -113,13 +109,6 @@ const NavWrapper = styled(Nav)`
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-`;
-
-const NavLinkWrapper = styled(({ subpage, curSubpage, ...rest }) => <Nav.Link {...rest} />)<{
-    subpage: string;
-    curSubpage: string;
-}>`
-    color: ${({ subpage, curSubpage }) => subpage === curSubpage && '#fff !important'};
 `;
 
 export default Header;

@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 
 // COMPONENTS //
 import styled from 'styled-components';
-import { Modal, Button, Form } from 'react-bootstrap';
+import { Modal, Form } from 'react-bootstrap';
+import Button from '../shared/Button';
 import Dropdown from '../shared/Dropdown';
 import ErrorMessage from '../shared/ErrorMessage';
 import CategoryDropdownMenu from '../shared/CategoryDropdownMenu';
@@ -227,6 +228,7 @@ const BudgetModal: React.FC<Props> = props => {
                 <Modal.Footer>
                     {props.mode === 'edit' ? (
                         <Button
+                            child='Delete'
                             onClick={() => {
                                 props.handleDeleteBudget(props.budget._id);
                                 props.close();
@@ -234,22 +236,23 @@ const BudgetModal: React.FC<Props> = props => {
                             style={{ marginRight: 'auto' }}
                             size='sm'
                             variant='danger'
-                        >
-                            Delete
-                        </Button>
+                        />
                     ) : null}
-                    <Button onClick={handleClose} size='sm' variant='secondary'>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSubmit} size='sm' type='submit' variant='primary'>
-                        Submit
-                    </Button>
+                    <Button child='Cancel' onClick={handleClose} size='sm' variant='secondary' />
+                    <Button
+                        child='Submit'
+                        onClick={handleSubmit}
+                        size='sm'
+                        variant='primary'
+                        submit
+                    />
                 </Modal.Footer>
             </Form>
         </Modal>
     );
 };
 
+// STYLES //
 const DateWrapper = styled.div`
     display: flex;
     & > div {

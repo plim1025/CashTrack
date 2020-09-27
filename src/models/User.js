@@ -12,10 +12,6 @@ const UserSchema = new Schema({
     password: requiredString,
     accessToken: String,
     itemID: String,
-    // accountIDs: {
-    //     type: [String],
-    //     default: [],
-    // },
     removedTransactionIDs: {
         type: [String],
         default: [],

@@ -3,13 +3,14 @@ import React, { useContext } from 'react';
 
 // COMPONENTS //
 import { usePlaidLink } from 'react-plaid-link';
-import { Button } from 'react-bootstrap';
+import styled from 'styled-components';
+import Button from '../shared/Button';
 
 // CONTEXT //
 import { ResourcesContext } from '../../App';
 
 interface Props {
-    linkToken: string;
+    token: string;
 }
 
 const PlaidLinkButton: React.FC<Props> = props => {
@@ -39,18 +40,27 @@ const PlaidLinkButton: React.FC<Props> = props => {
         }
     };
 
-    const { open, ready, error } = usePlaidLink({ token: props.linkToken, onSuccess: onSuccess });
+    const { open, ready, error } = usePlaidLink({ token: props.token, onSuccess: onSuccess });
 
     return (
-        <Button
-            disabled={!ready || error !== null}
-            onClick={() => open()}
-            size='sm'
-            variant='primary'
-        >
-            Add Account
-        </Button>
+        <ButtonWrapper>
+            <Button
+                child='+ Account'
+                disabled={!ready || error !== null}
+                onClick={() => open()}
+                variant='primary'
+                style={{ maxWidth: 600, width: 'calc(100% - 40px)' }}
+            />
+        </ButtonWrapper>
     );
 };
+
+// STYLES //
+const ButtonWrapper = styled.div`
+    display: flex;
+    justify-content: center;
+    margin: 20px auto;
+    width: 100%;
+`;
 
 export default PlaidLinkButton;

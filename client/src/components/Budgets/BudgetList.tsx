@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 
 // COMPONENTS //
 import styled from 'styled-components';
-import { ProgressBar, Button } from 'react-bootstrap';
+import { ProgressBar } from 'react-bootstrap';
+import Button from '../shared/Button';
 import ViewModal from '../shared/ViewModal';
 
 // TYPES //
@@ -67,7 +68,10 @@ const BudgetList: React.FC<Props> = props => {
                                             categoryTransactions.push(transaction);
                                         }
                                     });
-                                    if (transactionType === 'expenses') {
+                                    if (
+                                        transactionType === 'expenses' ||
+                                        transactionType === 'other'
+                                    ) {
                                         totalSpent *= -1;
                                     }
                                     const totalBudget = parseTotalBudget(
@@ -82,7 +86,15 @@ const BudgetList: React.FC<Props> = props => {
                                     }
                                     return (
                                         <BudgetWrapper key={budget._id}>
-                                            <BudgetCategory>{budget.categoryName}</BudgetCategory>
+                                            <BudgetText>
+                                                <BudgetCategory>
+                                                    {budget.categoryName}
+                                                </BudgetCategory>
+                                                <BudgetMoney>
+                                                    {moneyFormat(totalSpent)} /{' '}
+                                                    {moneyFormat(totalBudget)}
+                                                </BudgetMoney>
+                                            </BudgetText>
                                             <BudgetSubWrapper>
                                                 <ProgressBarWrapper
                                                     striped
@@ -102,15 +114,14 @@ const BudgetList: React.FC<Props> = props => {
                                                         })
                                                     }
                                                 />
-                                                <BudgetText>
-                                                    {moneyFormat(totalSpent)} /{' '}
-                                                    {moneyFormat(totalBudget)}
-                                                </BudgetText>
-                                                <ButtonWrapper
-                                                    onClick={() => props.openEditModal(budget)}
-                                                >
-                                                    <ButtonIcon>
-                                                        <svg viewBox='0 0 512 512'>
+                                                <Button
+                                                    child={
+                                                        <svg
+                                                            fill='#fff'
+                                                            height='12'
+                                                            width='12'
+                                                            viewBox='0 0 512 512'
+                                                        >
                                                             <polygon points='51.2,353.28 0,512 158.72,460.8' />
                                                             <rect
                                                                 x='89.73'
@@ -121,8 +132,10 @@ const BudgetList: React.FC<Props> = props => {
                                                             />
                                                             <path d='M504.32,79.36L432.64,7.68c-10.24-10.24-25.6-10.24-35.84,0l-23.04,23.04l107.52,107.52l23.04-23.04 C514.56,104.96,514.56,89.6,504.32,79.36z' />
                                                         </svg>
-                                                    </ButtonIcon>
-                                                </ButtonWrapper>
+                                                    }
+                                                    onClick={() => props.openEditModal(budget)}
+                                                    style={{ padding: 4, marginLeft: 10 }}
+                                                />
                                             </BudgetSubWrapper>
                                         </BudgetWrapper>
                                     );
@@ -164,6 +177,7 @@ const BudgetList: React.FC<Props> = props => {
     );
 };
 
+// STYLES //
 const TypeTitle = styled.div`
     font-size: 1rem;
     font-weight: 700;
@@ -187,6 +201,7 @@ const RemainingTransactionsText = styled.div``;
 
 const RemainingTransactionsMoney = styled.div`
     margin-left: auto;
+    margin-right: 36px;
 `;
 
 const BudgetWrapper = styled.div`
@@ -194,47 +209,35 @@ const BudgetWrapper = styled.div`
     width: calc(100% - 40px);
 `;
 
+const BudgetText = styled.div`
+    display: flex;
+    font-size: 16px;
+    white-space: nowrap;
+`;
+
+const BudgetCategory = styled.div``;
+
+const BudgetMoney = styled.div`
+    margin-left: auto;
+    margin-right: 36px;
+`;
+
 const BudgetSubWrapper = styled.div`
     align-items: center;
     display: flex;
-`;
-
-const BudgetCategory = styled.div`
-    font-size: 16px;
+    margin-top: 4px;
 `;
 
 const ProgressBarWrapper = styled(ProgressBar)`
     background-image: linear-gradient(45deg, #d0d0d0, #dcdcdc);
     cursor: pointer;
-    width: 80%;
+    width: 100%;
+    &&& {
+        height: 22px;
+    }
     &:hover {
         box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
     }
-`;
-
-const BudgetText = styled.div`
-    font-size: 14px;
-    margin: 0 10px;
-    white-space: nowrap;
-`;
-
-const ButtonWrapper = styled(Button)`
-    justify-content: center;
-    &&& {
-        align-items: center;
-        display: flex;
-        font-weight: 700;
-        line-height: inherit;
-        padding: 4px;
-        white-space: nowrap;
-    }
-    margin-left: auto;
-`;
-
-const ButtonIcon = styled.svg`
-    fill: #fff;
-    height: 16px;
-    width: 16px;
 `;
 
 export default BudgetList;

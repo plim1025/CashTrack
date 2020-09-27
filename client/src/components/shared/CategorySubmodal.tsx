@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 
 // COMPONENTS //
-import { Button, Modal, Form } from 'react-bootstrap';
+import { Modal, Form } from 'react-bootstrap';
+import Button from './Button';
 import ErrorMessage from './ErrorMessage';
 import Dropdown from './Dropdown';
 
@@ -115,6 +116,7 @@ const CategoryModal: React.FC<Props> = props => {
                     <Form.Group>
                         <Form.Label>Type</Form.Label>
                         <Dropdown
+                            padded
                             size='bg'
                             options={[
                                 {
@@ -147,20 +149,21 @@ const CategoryModal: React.FC<Props> = props => {
                 <Modal.Footer>
                     {props.mode === 'edit' ? (
                         <Button
+                            child='Delete'
                             onClick={() => props.openDeleteModal()}
                             style={{ marginRight: 'auto' }}
                             size='sm'
                             variant='danger'
-                        >
-                            Delete
-                        </Button>
+                        />
                     ) : null}
-                    <Button onClick={handleClose} size='sm' variant='secondary'>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSubmit} size='sm' type='submit' variant='primary'>
-                        Submit
-                    </Button>
+                    <Button child='Cancel' onClick={handleClose} size='sm' variant='secondary' />
+                    <Button
+                        child='Submit'
+                        onClick={handleSubmit}
+                        size='sm'
+                        variant='primary'
+                        submit
+                    />
                 </Modal.Footer>
                 <ErrorMessage error={error.show} errorMessage={error.message} />
             </Form>

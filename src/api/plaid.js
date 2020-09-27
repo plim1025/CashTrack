@@ -33,7 +33,7 @@ router.post('/create_link_token', async (req, res, next) => {
             });
             res.json(link_token);
         } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         next(error);
@@ -91,10 +91,12 @@ router.post('/set_account', async (req, res, next) => {
                         name: account.name,
                         institution: institution,
                         type: account.type,
+                        subtype: account.subtype,
                         mask: account.mask,
                         balance: accountBalance.balance,
                         available: accountBalance.available,
                         creditLimit: accountBalance.creditLimit,
+                        lastUpdated: new Date(),
                     });
                     plaidAccounts.push(newPlaidAccount);
                 }
@@ -106,30 +108,7 @@ router.post('/set_account', async (req, res, next) => {
             await User.updateOne(query, update, { runValidators: true });
             res.sendStatus(200);
         } else {
-            throw Error('User not logged in.');
-        }
-    } catch (error) {
-        if (error.name === 'ValidationError') {
-            res.status(422);
-        }
-        next(error);
-    }
-});
-
-router.post('/logout/:batchID', async (req, res, next) => {
-    try {
-        if (req.user) {
-            const { batchID } = req.params;
-            const plaidAccountQuery = { batchID: batchID };
-            const deletedPlaidAccounts = await PlaidAccount.find(plaidAccountQuery);
-            const deletedPlaidAccountIDs = deletedPlaidAccounts.map(account => account.id);
-            await PlaidAccount.deleteMany(plaidAccountQuery);
-
-            const transactionQuery = { accountID: { $in: deletedPlaidAccountIDs } };
-            await Transaction.deleteMany(transactionQuery);
-            res.sendStatus(200);
-        } else {
-            throw Error('User not logged in.');
+            throw Error('User not logged in');
         }
     } catch (error) {
         if (error.name === 'ValidationError') {
@@ -164,6 +143,7 @@ router.post('/refresh', async (req, res, next) => {
                 '2000-01-01',
                 getPresentDayFormatted()
             );
+            const updatedAccountIDs = [];
             const parsedTransactions = newTransactions.transactions
                 .filter(
                     transaction =>
@@ -172,6 +152,7 @@ router.post('/refresh', async (req, res, next) => {
                         !transaction.pending
                 )
                 .map(transaction => {
+                    updatedAccountIDs.push(transaction.account_id);
                     return new Transaction({
                         userID: _id,
                         transactionID: transaction.transaction_id,
@@ -190,6 +171,9 @@ router.post('/refresh', async (req, res, next) => {
                     });
                 });
             await Transaction.insertMany(parsedTransactions);
+            const accountQuery = { id: { $in: updatedAccountIDs } };
+            const accountUpdate = { lastUpdated: new Date() };
+            await PlaidAccount.updateMany(accountQuery, accountUpdate);
         }
         res.sendStatus(200);
     } catch (error) {

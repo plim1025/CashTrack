@@ -46,7 +46,7 @@ const Dropdown: React.FC<Props> = props => {
             options={props.options}
             defaultValue={props.defaultOption}
             styles={{
-                menu: (base: any) => ({ ...base, fontSize: 14 }),
+                menu: (base: any) => ({ ...base, fontSize: 12 }),
                 menuPortal: (base: any) => ({ ...base, zIndex: 9999 }),
                 container: (base: any) => ({ ...base, ...props.style }),
             }}
@@ -73,7 +73,7 @@ const Dropdown: React.FC<Props> = props => {
 // STYLES //
 const SelectWrapper = styled(Select)<{ padded: boolean; size: 'bg' | 'sm' }>`
     font-family: 'Open Sans';
-    font-size: ${({ size }) => size === 'sm' && '14px'};
+    font-size: ${({ size }) => size === 'sm' && '12px'};
     .react-select__control {
         height: ${({ size }) => (size === 'bg' ? '45px' : size === 'sm' ? '38px' : 'initial')};
         border: 1px solid #ced4da !important;

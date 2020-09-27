@@ -77,7 +77,7 @@ const TotalCard: React.FC<Props> = props => {
                         </BudgetTotalItem>
                         <SumLine />
                         <BudgetTotalItem>
-                            <div>Total</div>
+                            <div>Remaining</div>
                             <BudgetMoney>
                                 {moneyFormat(
                                     incomeBudgetTotal - otherBudgetTotal - expenseBudgetTotal
@@ -91,7 +91,9 @@ const TotalCard: React.FC<Props> = props => {
     );
 };
 
+// STYLES //
 const CardWrapper = styled(Card)`
+    margin-bottom: 20px;
     margin-top: 20px;
     padding: 20px;
     width: 250px;

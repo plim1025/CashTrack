@@ -2,10 +2,11 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 
 // COMPONENTS //
-import { Button, Form, Modal } from 'react-bootstrap';
+import { Form, Modal } from 'react-bootstrap';
 import Dropdown from '../shared/Dropdown';
 import ErrorMessage from '../shared/ErrorMessage';
 import CategoryDropdownMenu from '../shared/CategoryDropdownMenu';
+import Button from '../shared/Button';
 
 // CONTEXT //
 import { ResourcesContext } from '../../App';
@@ -161,12 +162,14 @@ const TransactionModal: React.FC<Props> = props => {
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={handleClose} size='sm' variant='secondary'>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSubmit} size='sm' type='submit' variant='primary'>
-                        Submit
-                    </Button>
+                    <Button child='Cancel' onClick={handleClose} size='sm' variant='secondary' />
+                    <Button
+                        child='Submit'
+                        onClick={handleSubmit}
+                        size='sm'
+                        variant='primary'
+                        submit
+                    />
                 </Modal.Footer>
             </Form>
         </Modal>

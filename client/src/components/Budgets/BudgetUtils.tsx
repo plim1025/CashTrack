@@ -64,7 +64,7 @@ export const updateBudget = async (budgetID: string, budget: Budget): Promise<Bu
         const newResponse = await response.json();
         return newResponse;
     } catch (error) {
-        throw Error(`Error deleting budget: ${error}`);
+        throw Error(`Error updating budget: ${error}`);
     }
 };
 

@@ -22,8 +22,11 @@ export interface Account {
     name: string;
     institution: string;
     type: string;
+    subtype: string;
     mask: string;
     balance: number;
+    lastUpdated: Date;
+    hidden: boolean;
     available?: number;
     creditLimit?: number;
     debt?: number;

@@ -236,6 +236,7 @@ const Table: React.FC<Props> = props => {
     );
 };
 
+// STYLES //
 const FormWrapper = styled(Form)`
     &&& input {
         width: 100%;
@@ -245,7 +246,7 @@ const FormWrapper = styled(Form)`
 
 const BootstrapTableWrapper = styled.div`
     #transaction-table {
-        font-size: 14px;
+        font-size: 12px;
     }
 
     .transaction-table-header th,
@@ -288,7 +289,7 @@ const BootstrapTableWrapper = styled.div`
     }
 
     .transaction-table-edit-cell input {
-        font-size: 14px !important;
+        font-size: 12px !important;
         color: #212529 !important;
     }
 

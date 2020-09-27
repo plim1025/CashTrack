@@ -90,7 +90,7 @@ const Item = styled.div`
 `;
 
 const Title = styled.div`
-    font-size: 14px;
+    font-size: 16px;
     opacity: 0.75;
     text-transform: uppercase;
 `;
