@@ -2,6 +2,16 @@ import rootReducer from './redux/Reducers';
 // import { Action } from 'redux';
 // import { ThunkAction } from 'redux-thunk';
 
+export interface User {
+    email: string;
+    password: string;
+    accessToken: string;
+    itemID: string;
+    removedTransactionIDs: string[];
+    theme: string;
+    notification: string;
+}
+
 export interface Transaction {
     _id: string;
     date: Date;

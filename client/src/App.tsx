@@ -11,6 +11,7 @@ import { loadEmail } from './redux/Actions';
 // COMPONENTS //
 import Header from './components/shared/Header';
 import {
+    fetchUser,
     fetchTransactions,
     fetchAccounts,
     fetchCategories,
@@ -19,10 +20,9 @@ import {
 import FallbackSpinner from './components/shared/FallbackSpinner';
 
 // TYPES //
-import { RootState, Transaction, Account, Category, Budget } from './types';
+import { RootState, User, Transaction, Account, Category, Budget } from './types';
 
 // VIEWS //
-const Home = React.lazy(() => import(/* webpackChunkName: 'Home' */ './view/Home'));
 const Transactions = React.lazy(
     () => import(/* webpackChunkName: 'Transactions' */ './view/Transactions')
 );
@@ -38,6 +38,8 @@ interface HeaderContextType {
 }
 
 interface ResourcesContextType {
+    user: User;
+    setUser: (user: User) => void;
     transactions: Transaction[];
     setTransactions: (transactions: Transaction[]) => void;
     accounts: Account[];
@@ -56,11 +58,13 @@ type Actions =
     | { type: 'SET_LOADING'; loading: boolean }
     | {
           type: 'SET_ALL_RESOURCES';
+          user: User;
           transactions: Transaction[];
           accounts: Account[];
           categories: Category[];
           budgets: Budget[];
       }
+    | { type: 'SET_USER'; user: User }
     | { type: 'SET_TRANSACTIONS'; transactions: Transaction[] }
     | { type: 'SET_ACCOUNTS'; accounts: Account[] }
     | { type: 'SET_CATEGORIES'; categories: Category[] }
@@ -70,6 +74,7 @@ type Actions =
 
 interface ReducerState {
     loading: boolean;
+    user: User;
     transactions: Transaction[];
     accounts: Account[];
     categories: Category[];
@@ -85,11 +90,14 @@ const reducer = (state: ReducerState, action: Actions) => {
         case 'SET_ALL_RESOURCES':
             return {
                 ...state,
+                user: action.user,
                 transactions: action.transactions,
                 accounts: action.accounts,
                 categories: action.categories,
                 budgets: action.budgets,
             };
+        case 'SET_USER':
+            return { ...state, user: action.user };
         case 'SET_TRANSACTIONS':
             return { ...state, transactions: action.transactions };
         case 'SET_ACCOUNTS':
@@ -117,6 +125,7 @@ const App: React.FC<Props & RouteComponentProps> = props => {
     const sessionEmail = sessionStorage.getItem('email');
     const [state, dispatch] = useReducer(reducer, {
         loading: false,
+        user: null,
         transactions: [],
         accounts: [],
         categories: [],
@@ -128,11 +137,12 @@ const App: React.FC<Props & RouteComponentProps> = props => {
     const fetchResources = async () => {
         dispatch({ type: 'SET_LOADING', loading: true });
         await Promise.all([
+            fetchUser(),
             fetchTransactions(),
             fetchAccounts(),
             fetchCategories(),
             fetchBudgets(),
-        ]).then(([transactions, accounts, categories, budgets]) => {
+        ]).then(([user, transactions, accounts, categories, budgets]) => {
             const hiddenAccountIDs = accounts
                 .filter(account => account.hidden)
                 .map(account => account.id);
@@ -141,10 +151,51 @@ const App: React.FC<Props & RouteComponentProps> = props => {
             );
             dispatch({
                 type: 'SET_ALL_RESOURCES',
+                user: user,
                 transactions: parsedTransactions,
                 accounts: accounts,
                 // eslint-disable-next-line prettier/prettier
-                categories: [...categories, { name: 'Bank Fees', type: 'expenses' }, { name: 'Legal Fees', type: 'expenses' }, { name: 'Charitable Giving', type: 'expenses' }, { name: 'Medical', type: 'expenses' }, { name: 'Check', type: 'expenses' }, { name: 'Education', type: 'expenses' }, { name: 'Membership Fee', type: 'expenses' }, { name: 'Service', type: 'expenses' }, { name: 'Utilities', type: 'expenses' }, { name: 'Postage/Shipping', type: 'expenses' }, { name: 'Restaurant', type: 'expenses' }, { name: 'Entertainment', type: 'expenses' }, { name: 'Loan', type: 'expenses' }, { name: 'Rent', type: 'expenses' }, { name: 'Home Maintenance/Improvement', type: 'expenses' }, { name: 'Automotive', type: 'expenses' }, { name: 'Electronic', type: 'expenses' }, { name: 'Insurance', type: 'expenses' }, { name: 'Business Expenditure', type: 'expenses' }, { name: 'Real Estate', type: 'expenses' }, { name: 'Personal Care', type: 'expenses' }, { name: 'Gas', type: 'expenses' }, { name: 'Subscription', type: 'expenses' }, { name: 'Travel', type: 'expenses' }, { name: 'Shopping', type: 'expenses' }, { name: 'Clothing', type: 'expenses' }, { name: 'Groceries', type: 'expenses' }, { name: 'Tax', type: 'expenses' }, { name: 'Subsidy', type: 'income' }, { name: 'Interest', type: 'income' }, { name: 'Deposit', type: 'income' }, { name: 'Payroll/Salary', type: 'income' }, { name: 'Transfer', type: 'other' }, { name: 'Investment', type: 'other' }, { name: 'Savings', type: 'other' }, { name: 'Cash', type: 'other' }, { name: 'Retirement', type: 'other' }, { name: 'Uncategorized', type: 'other' }],
+                categories: [
+                    ...categories,
+                    { name: 'Bank Fees', type: 'expenses' },
+                    { name: 'Legal Fees', type: 'expenses' },
+                    { name: 'Charitable Giving', type: 'expenses' },
+                    { name: 'Medical', type: 'expenses' },
+                    { name: 'Check', type: 'expenses' },
+                    { name: 'Education', type: 'expenses' },
+                    { name: 'Membership Fee', type: 'expenses' },
+                    { name: 'Service', type: 'expenses' },
+                    { name: 'Utilities', type: 'expenses' },
+                    { name: 'Postage/Shipping', type: 'expenses' },
+                    { name: 'Restaurant', type: 'expenses' },
+                    { name: 'Entertainment', type: 'expenses' },
+                    { name: 'Loan', type: 'expenses' },
+                    { name: 'Rent', type: 'expenses' },
+                    { name: 'Home Maintenance/Improvement', type: 'expenses' },
+                    { name: 'Automotive', type: 'expenses' },
+                    { name: 'Electronic', type: 'expenses' },
+                    { name: 'Insurance', type: 'expenses' },
+                    { name: 'Business Expenditure', type: 'expenses' },
+                    { name: 'Real Estate', type: 'expenses' },
+                    { name: 'Personal Care', type: 'expenses' },
+                    { name: 'Gas', type: 'expenses' },
+                    { name: 'Subscription', type: 'expenses' },
+                    { name: 'Travel', type: 'expenses' },
+                    { name: 'Shopping', type: 'expenses' },
+                    { name: 'Clothing', type: 'expenses' },
+                    { name: 'Groceries', type: 'expenses' },
+                    { name: 'Tax', type: 'expenses' },
+                    { name: 'Subsidy', type: 'income' },
+                    { name: 'Interest', type: 'income' },
+                    { name: 'Deposit', type: 'income' },
+                    { name: 'Payroll/Salary', type: 'income' },
+                    { name: 'Transfer', type: 'other' },
+                    { name: 'Investment', type: 'other' },
+                    { name: 'Savings', type: 'other' },
+                    { name: 'Cash', type: 'other' },
+                    { name: 'Retirement', type: 'other' },
+                    { name: 'Uncategorized', type: 'other' },
+                ],
                 budgets: budgets,
             });
         });
@@ -214,6 +265,8 @@ const App: React.FC<Props & RouteComponentProps> = props => {
             <Header />
             <ResourcesContext.Provider
                 value={{
+                    user: state.user,
+                    setUser: (newUser: User) => dispatch({ type: 'SET_USER', user: newUser }),
                     transactions: state.transactions,
                     setTransactions: (newTransactions: Transaction[]) =>
                         dispatch({ type: 'SET_TRANSACTIONS', transactions: newTransactions }),
@@ -233,9 +286,7 @@ const App: React.FC<Props & RouteComponentProps> = props => {
                 }}
             >
                 <Suspense fallback={<FallbackSpinner show />}>
-                    {state.subpage === 'home' ? (
-                        <Home />
-                    ) : state.subpage === 'transactions' ? (
+                    {state.subpage === 'transactions' ? (
                         <Transactions />
                     ) : state.subpage === 'trends' ? (
                         <Trends />

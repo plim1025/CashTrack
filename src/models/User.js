@@ -16,6 +16,14 @@ const UserSchema = new Schema({
         type: [String],
         default: [],
     },
+    theme: {
+        type: String,
+        default: 'Light',
+    },
+    notification: {
+        type: String,
+        default: 'Weekly',
+    },
 });
 
 const User = mongoose.model('User', UserSchema);

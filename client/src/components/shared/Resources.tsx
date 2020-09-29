@@ -1,5 +1,20 @@
 // TYPES //
-import { Transaction, Account, Category, Budget } from '../../types';
+import { User, Transaction, Account, Category, Budget } from '../../types';
+
+export const fetchUser = async (): Promise<User> => {
+    try {
+        const response = await fetch(`${process.env.BACKEND_URI}/api/user`, {
+            credentials: 'include',
+        });
+        if (!response.ok) {
+            throw Error('Bad response from server');
+        }
+        const parsedResponse = await response.json();
+        return parsedResponse;
+    } catch (error) {
+        throw Error(`Error fetching user: ${error}`);
+    }
+};
 
 export const fetchTransactions = async (): Promise<Transaction[]> => {
     try {

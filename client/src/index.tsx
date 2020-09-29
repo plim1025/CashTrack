@@ -17,12 +17,18 @@ import './assets/css/index.css';
 import Signin from './view/Signin';
 import Register from './view/Register';
 import Landing from './view/Landing';
+import ForgotPassword from './view/ForgotPassword';
+import ResetPassword from './view/ResetPassword';
 import App from './App';
 
 const { store, persistor } = configureStore();
 
-interface TRouteParams {
+interface SubpageRouteParams {
     subpage: string;
+}
+
+interface ResetPasswordRouteParams {
+    userID: string;
 }
 
 ReactDOM.render(
@@ -33,13 +39,21 @@ ReactDOM.render(
                     <Route exact path='/landing' component={Landing} />
                     <Route exact path='/signin' component={Signin} />
                     <Route exact path='/register' component={Register} />
-                    <Redirect exact from='/' to='/home' />
+                    <Route exact path='/forgotpassword' component={ForgotPassword} />
                     <Route
-                        path='/:subpage'
-                        component={({ match }: RouteComponentProps<TRouteParams>) => (
-                            <App subpage={match.params.subpage} />
+                        path='/resetpassword/:userID'
+                        render={({ match }: RouteComponentProps<ResetPasswordRouteParams>) => (
+                            <ResetPassword userID={match.params.userID} />
                         )}
                     />
+                    <Redirect exact from='/' to='/transactions' />
+                    <Route
+                        path='/:subpage'
+                        component={({ match }: RouteComponentProps<SubpageRouteParams>) => {
+                            return <App subpage={match.params.subpage} />;
+                        }}
+                    />
+                    <Route path='*' component={() => <div>404</div>} />
                 </Switch>
             </BrowserRouter>
         </PersistGate>

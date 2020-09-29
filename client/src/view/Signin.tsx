@@ -28,7 +28,7 @@ const Signin: React.FC<RouteComponentProps> = props => {
     const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const signin = async (e: React.MouseEvent<HTMLElement>) => {
+    const handleSubmit = async (e: React.MouseEvent<HTMLElement>) => {
         e.preventDefault();
         if (!email || !password) {
             setError({ show: true, message: 'All fields must be filled in' });
@@ -49,11 +49,11 @@ const Signin: React.FC<RouteComponentProps> = props => {
                 } else {
                     sessionStorage.setItem('email', email);
                 }
+                props.history.push('/transactions');
             } catch {
                 setError({ show: true, message: 'Email and password do not match' });
             }
             setLoading(false);
-            props.history.push('/home');
         }
         if (errorTimeout) {
             clearTimeout(errorTimeout);
@@ -70,7 +70,7 @@ const Signin: React.FC<RouteComponentProps> = props => {
     }, []);
 
     if (globalEmail || sessionStorage.getItem('email')) {
-        return <Redirect to='/home' />;
+        return <Redirect to='/transactions' />;
     }
     return (
         <Wrapper>
@@ -90,7 +90,7 @@ const Signin: React.FC<RouteComponentProps> = props => {
                         <Form.Label>Password</Form.Label>
                         <Form.Control onChange={e => setPassword(e.target.value)} type='password' />
                     </Form.Group>
-                    <Form.Group>
+                    <FormGroupWrapper>
                         <Form.Check
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                 setRememberMe(e.target.checked)
@@ -98,7 +98,12 @@ const Signin: React.FC<RouteComponentProps> = props => {
                             type='checkbox'
                             label='Remember me'
                         />
-                    </Form.Group>
+                        <Button
+                            child='Forgot password?'
+                            onClick={() => props.history.push('/forgotpassword')}
+                            variant='link'
+                        />
+                    </FormGroupWrapper>
                     <Register>
                         <span>New to CashTrack?</span>
                         <Button
@@ -111,7 +116,7 @@ const Signin: React.FC<RouteComponentProps> = props => {
                         child={
                             loading ? <Spinner as='span' animation='border' size='sm' /> : 'Sign In'
                         }
-                        onClick={signin}
+                        onClick={handleSubmit}
                         variant='primary'
                         submit
                         block
@@ -136,7 +141,12 @@ const CardWrapper = styled(Card)`
     margin-top: auto;
     padding: 20px;
     position: relative;
-    width: 400px;
+    width: 410px;
+`;
+
+const FormGroupWrapper = styled(Form.Group)`
+    align-items: center;
+    display: flex;
 `;
 
 const Logo = styled.svg`

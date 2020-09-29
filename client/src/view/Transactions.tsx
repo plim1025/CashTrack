@@ -113,6 +113,9 @@ const reducer = (state: ReducerState, action: Actions) => {
                 categoryModal: true,
             };
         case 'SET_ERROR':
+            if (errorTimeout) {
+                clearTimeout(errorTimeout);
+            }
             return { ...state, error: { show: true, message: action.message } };
         case 'HIDE_ERROR':
             return { ...state, error: { ...state.error, show: false } };
@@ -192,9 +195,6 @@ const Transactions: React.FC<RouteComponentProps> = props => {
     const handleDeleteMultipleTransactions = async () => {
         if (!state.selectedTransactionIDs.length) {
             dispatch({ type: 'SET_ERROR', message: 'No transactions selected to delete' });
-            if (errorTimeout) {
-                clearTimeout(errorTimeout);
-            }
             errorTimeout = setTimeout(() => dispatch({ type: 'HIDE_ERROR' }), 3000);
         } else {
             dispatch({ type: 'SET_LOADING', loading: true });
@@ -211,9 +211,6 @@ const Transactions: React.FC<RouteComponentProps> = props => {
     const handleEditButton = () => {
         if (!state.selectedTransactionIDs.length) {
             dispatch({ type: 'SET_ERROR', message: 'No transactions selected to edit' });
-            if (errorTimeout) {
-                clearTimeout(errorTimeout);
-            }
             errorTimeout = setTimeout(() => dispatch({ type: 'HIDE_ERROR' }), 3000);
         } else {
             dispatch({ type: 'SHOW_TRANSACTION_EDIT_MODAL' });
