@@ -32,7 +32,11 @@ const Dropdown: React.FC<Props> = props => {
     const dropdownMenuRef = useRef(null);
 
     useEffect(() => {
-        window.onresize = () => dropdownMenuRef.current.blur();
+        const resizeListener = () => dropdownMenuRef.current.blur();
+        window.addEventListener('resize', resizeListener);
+        return () => {
+            window.removeEventListener('resize', resizeListener);
+        };
     }, []);
 
     return (

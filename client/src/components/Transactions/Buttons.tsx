@@ -90,13 +90,13 @@ const Buttons: React.FC<Props> = props => {
 const Wrapper = styled.div`
     display: flex;
     margin: 10px 0;
-    @media (max-width: 750px) {
+    @media (max-width: 550px) {
         justify-content: space-around;
     }
 `;
 
 const ButtonText = styled.div`
-    @media (max-width: 750px) {
+    @media (max-width: 550px) {
         display: none;
     } ;
 `;
@@ -106,7 +106,7 @@ const ButtonIcon = styled.svg`
     height: 16px;
     margin-right: 8px;
     width: 16px;
-    @media (max-width: 750px) {
+    @media (max-width: 550px) {
         margin-right: 0;
     } ;
 `;

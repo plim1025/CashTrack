@@ -302,6 +302,7 @@ const Wrapper = styled.div`
 `;
 
 const SubWrapper = styled.div`
+    margin-top: 1.25rem;
     max-width: 800px;
     padding: 20px;
     width: 100%;

@@ -243,7 +243,7 @@ const SubWrapper = styled.div`
     flex-wrap: wrap;
     margin: 20px 0;
     max-width: 800px;
-    width: 100%;
+    width: calc(100% - 40px);
 `;
 
 const Title = styled.div`

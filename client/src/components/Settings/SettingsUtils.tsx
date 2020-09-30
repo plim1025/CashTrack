@@ -1,4 +1,4 @@
-export const updateUser = async (theme: string, notification: string): Promise<void> => {
+export const updateUser = async (notification: string): Promise<void> => {
     try {
         const response = await fetch(`${process.env.BACKEND_URI}/api/user`, {
             method: 'PUT',
@@ -7,7 +7,6 @@ export const updateUser = async (theme: string, notification: string): Promise<v
             },
             credentials: 'include',
             body: JSON.stringify({
-                theme: theme,
                 notification: notification,
             }),
         });

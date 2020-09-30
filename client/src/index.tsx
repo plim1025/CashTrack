@@ -49,9 +49,9 @@ ReactDOM.render(
                     <Redirect exact from='/' to='/transactions' />
                     <Route
                         path='/:subpage'
-                        component={({ match }: RouteComponentProps<SubpageRouteParams>) => {
-                            return <App subpage={match.params.subpage} />;
-                        }}
+                        component={({ match }: RouteComponentProps<SubpageRouteParams>) => (
+                            <App subpage={match.params.subpage} />
+                        )}
                     />
                     <Route path='*' component={() => <div>404</div>} />
                 </Switch>

@@ -9,7 +9,9 @@ interface Props {
 }
 
 const AddButton: React.FC<Props> = props => {
-    return <Button child='+ Budget' onClick={() => props.openAddModal()} />;
+    return (
+        <Button child='+ Budget' onClick={() => props.openAddModal()} style={{ margin: 'auto' }} />
+    );
 };
 
 export default AddButton;

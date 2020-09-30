@@ -8,7 +8,6 @@ export interface User {
     accessToken: string;
     itemID: string;
     removedTransactionIDs: string[];
-    theme: string;
     notification: string;
 }
 

@@ -80,9 +80,9 @@ router.post('/logout', (req, res, next) => {
 router.put('/', async (req, res, next) => {
     try {
         if (req.user) {
-            const { notification, theme } = req.body;
+            const { notification } = req.body;
             const query = { _id: req.user._id };
-            const update = { notification: notification, theme: theme };
+            const update = { notification: notification };
             await User.updateOne(query, update);
             res.sendStatus(200);
         } else {

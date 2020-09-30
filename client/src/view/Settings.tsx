@@ -15,7 +15,6 @@ import { updateUser, verifyPassword, updatePassword } from '../components/Settin
 
 type Actions =
     | { type: 'SET_LOADING'; loading: boolean }
-    | { type: 'SET_THEME'; theme: string }
     | { type: 'SET_NOTIFICATION'; notification: string }
     | { type: 'SET_OLD_PASSWORD'; oldPassword: string }
     | { type: 'SET_NEW_PASSWORD'; newPassword: string }
@@ -26,7 +25,6 @@ type Actions =
 
 interface ReducerState {
     loading: boolean;
-    theme: string;
     notification: string;
     oldPassword: string;
     newPassword: string;
@@ -42,8 +40,6 @@ const reducer = (state: ReducerState, action: Actions) => {
     switch (action.type) {
         case 'SET_LOADING':
             return { ...state, loading: action.loading };
-        case 'SET_THEME':
-            return { ...state, theme: action.theme };
         case 'SET_NOTIFICATION':
             return { ...state, notification: action.notification };
         case 'SET_OLD_PASSWORD':
@@ -75,7 +71,6 @@ const Settings: React.FC = () => {
     const { user, setUser } = useContext(ResourcesContext);
     const [state, dispatch] = useReducer(reducer, {
         loading: false,
-        theme: user.theme,
         notification: user.notification,
         oldPassword: '',
         newPassword: '',
@@ -87,17 +82,10 @@ const Settings: React.FC = () => {
         },
     });
 
-    const handleChangeTheme = async (checked: boolean) => {
-        const theme = checked ? 'Dark' : 'Light';
-        dispatch({ type: 'SET_THEME', theme: theme });
-        setUser({ ...user, theme: theme });
-        await updateUser(theme, state.notification);
-    };
-
     const handleChangeNotification = async (frequency: string) => {
         dispatch({ type: 'SET_NOTIFICATION', notification: frequency });
         setUser({ ...user, notification: frequency });
-        await updateUser(state.theme, frequency);
+        await updateUser(frequency);
     };
 
     const handleSubmitPassword = async (e: React.MouseEvent<HTMLElement>) => {
@@ -147,7 +135,7 @@ const Settings: React.FC = () => {
         <Wrapper>
             <FormWrapper>
                 <NotificationForm>
-                    <Form.Label>Email Notifications</Form.Label>
+                    <SectionTitle>Email Notifications</SectionTitle>
                     <Form.Check
                         inline
                         label='Daily'
@@ -173,19 +161,7 @@ const Settings: React.FC = () => {
                         onChange={() => handleChangeNotification('Monthly')}
                     />
                 </NotificationForm>
-                <Form.Group>
-                    <Form.Label>Theme</Form.Label>
-                    <Form.Check
-                        checked={state.theme === 'Dark'}
-                        type='switch'
-                        label={state.theme}
-                        id='4'
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            handleChangeTheme(e.target.checked)
-                        }
-                    />
-                </Form.Group>
-                <ResetPasswordTitle>Reset Password</ResetPasswordTitle>
+                <SectionTitle>Reset Password</SectionTitle>
                 <Form.Group>
                     <Form.Label>Old Password</Form.Label>
                     <Form.Control
@@ -227,7 +203,7 @@ const Settings: React.FC = () => {
                     variant='primary'
                     submit
                     block
-                    style={{ height: 40 }}
+                    style={{ height: 40, marginBottom: 20 }}
                 />
                 <ErrorMessage
                     error={state.error.show}
@@ -255,7 +231,7 @@ const NotificationForm = styled(Form.Group)`
     flex-direction: column;
 `;
 
-const ResetPasswordTitle = styled.div`
+const SectionTitle = styled.div`
     font-size: 1.25rem;
     font-weight: 700;
     margin-top: 1rem;
