@@ -19,6 +19,7 @@ import Register from './view/Register';
 import Landing from './view/Landing';
 import ForgotPassword from './view/ForgotPassword';
 import ResetPassword from './view/ResetPassword';
+import BadRequest from './view/BadRequest';
 import App from './App';
 
 const { store, persistor } = configureStore();
@@ -53,7 +54,7 @@ ReactDOM.render(
                             <App subpage={match.params.subpage} />
                         )}
                     />
-                    <Route path='*' component={() => <div>404</div>} />
+                    <Route path='*' component={BadRequest} />
                 </Switch>
             </BrowserRouter>
         </PersistGate>

@@ -2,7 +2,7 @@
 import React from 'react';
 
 const Landing: React.FC = () => {
-    return <div>Landing kahoe</div>;
+    return <></>;
 };
 
 export default Landing;

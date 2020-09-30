@@ -23,12 +23,9 @@ const Sidebar: React.FC<Props> = props => {
 
     useEffect(() => {
         const resizeListener = () => {
-            console.log('here');
             if (prevWindowWidth.current > 750 && window.innerWidth <= 750) {
-                console.log('set mini');
                 setMinified(true);
             } else if (prevWindowWidth.current <= 750 && window.innerWidth > 750) {
-                console.log('off mini');
                 setMinified(false);
                 setExpanded(false);
             }
@@ -94,9 +91,11 @@ const Sidebar: React.FC<Props> = props => {
 const Wrapper = styled.nav`
     background: #f0f0f0;
     margin-bottom: 20px;
+    padding-top: calc(20px + 1.25rem);
     width: 250px;
     z-index: 1;
     @media (max-width: 750px) {
+        padding-top: 0;
         position: fixed;
     }
 `;

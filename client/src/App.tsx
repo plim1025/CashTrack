@@ -30,6 +30,9 @@ const Trends = React.lazy(() => import(/* webpackChunkName: 'Trends' */ './view/
 const Accounts = React.lazy(() => import(/* webpackChunkName: 'Accounts' */ './view/Accounts'));
 const Budgets = React.lazy(() => import(/* webpackChunkName: 'Budgets' */ './view/Budgets'));
 const Settings = React.lazy(() => import(/* webpackChunkName: 'Settings' */ './view/Settings'));
+const BadRequest = React.lazy(
+    () => import(/* webpackChunkName: 'BadRequest' */ './view/BadRequest')
+);
 
 interface HeaderContextType {
     subpage: string;
@@ -297,7 +300,7 @@ const App: React.FC<Props & RouteComponentProps> = props => {
                     ) : state.subpage === 'settings' ? (
                         <Settings />
                     ) : (
-                        <div>404</div>
+                        <BadRequest />
                     )}
                 </Suspense>
             </ResourcesContext.Provider>
