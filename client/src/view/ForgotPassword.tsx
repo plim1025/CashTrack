@@ -27,13 +27,10 @@ const ForgotPassword: React.FC<RouteComponentProps> = props => {
         } else {
             setLoading(true);
             try {
-                const response = await fetch(
-                    `${process.env.BACKEND_URI}/api/user/forgotpassword/${email}`,
-                    {
-                        method: 'POST',
-                        credentials: 'include',
-                    }
-                );
+                const response = await fetch(`/api/user/forgotpassword/${email}`, {
+                    method: 'POST',
+                    credentials: 'include',
+                });
                 if (!response.ok) {
                     throw Error('Bad response from server');
                 }

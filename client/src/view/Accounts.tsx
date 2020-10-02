@@ -59,16 +59,13 @@ const Accounts: React.FC = () => {
     useEffect(() => {
         const getLinkToken = async () => {
             try {
-                const response = await fetch(
-                    `${process.env.BACKEND_URI}/api/plaid/create_link_token`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                    }
-                );
+                const response = await fetch('/api/plaid/create_link_token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                });
                 if (!response.ok) {
                     throw Error('Bad response from server');
                 }
