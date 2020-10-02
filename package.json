@@ -31,7 +31,7 @@
         "plaid": "^7.0.0"
     },
     "scripts": {
-        "start": "nodemon src/index.js",
+        "start": "node src/index.js",
         "dev": "concurrently \"yarn run server\" \"yarn run start\"",
         "lint": "eslint ./src",
         "heroku-postbuild": "cd client && yarn install"
