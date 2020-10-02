@@ -8,7 +8,6 @@ const path = require('path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
-const fs = require('fs');
 const userRoute = require('./api/user');
 const transactionRoute = require('./api/transaction');
 const plaidAccountRoute = require('./api/plaidAccount');
@@ -63,9 +62,6 @@ app.use('/api/budget', budgetRoute);
 app.use('/api/plaid', plaidRoute);
 
 if (process.env.NODE_ENV === 'production') {
-    fs.readdir(__dirname, (err, files) => {
-        files.forEach(file => console.log(file));
-    });
     app.use(express.static('client/dist'));
     app.get('*', (req, res) => {
         res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
