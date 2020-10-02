@@ -42,6 +42,7 @@ const PlaidLinkButton: React.FC<Props> = props => {
 
     const { open, ready, error } = usePlaidLink({ token: props.token, onSuccess: onSuccess });
 
+    console.log(error);
     return (
         <ButtonWrapper>
             <Button
