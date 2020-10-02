@@ -62,6 +62,7 @@ app.use(middlewares.errorHandler);
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static('./client/dist'));
     app.get('*', (req, res) => {
+        console.log('GOT FILEEEEEEEEEEEEEEEEEEEEE');
         res.sendFile('./client/dist/index.html');
     });
 }
