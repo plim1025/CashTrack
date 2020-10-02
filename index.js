@@ -33,7 +33,12 @@ mongoose.connection
 middlewares.initializePassport(passport);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors());
+app.use(
+    cors({
+        credentials: true,
+        origin: process.env.FRONTEND_URI,
+    })
+);
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(
@@ -56,12 +61,6 @@ app.use('/api/plaidAccount', plaidAccountRoute);
 app.use('/api/category', categoryRoute);
 app.use('/api/budget', budgetRoute);
 app.use('/api/plaid', plaidRoute);
-app.use(middlewares.notFound);
-app.use(middlewares.errorHandler);
-
-app.get('/', (req, res) => {
-    console.log('GOT ROUTEEEEEEE');
-});
 
 if (process.env.NODE_ENV === 'production') {
     fs.readdir(__dirname, (err, files) => {
@@ -72,6 +71,9 @@ if (process.env.NODE_ENV === 'production') {
         res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
     });
 }
+
+app.use(middlewares.notFound);
+app.use(middlewares.errorHandler);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening at PORT ${port}`));
