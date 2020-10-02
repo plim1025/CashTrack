@@ -65,11 +65,10 @@ app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 
 if (process.env.NODE_ENV === 'production') {
-    fs.readdir('../client/dist', (err, files) => {
-        files.forEach(file => console.log(file));
-    });
     fs.readdir('../', (err, files) => {
-        files.forEach(file => console.log(file));
+        for (let i = 0; i < files.length; i++) {
+            console.log(files[i]);
+        }
     });
     app.use(express.static('../client/dist'));
     app.get('*', (req, res) => {
