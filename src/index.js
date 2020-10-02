@@ -64,9 +64,9 @@ app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 
 if (process.env.NODE_ENV === 'production') {
+    console.log(__dirname);
     app.use(express.static('client/dist'));
     app.get('*', (req, res) => {
-        console.log(__dirname);
         res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
     });
 }
