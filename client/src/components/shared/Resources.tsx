@@ -3,7 +3,7 @@ import { User, Transaction, Account, Category, Budget } from '../../types';
 
 export const fetchUser = async (): Promise<User> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/user`, {
+        const response = await fetch('/api/user', {
             credentials: 'include',
         });
         if (!response.ok) {
@@ -18,7 +18,7 @@ export const fetchUser = async (): Promise<User> => {
 
 export const fetchTransactions = async (): Promise<Transaction[]> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+        const response = await fetch('/api/transaction', {
             credentials: 'include',
         });
         if (!response.ok) {
@@ -33,7 +33,7 @@ export const fetchTransactions = async (): Promise<Transaction[]> => {
 
 export const fetchAccounts = async (): Promise<Account[]> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/plaidAccount`, {
+        const response = await fetch('/api/plaidAccount', {
             credentials: 'include',
         });
         if (!response.ok) {
@@ -48,7 +48,7 @@ export const fetchAccounts = async (): Promise<Account[]> => {
 
 export const fetchCategories = async (): Promise<Category[]> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/category`, {
+        const response = await fetch('/api/category', {
             credentials: 'include',
         });
         if (!response.ok) {
@@ -63,7 +63,7 @@ export const fetchCategories = async (): Promise<Category[]> => {
 
 export const fetchBudgets = async (): Promise<Budget[]> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/budget`, {
+        const response = await fetch('/api/budget', {
             credentials: 'include',
         });
         if (!response.ok) {

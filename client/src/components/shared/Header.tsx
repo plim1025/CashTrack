@@ -32,7 +32,7 @@ const Header: React.FC<Props & RouteComponentProps> = props => {
 
     const logout = async () => {
         try {
-            const response = await fetch(`${process.env.BACKEND_URI}/api/user/logout`, {
+            const response = await fetch('/api/user/logout', {
                 method: 'POST',
                 credentials: 'include',
             });

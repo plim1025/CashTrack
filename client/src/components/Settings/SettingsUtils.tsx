@@ -1,6 +1,6 @@
 export const updateUser = async (notification: string): Promise<void> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/user`, {
+        const response = await fetch('/api/user', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -22,7 +22,7 @@ export const updateUser = async (notification: string): Promise<void> => {
 
 export const verifyPassword = async (password: string): Promise<boolean> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/user/password`, {
+        const response = await fetch('/api/user/password', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ export const updatePassword = async (newPassword: string, userID?: string): Prom
         } else {
             body = JSON.stringify({ password: newPassword });
         }
-        const response = await fetch(`${process.env.BACKEND_URI}/api/user/password`, {
+        const response = await fetch('/api/user/password', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

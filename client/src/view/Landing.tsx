@@ -30,7 +30,7 @@ const Landing: React.FC<RouteComponentProps> = props => {
     const loginAsGuest = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${process.env.BACKEND_URI}/api/user/signin`, {
+            const response = await fetch('/api/user/signin', {
                 method: 'POST',
                 credentials: 'include',
                 headers: {

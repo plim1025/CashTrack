@@ -18,7 +18,7 @@ export const getFrequencyLabel = (frequency: string): string => {
 
 export const createBudget = async (budget: Budget): Promise<Budget> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/budget`, {
+        const response = await fetch(`/api/budget`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export const createBudget = async (budget: Budget): Promise<Budget> => {
 
 export const updateBudget = async (budgetID: string, budget: Budget): Promise<Budget> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/budget/${budgetID}`, {
+        const response = await fetch(`/api/budget/${budgetID}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export const updateBudget = async (budgetID: string, budget: Budget): Promise<Bu
 
 export const deleteBudget = async (budgetID: string): Promise<void> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/budget/${budgetID}`, {
+        const response = await fetch(`/api/budget/${budgetID}`, {
             method: 'DELETE',
             credentials: 'include',
         });

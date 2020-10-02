@@ -19,7 +19,7 @@ const PlaidLinkButton: React.FC<Props> = props => {
     const onSuccess = async (token: string, metadata: any) => {
         refresh('Fetching account information...');
         try {
-            const response = await fetch(`${process.env.BACKEND_URI}/api/plaid/set_account`, {
+            const response = await fetch('/api/plaid/set_account', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

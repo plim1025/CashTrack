@@ -46,7 +46,7 @@ export const updateAccount = async (
     accountInfo: { name: string; hidden: boolean }
 ): Promise<Account> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/plaidAccount/${accountID}`, {
+        const response = await fetch(`/api/plaidAccount/${accountID}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ export const updateAccount = async (
 
 export const deleteAccounts = async (batchID: string): Promise<void> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/plaidAccount/${batchID}`, {
+        const response = await fetch(`/api/plaidAccount/${batchID}`, {
             method: 'DELETE',
             credentials: 'include',
         });

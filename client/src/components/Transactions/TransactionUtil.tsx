@@ -2,7 +2,7 @@ import { Transaction, Account } from '../../types';
 
 export const createTransaction = async (transaction: Transaction): Promise<Transaction> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+        const response = await fetch('/api/transaction', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -27,7 +27,7 @@ export const createTransaction = async (transaction: Transaction): Promise<Trans
 
 export const deleteTransactions = async (transactionIDs: string[]): Promise<void> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+        const response = await fetch('/api/transaction', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export const updateTransactions = async (
     transaction: Transaction
 ): Promise<Transaction[]> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+        const response = await fetch('/api/transaction', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

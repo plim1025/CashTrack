@@ -32,7 +32,7 @@ const Register: React.FC<RouteComponentProps> = props => {
         } else {
             setLoading(true);
             try {
-                const response = await fetch(`${process.env.BACKEND_URI}/api/user`, {
+                const response = await fetch('/api/user', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

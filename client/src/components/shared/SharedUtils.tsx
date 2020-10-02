@@ -63,7 +63,7 @@ export const parseCategoryDropdownOptions = (categories: Category[]): GroupedDro
 
 export const createCategory = async (name: string, type: string): Promise<Category> => {
     try {
-        const response = await fetch(`${process.env.BACKEND_URI}/api/category`, {
+        const response = await fetch('/api/category', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ export const updateCategory = async (
 ): Promise<Category> => {
     try {
         const [categoryResponse, transactionResponse] = await Promise.all([
-            fetch(`${process.env.BACKEND_URI}/api/category/${id}`, {
+            fetch(`/api/category/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ export const updateCategory = async (
                     type: type,
                 }),
             }),
-            fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+            fetch('/api/transaction', {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {
@@ -128,11 +128,11 @@ export const updateCategory = async (
 export const deleteCategory = async (id: string, transactionIDs: string[]): Promise<void> => {
     try {
         const [deleteResponse, editResponse] = await Promise.all([
-            fetch(`${process.env.BACKEND_URI}/api/category/${id}`, {
+            fetch(`/api/category/${id}`, {
                 method: 'DELETE',
                 credentials: 'include',
             }),
-            fetch(`${process.env.BACKEND_URI}/api/transaction`, {
+            fetch('/api/transaction', {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {

@@ -22,22 +22,16 @@ import FallbackSpinner from './components/shared/FallbackSpinner';
 import { RootState, User, Transaction, Account, Category, Budget } from './types';
 
 // VIEWS //
-// const Transactions = React.lazy(
-//     () => import(/* webpackChunkName: 'Transactions' */ './view/Transactions')
-// );
-// const Trends = React.lazy(() => import(/* webpackChunkName: 'Trends' */ './view/Trends'));
-// const Accounts = React.lazy(() => import(/* webpackChunkName: 'Accounts' */ './view/Accounts'));
-// const Budgets = React.lazy(() => import(/* webpackChunkName: 'Budgets' */ './view/Budgets'));
-// const Settings = React.lazy(() => import(/* webpackChunkName: 'Settings' */ './view/Settings'));
-// const BadRequest = React.lazy(
-//     () => import(/* webpackChunkName: 'BadRequest' */ './view/BadRequest')
-// );
-import Transactions from './view/Transactions';
-import Trends from './view/Trends';
-import Accounts from './view/Accounts';
-import Budgets from './view/Budgets';
-import Settings from './view/Settings';
-import BadRequest from './view/BadRequest';
+const Transactions = React.lazy(
+    () => import(/* webpackChunkName: 'Transactions' */ './view/Transactions')
+);
+const Trends = React.lazy(() => import(/* webpackChunkName: 'Trends' */ './view/Trends'));
+const Accounts = React.lazy(() => import(/* webpackChunkName: 'Accounts' */ './view/Accounts'));
+const Budgets = React.lazy(() => import(/* webpackChunkName: 'Budgets' */ './view/Budgets'));
+const Settings = React.lazy(() => import(/* webpackChunkName: 'Settings' */ './view/Settings'));
+const BadRequest = React.lazy(
+    () => import(/* webpackChunkName: 'BadRequest' */ './view/BadRequest')
+);
 
 interface ResourcesContextType {
     user: User;
