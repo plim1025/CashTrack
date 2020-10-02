@@ -34,6 +34,7 @@
         "start": "node src/index.js",
         "dev": "concurrently \"yarn run server\" \"yarn run start\"",
         "lint": "eslint ./src",
-        "heroku-postbuild": "cd client && yarn install"
+        "heroku-postbuild": "cd client && yarn install",
+        "build": "cd client && yarn build"
     }
 }
