@@ -83,7 +83,7 @@ const Trends: React.FC = () => {
         trend: 'expenses',
         subtrend: 'date',
         chart: 'bar',
-        date: 'all time',
+        date: 'month',
         accountIDs: [],
         selectedTransactions: [],
         data: [],

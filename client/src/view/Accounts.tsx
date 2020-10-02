@@ -81,9 +81,6 @@ const Accounts: React.FC = () => {
         getLinkToken();
     }, []);
 
-    if (!state.token) {
-        return <FallbackSpinner backdrop show />;
-    }
     return (
         <>
             <PlaidLinkButton token={state.token} />

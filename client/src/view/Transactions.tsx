@@ -1,9 +1,6 @@
 // REACT //
 import React, { useEffect, useReducer, useContext } from 'react';
 
-// ROUTER //
-import { withRouter, RouteComponentProps } from 'react-router';
-
 // COMPONENTS //
 import styled from 'styled-components';
 import Table from '../components/Transactions/Table';
@@ -14,10 +11,9 @@ import AccountInfo from '../components/Transactions/AccountInfo';
 import Buttons from '../components/Transactions/Buttons';
 import ErrorMessage from '../components/shared/ErrorMessage';
 import FallbackSpinner from '../components/shared/FallbackSpinner';
-import Button from '../components/shared/Button';
 
 // CONTEXT //
-import { ResourcesContext, HeaderContext } from '../App';
+import { ResourcesContext } from '../App';
 
 // TYPES //
 import { Transaction, Category } from '../types';
@@ -126,9 +122,8 @@ const reducer = (state: ReducerState, action: Actions) => {
 
 let errorTimeout: ReturnType<typeof setTimeout>;
 
-const Transactions: React.FC<RouteComponentProps> = props => {
+const Transactions: React.FC = () => {
     const { transactions, setTransactions, accounts } = useContext(ResourcesContext);
-    const { setSubpage } = useContext(HeaderContext);
 
     const [state, dispatch] = useReducer(reducer, {
         loading: false,
@@ -244,14 +239,6 @@ const Transactions: React.FC<RouteComponentProps> = props => {
                 {!accounts.length ? (
                     <NoTransactionsText>
                         <span>No accounts added.</span>
-                        <Button
-                            child='Link an account.'
-                            variant='link'
-                            onClick={() => {
-                                props.history.push('/accounts');
-                                setSubpage('accounts');
-                            }}
-                        />
                     </NoTransactionsText>
                 ) : null}
                 <Table
@@ -316,4 +303,4 @@ const NoTransactionsText = styled.div`
     opacity: 0.75;
 `;
 
-export default withRouter(Transactions);
+export default Transactions;

@@ -139,7 +139,7 @@ export const generateDateMonths = (monthDate: Date): DropdownOption[] => {
         { label: `Oct ${year}`, value: new Date(year, 9, 1) },
         { label: `Nov ${year}`, value: new Date(year, 10, 1) },
         { label: `Dec ${year}`, value: new Date(year, 11, 1) },
-        { label: 'Forever', value: new Date(9999) },
+        { label: 'Forever', value: new Date(9999, 0, 0) },
     ];
 };
 

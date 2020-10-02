@@ -1,8 +1,12 @@
 // REACT //
-import React, { useContext } from 'react';
+import React from 'react';
+
+// ROUTER //
+import { RouteComponentProps, withRouter } from 'react-router';
 
 // REDUX //
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { loadEmail } from '../../redux/Actions';
 
 // COMPONENTS //
 import styled from 'styled-components';
@@ -11,16 +15,41 @@ import { Navbar, Nav, NavDropdown } from 'react-bootstrap';
 // TYPES //
 import { RootState } from '../../types';
 
-// CONTEXT //
-import { HeaderContext } from '../../App';
+interface Props {
+    subpage: string;
+    setSubpage: (subpage: string) => void;
+}
 
-const Header: React.FC = () => {
+const Header: React.FC<Props & RouteComponentProps> = props => {
+    const reduxDispatch = useDispatch();
     const reduxEmail = useSelector((redux: RootState) => redux.email);
-    const { subpage, setSubpage, logout } = useContext(HeaderContext);
+    const sessionEmail = sessionStorage.getItem('email');
 
     const changeLink = (newSubpage: string) => {
-        setSubpage(newSubpage);
+        props.setSubpage(newSubpage);
         window.history.replaceState(null, '', `/${newSubpage}`);
+    };
+
+    const logout = async () => {
+        try {
+            const response = await fetch(`${process.env.BACKEND_URI}/api/user/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+            if (!response.ok) {
+                throw Error('Bad response from server');
+            }
+        } catch (error) {
+            throw Error(`Error logging out: ${error}`);
+        }
+        if (reduxEmail) {
+            reduxDispatch(loadEmail(''));
+        }
+        if (sessionEmail) {
+            sessionStorage.setItem('email', '');
+        }
+        props.setSubpage('landing');
+        props.history.push('/landing');
     };
 
     return (
@@ -38,7 +67,7 @@ const Header: React.FC = () => {
                         onClick={() => changeLink('transactions')}
                         eventKey='1'
                         style={{
-                            color: subpage === 'transactions' ? '#fff' : 'rgba(255,255,255,.5)',
+                            color: props.subpage === 'transactions' && '#fff',
                         }}
                     >
                         Transactions
@@ -46,18 +75,28 @@ const Header: React.FC = () => {
                     <Nav.Link
                         onClick={() => changeLink('trends')}
                         eventKey='2'
-                        style={{ color: subpage === 'trends' ? '#fff' : 'rgba(255,255,255,.5)' }}
+                        style={{
+                            color: props.subpage === 'trends' && '#fff',
+                        }}
                     >
                         Trends
                     </Nav.Link>
                     <Nav.Link
                         onClick={() => changeLink('budgets')}
                         eventKey='3'
-                        style={{ color: subpage === 'budgets' ? '#fff' : 'rgba(255,255,255,.5)' }}
+                        style={{
+                            color: props.subpage === 'budgets' && '#fff',
+                        }}
                     >
                         Budgets
                     </Nav.Link>
-                    <Nav.Link onClick={() => changeLink('accounts')} eventKey='4'>
+                    <Nav.Link
+                        onClick={() => changeLink('accounts')}
+                        eventKey='4'
+                        style={{
+                            color: props.subpage === 'accounts' && '#fff',
+                        }}
+                    >
                         Accounts
                     </Nav.Link>
                 </Nav>
@@ -67,13 +106,13 @@ const Header: React.FC = () => {
                         title={reduxEmail || sessionStorage.getItem('email') || ''}
                     >
                         <NavDropdown.Item
-                            active={subpage === 'settings'}
+                            active={props.subpage === 'settings'}
                             onClick={() => changeLink('settings')}
                             eventKey='5'
                         >
                             Settings
                         </NavDropdown.Item>
-                        <NavDropdown.Item onClick={() => logout()} eventKey='6'>
+                        <NavDropdown.Item onClick={logout} eventKey='6'>
                             Logout
                         </NavDropdown.Item>
                     </NavDropdown>
@@ -94,7 +133,7 @@ const Logo = styled.svg`
     margin-right: auto;
     &&& {
         height: 40px;
-        width: 170px;
+        width: 160px;
     }
 `;
 
@@ -114,4 +153,4 @@ const NavWrapper = styled(Nav)`
     }
 `;
 
-export default Header;
+export default withRouter(Header);

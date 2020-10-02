@@ -108,7 +108,7 @@ const Filters: React.FC<Props> = props => {
                         { value: 'month', label: 'Past Month' },
                         { value: 'week', label: 'Past Week' },
                     ]}
-                    defaultOption={{ value: 'all time', label: 'All Time' }}
+                    defaultOption={{ value: 'month', label: 'Past Month' }}
                     onChange={(options: any) => props.setDate(options.value)}
                 />
                 {props.trend !== 'net earnings' && props.trend !== 'net worth' ? (

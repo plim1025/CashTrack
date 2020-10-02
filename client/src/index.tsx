@@ -47,7 +47,7 @@ ReactDOM.render(
                             <ResetPassword userID={match.params.userID} />
                         )}
                     />
-                    <Redirect exact from='/' to='/transactions' />
+                    <Redirect exact from='/' to='/landing' />
                     <Route
                         path='/:subpage'
                         component={({ match }: RouteComponentProps<SubpageRouteParams>) => (

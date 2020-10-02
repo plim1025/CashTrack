@@ -64,7 +64,7 @@ const BudgetModal: React.FC<Props> = props => {
         ) {
             setError({ show: true, message: 'All fields must be filled.' });
         } else if (budget.startDate > budget.endDate) {
-            setError({ show: true, message: 'Start date must be before end date of purchase' });
+            setError({ show: true, message: 'Start date must be before end date' });
         } else if (isNaN(budget.amount)) {
             setError({ show: true, message: 'Amount should be numeric' });
         } else if (budget.amount < 0) {

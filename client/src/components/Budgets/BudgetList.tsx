@@ -205,6 +205,7 @@ const RemainingTransactionsMoney = styled.div`
 `;
 
 const BudgetWrapper = styled.div`
+    margin: 10px 0;
     max-width: 800px;
     width: calc(100% - 40px);
 `;

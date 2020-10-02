@@ -5,8 +5,7 @@ import React, { Suspense, useReducer, useEffect, createContext } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router';
 
 // REDUX //
-import { useSelector, useDispatch } from 'react-redux';
-import { loadEmail } from './redux/Actions';
+import { useSelector } from 'react-redux';
 
 // COMPONENTS //
 import Header from './components/shared/Header';
@@ -34,12 +33,6 @@ const BadRequest = React.lazy(
     () => import(/* webpackChunkName: 'BadRequest' */ './view/BadRequest')
 );
 
-interface HeaderContextType {
-    subpage: string;
-    setSubpage: (subpage: string) => void;
-    logout: () => void;
-}
-
 interface ResourcesContextType {
     user: User;
     setUser: (user: User) => void;
@@ -54,7 +47,6 @@ interface ResourcesContextType {
     refresh: (message?: string) => void;
 }
 
-export const HeaderContext = createContext<HeaderContextType>(null);
 export const ResourcesContext = createContext<ResourcesContextType>(null);
 
 type Actions =
@@ -123,7 +115,6 @@ interface Props {
 }
 
 const App: React.FC<Props & RouteComponentProps> = props => {
-    const reduxDispatch = useDispatch();
     const reduxEmail = useSelector((redux: RootState) => redux.email);
     const sessionEmail = sessionStorage.getItem('email');
     const [state, dispatch] = useReducer(reducer, {
@@ -133,7 +124,7 @@ const App: React.FC<Props & RouteComponentProps> = props => {
         accounts: [],
         categories: [],
         budgets: [],
-        subpage: '',
+        subpage: props.subpage,
         refreshMessage: '',
     });
 
@@ -157,7 +148,6 @@ const App: React.FC<Props & RouteComponentProps> = props => {
                 user: user,
                 transactions: parsedTransactions,
                 accounts: accounts,
-                // eslint-disable-next-line prettier/prettier
                 categories: [
                     ...categories,
                     { name: 'Bank Fees', type: 'expenses' },
@@ -211,28 +201,6 @@ const App: React.FC<Props & RouteComponentProps> = props => {
         }
     }, []);
 
-    const logout = async () => {
-        try {
-            const response = await fetch(`${process.env.BACKEND_URI}/api/user/logout`, {
-                method: 'POST',
-                credentials: 'include',
-            });
-            if (!response.ok) {
-                throw Error('Bad response from server');
-            }
-        } catch (error) {
-            throw Error(`Error logging out: ${error}`);
-        }
-        if (reduxEmail) {
-            reduxDispatch(loadEmail(''));
-        }
-        if (sessionEmail) {
-            sessionStorage.setItem('email', '');
-        }
-        dispatch({ type: 'SET_SUBPAGE', subpage: 'home' });
-        props.history.push('/signin');
-    };
-
     useEffect(() => {
         if (!reduxEmail && !sessionEmail) {
             props.history.push('/signin');
@@ -243,68 +211,62 @@ const App: React.FC<Props & RouteComponentProps> = props => {
 
     if (state.loading) {
         return (
-            <HeaderContext.Provider
-                value={{
-                    subpage: state.subpage,
-                    setSubpage: (newSubpage: string) =>
-                        dispatch({ type: 'SET_SUBPAGE', subpage: newSubpage }),
-                    logout: logout,
-                }}
-            >
-                <Header />
+            <>
+                <Header
+                    subpage={state.subpage}
+                    setSubpage={(newSubpage: string) =>
+                        dispatch({ type: 'SET_SUBPAGE', subpage: newSubpage })
+                    }
+                />
                 <FallbackSpinner show message={state.refreshMessage} />
-            </HeaderContext.Provider>
+            </>
         );
     }
     return (
-        <HeaderContext.Provider
+        <ResourcesContext.Provider
             value={{
-                subpage: state.subpage,
-                setSubpage: (newSubpage: string) =>
-                    dispatch({ type: 'SET_SUBPAGE', subpage: newSubpage }),
-                logout: logout,
+                user: state.user,
+                setUser: (newUser: User) => dispatch({ type: 'SET_USER', user: newUser }),
+                transactions: state.transactions,
+                setTransactions: (newTransactions: Transaction[]) =>
+                    dispatch({ type: 'SET_TRANSACTIONS', transactions: newTransactions }),
+                accounts: state.accounts,
+                setAccounts: (newAccounts: Account[]) =>
+                    dispatch({ type: 'SET_ACCOUNTS', accounts: newAccounts }),
+                categories: state.categories,
+                setCategories: (newCategories: Category[]) =>
+                    dispatch({ type: 'SET_CATEGORIES', categories: newCategories }),
+                budgets: state.budgets,
+                setBudgets: (newBudgets: Budget[]) =>
+                    dispatch({ type: 'SET_BUDGETS', budgets: newBudgets }),
+                refresh: (message?: string) => {
+                    dispatch({ type: 'SET_REFRESH_MESSAGE', message: message || '' });
+                    fetchResources();
+                },
             }}
         >
-            <Header />
-            <ResourcesContext.Provider
-                value={{
-                    user: state.user,
-                    setUser: (newUser: User) => dispatch({ type: 'SET_USER', user: newUser }),
-                    transactions: state.transactions,
-                    setTransactions: (newTransactions: Transaction[]) =>
-                        dispatch({ type: 'SET_TRANSACTIONS', transactions: newTransactions }),
-                    accounts: state.accounts,
-                    setAccounts: (newAccounts: Account[]) =>
-                        dispatch({ type: 'SET_ACCOUNTS', accounts: newAccounts }),
-                    categories: state.categories,
-                    setCategories: (newCategories: Category[]) =>
-                        dispatch({ type: 'SET_CATEGORIES', categories: newCategories }),
-                    budgets: state.budgets,
-                    setBudgets: (newBudgets: Budget[]) =>
-                        dispatch({ type: 'SET_BUDGETS', budgets: newBudgets }),
-                    refresh: (message?: string) => {
-                        dispatch({ type: 'SET_REFRESH_MESSAGE', message: message || '' });
-                        fetchResources();
-                    },
-                }}
-            >
-                <Suspense fallback={<FallbackSpinner show />}>
-                    {state.subpage === 'transactions' ? (
-                        <Transactions />
-                    ) : state.subpage === 'trends' ? (
-                        <Trends />
-                    ) : state.subpage === 'budgets' ? (
-                        <Budgets />
-                    ) : state.subpage === 'accounts' ? (
-                        <Accounts />
-                    ) : state.subpage === 'settings' ? (
-                        <Settings />
-                    ) : (
-                        <BadRequest />
-                    )}
-                </Suspense>
-            </ResourcesContext.Provider>
-        </HeaderContext.Provider>
+            <Header
+                subpage={state.subpage}
+                setSubpage={(newSubpage: string) =>
+                    dispatch({ type: 'SET_SUBPAGE', subpage: newSubpage })
+                }
+            />
+            <Suspense fallback={<FallbackSpinner show />}>
+                {state.subpage === 'transactions' ? (
+                    <Transactions />
+                ) : state.subpage === 'trends' ? (
+                    <Trends />
+                ) : state.subpage === 'budgets' ? (
+                    <Budgets />
+                ) : state.subpage === 'accounts' ? (
+                    <Accounts />
+                ) : state.subpage === 'settings' ? (
+                    <Settings />
+                ) : (
+                    <BadRequest />
+                )}
+            </Suspense>
+        </ResourcesContext.Provider>
     );
 };
 
