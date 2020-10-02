@@ -65,7 +65,7 @@ app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 
 if (process.env.NODE_ENV === 'production') {
-    fs.readdir('./', (err, files) => {
+    fs.readdir('./client/dist', (err, files) => {
         for (let i = 0; i < files.length; i++) {
             console.log(files[i]);
         }
