@@ -65,14 +65,14 @@ app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 
 if (process.env.NODE_ENV === 'production') {
-    fs.readdir('../', (err, files) => {
+    fs.readdir('./', (err, files) => {
         for (let i = 0; i < files.length; i++) {
             console.log(files[i]);
         }
     });
-    app.use(express.static('../client/dist'));
+    app.use(express.static('./client/dist'));
     app.get('*', (req, res) => {
-        res.sendFile('../client/dist/index.html');
+        res.sendFile('./client/dist/index.html');
     });
 }
 
