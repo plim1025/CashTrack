@@ -35,7 +35,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(
     cors({
         credentials: true,
-        origin: process.env.FRONTEND_URI,
     })
 );
 app.use(helmet());
