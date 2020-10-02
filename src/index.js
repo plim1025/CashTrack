@@ -33,12 +33,7 @@ mongoose.connection
 middlewares.initializePassport(passport);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(
-    cors({
-        credentials: true,
-        origin: process.env.FRONTEND_URI,
-    })
-);
+app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(
@@ -65,11 +60,6 @@ app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 
 if (process.env.NODE_ENV === 'production') {
-    fs.readdir('./client/dist', (err, files) => {
-        for (let i = 0; i < files.length; i++) {
-            console.log(files[i]);
-        }
-    });
     app.use(express.static('./client/dist'));
     app.get('*', (req, res) => {
         res.sendFile('./client/dist/index.html');
