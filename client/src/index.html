@@ -3,10 +3,6 @@
     <head>
         <link rel="icon" type="image/png" href="favicon.png" />
         <meta charset="UTF-8" />
-        <!-- <meta
-            http-equiv="Content-Security-Policy"
-            content="default-src 'self' https://cdn.plaid.com/link/v2/stable/link-initialize.js"
-        /> -->
         <title>CashTrack</title>
     </head>
     <body>
@@ -19,7 +15,11 @@
         />
         <script
             src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"
-            crossorigin="anonymous"
-        ></script>
+            data-client-name="Client Name"
+            data-form-id="link-form-id"
+            data-token="[LINK_TOKEN]"
+            data-product="auth"
+            data-env="sandbox">
+      </script>
     </body>
 </html>
