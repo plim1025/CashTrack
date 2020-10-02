@@ -54,24 +54,21 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// app.get('/', (req, res, next) => {});
-
 app.use('/api/user', userRoute);
 app.use('/api/transaction', transactionRoute);
 app.use('/api/plaidAccount', plaidAccountRoute);
 app.use('/api/category', categoryRoute);
 app.use('/api/budget', budgetRoute);
 app.use('/api/plaid', plaidRoute);
+app.use(middlewares.notFound);
+app.use(middlewares.errorHandler);
 
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static('client/build'));
+    app.use(express.static('client/dist'));
     app.get('*', (req, res) => {
         res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
     });
 }
-
-app.use(middlewares.notFound);
-app.use(middlewares.errorHandler);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening at PORT ${port}`));
