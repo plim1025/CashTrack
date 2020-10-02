@@ -8,6 +8,7 @@ const passport = require('passport');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
+const fs = require('fs');
 const userRoute = require('./api/user');
 const transactionRoute = require('./api/transaction');
 const plaidAccountRoute = require('./api/plaidAccount');
@@ -64,7 +65,9 @@ app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 
 if (process.env.NODE_ENV === 'production') {
-    console.log(__dirname);
+    fs.readdir(__dirname, (err, files) => {
+        files.forEach(file => console.log(file));
+    });
     app.use(express.static('client/dist'));
     app.get('*', (req, res) => {
         res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
