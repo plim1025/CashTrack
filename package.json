@@ -31,6 +31,7 @@
         "plaid": "^7.0.0"
     },
     "scripts": {
+        "start": "node index.js",
         "client": "cd client && yarn dev",
         "server": "nodemon index.js",
         "dev": "concurrently \"yarn run server\" \"yarn client\"",
