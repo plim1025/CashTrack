@@ -68,6 +68,9 @@ if (process.env.NODE_ENV === 'production') {
     fs.readdir('../client/dist', (err, files) => {
         files.forEach(file => console.log(file));
     });
+    fs.readdir('../', (err, files) => {
+        files.forEach(file => console.log(file));
+    });
     app.use(express.static('../client/dist'));
     app.get('*', (req, res) => {
         res.sendFile('../client/dist/index.html');
