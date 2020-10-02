@@ -3,8 +3,8 @@ const express = require('express');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
-const path = require('path');
 const passport = require('passport');
+const path = require('path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
@@ -60,10 +60,12 @@ app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static('./client/dist'));
-    console.log(fs.existsSync('./client/dist/index.html'));
+    fs.readdir(__dirname, (err, files) => {
+        files.forEach(file => console.log(file));
+    });
+    app.use(express.static('client/dist'));
     app.get('*', (req, res) => {
-        res.sendFile('./client/dist/index.html');
+        res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
     });
 }
 
