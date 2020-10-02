@@ -59,6 +59,10 @@ app.use('/api/plaid', plaidRoute);
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 
+app.get('/', (req, res) => {
+    console.log('GOT ROUTEEEEEEE');
+});
+
 if (process.env.NODE_ENV === 'production') {
     fs.readdir(__dirname, (err, files) => {
         files.forEach(file => console.log(file));
