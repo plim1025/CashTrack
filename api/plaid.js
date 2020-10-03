@@ -31,7 +31,6 @@ router.post('/create_link_token', async (req, res, next) => {
                 language: 'en',
                 webhook: process.env.PLAID_WEBHOOK_URI,
             });
-            console.log("LINK TOKEN", link_token);
             res.json(link_token);
         } else {
             throw Error('User not logged in');
