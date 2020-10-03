@@ -6,7 +6,7 @@ module.exports = merge(common, {
     mode: 'production',
     plugins: [
         new CopyWebpackPlugin({
-            patterns: [{ from: './assets/img/favicon.svg' }],
+            patterns: [{ from: './src/assets/img/favicon.svg' }],
         }),
     ],
 });

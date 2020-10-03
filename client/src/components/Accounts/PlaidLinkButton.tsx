@@ -17,7 +17,6 @@ const PlaidLinkButton: React.FC<Props> = props => {
     const { refresh } = useContext(ResourcesContext);
 
     const onSuccess = async (token: string, metadata: any) => {
-        refresh('Fetching account information...');
         try {
             const response = await fetch('/api/plaid/set_account', {
                 method: 'POST',
@@ -38,11 +37,11 @@ const PlaidLinkButton: React.FC<Props> = props => {
         } catch (err) {
             throw Error(`Error setting plaid account: ${err}`);
         }
+        refresh('Fetching account information...');
     };
 
     const { open, ready, error } = usePlaidLink({ token: props.token, onSuccess: onSuccess });
 
-    console.log(error);
     return (
         <ButtonWrapper>
             <Button
