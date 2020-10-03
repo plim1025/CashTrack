@@ -10,6 +10,7 @@ import Button from '../shared/Button';
 import { ResourcesContext } from '../../App';
 
 interface Props {
+    setLoading: (loading: boolean) => void;
     token: string;
 }
 
@@ -17,6 +18,7 @@ const PlaidLinkButton: React.FC<Props> = props => {
     const { refresh } = useContext(ResourcesContext);
 
     const onSuccess = async (token: string, metadata: any) => {
+        props.setLoading(true);
         try {
             const response = await fetch('/api/plaid/set_account', {
                 method: 'POST',
@@ -38,6 +40,7 @@ const PlaidLinkButton: React.FC<Props> = props => {
             throw Error(`Error setting plaid account: ${err}`);
         }
         refresh('Fetching account information...');
+        props.setLoading(false);
     };
 
     const { open, ready, error } = usePlaidLink({ token: props.token, onSuccess: onSuccess });

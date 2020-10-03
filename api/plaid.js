@@ -40,6 +40,47 @@ router.post('/create_link_token', async (req, res, next) => {
     }
 });
 
+const updateTransactions = async item_id => {
+    const userQuery = { itemID: item_id };
+    const { accessToken, removedTransactionIDs, _id } = await User.findOne(userQuery);
+    const transactionQuery = { userID: _id };
+    const oldTransactions = await Transaction.find(transactionQuery);
+    const oldTransactionIDs = oldTransactions.map(transaction => transaction.transactionID);
+    const newTransactions = await plaidClient.getAllTransactions(
+        accessToken,
+        '2000-01-01',
+        getPresentDayFormatted()
+    );
+    const updatedAccountIDs = [];
+    const parsedTransactions = newTransactions.transactions
+        .filter(
+            transaction =>
+                oldTransactionIDs.indexOf(transaction.transaction_id) === -1 &&
+                removedTransactionIDs.indexOf(transaction.transactionID) === -1 &&
+                !transaction.pending
+        )
+        .map(transaction => {
+            updatedAccountIDs.push(transaction.account_id);
+            return new Transaction({
+                userID: _id,
+                transactionID: transaction.transaction_id,
+                accountID: transaction.account_id,
+                categoryID: transaction.category_id,
+                description: transaction.name,
+                amount: transaction.amount * -1,
+                category: getTransactionCategory(transaction.category_id, transaction.amount),
+                merchant: transaction.merchant_name,
+                type: getTransactionType(transaction.category_id, transaction.amount),
+                date: transaction.date,
+                selected: true,
+            });
+        });
+    await Transaction.insertMany(parsedTransactions);
+    const accountQuery = { id: { $in: updatedAccountIDs } };
+    const accountUpdate = { lastUpdated: new Date() };
+    await PlaidAccount.updateMany(accountQuery, accountUpdate);
+};
+
 router.post('/set_account', async (req, res, next) => {
     try {
         if (req.user) {
@@ -106,6 +147,7 @@ router.post('/set_account', async (req, res, next) => {
             const query = { _id: req.user._id };
             const update = { $set: { accessToken: access_token, itemID: item_id } };
             await User.updateOne(query, update, { runValidators: true });
+            await updateTransactions(item_id);
             res.sendStatus(200);
         } else {
             throw Error('User not logged in');
@@ -121,7 +163,6 @@ router.post('/set_account', async (req, res, next) => {
 router.post('/refresh', async (req, res, next) => {
     try {
         const { webhook_code, item_id, error, new_transactions, removed_transactions } = req.body;
-        console.log(req.body)
         if (error) {
             throw error;
         }
@@ -134,47 +175,7 @@ router.post('/refresh', async (req, res, next) => {
                 webhook_code === 'DEFAULT_UPDATE') &&
             new_transactions > 0
         ) {
-            const userQuery = { itemID: item_id };
-            const { accessToken, removedTransactionIDs, _id } = await User.findOne(userQuery);
-            const transactionQuery = { userID: _id };
-            const oldTransactions = await Transaction.find(transactionQuery);
-            const oldTransactionIDs = oldTransactions.map(transaction => transaction.transactionID);
-            const newTransactions = await plaidClient.getAllTransactions(
-                accessToken,
-                '2000-01-01',
-                getPresentDayFormatted()
-            );
-            const updatedAccountIDs = [];
-            const parsedTransactions = newTransactions.transactions
-                .filter(
-                    transaction =>
-                        oldTransactionIDs.indexOf(transaction.transaction_id) === -1 &&
-                        removedTransactionIDs.indexOf(transaction.transactionID) === -1 &&
-                        !transaction.pending
-                )
-                .map(transaction => {
-                    updatedAccountIDs.push(transaction.account_id);
-                    return new Transaction({
-                        userID: _id,
-                        transactionID: transaction.transaction_id,
-                        accountID: transaction.account_id,
-                        categoryID: transaction.category_id,
-                        description: transaction.name,
-                        amount: transaction.amount * -1,
-                        category: getTransactionCategory(
-                            transaction.category_id,
-                            transaction.amount
-                        ),
-                        merchant: transaction.merchant_name,
-                        type: getTransactionType(transaction.category_id, transaction.amount),
-                        date: transaction.date,
-                        selected: true,
-                    });
-                });
-            await Transaction.insertMany(parsedTransactions);
-            const accountQuery = { id: { $in: updatedAccountIDs } };
-            const accountUpdate = { lastUpdated: new Date() };
-            await PlaidAccount.updateMany(accountQuery, accountUpdate);
+            await updateTransactions(item_id);
         }
         res.sendStatus(200);
     } catch (error) {

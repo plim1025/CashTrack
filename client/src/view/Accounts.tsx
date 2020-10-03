@@ -80,7 +80,12 @@ const Accounts: React.FC = () => {
 
     return (
         <>
-            <PlaidLinkButton token={state.token} />
+            <PlaidLinkButton
+                setLoading={(loading: boolean) =>
+                    dispatch({ type: 'SET_LOADING', loading: loading })
+                }
+                token={state.token}
+            />
             <AccountList
                 setLoading={(loading: boolean) =>
                     dispatch({ type: 'SET_LOADING', loading: loading })
