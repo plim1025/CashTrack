@@ -121,6 +121,7 @@ router.post('/set_account', async (req, res, next) => {
 router.post('/refresh', async (req, res, next) => {
     try {
         const { webhook_code, item_id, error, new_transactions, removed_transactions } = req.body;
+        console.log(req.body)
         if (error) {
             throw error;
         }
