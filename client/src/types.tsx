@@ -33,12 +33,10 @@ export interface Account {
     type: string;
     subtype: string;
     mask: string;
-    balance: number;
     lastUpdated: Date;
     hidden: boolean;
     available?: number;
     creditLimit?: number;
-    debt?: number;
 }
 
 export interface Category {

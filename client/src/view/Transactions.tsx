@@ -29,6 +29,7 @@ type Actions =
     | { type: 'SET_LOADING'; loading: boolean }
     | { type: 'SET_SELECTED_TRANSACTION_IDS'; ids: string[] }
     | { type: 'SET_SELECTED_ACCOUNT_ID'; id: string }
+    | { type: 'SET_BALANCE'; balance: number }
     | { type: 'SHOW_TRANSACTION_ADD_MODAL' }
     | { type: 'SHOW_TRANSACTION_EDIT_MODAL' }
     | { type: 'HIDE_TRANSACTION_MODAL' }
@@ -45,6 +46,7 @@ interface ReducerState {
     loading: boolean;
     selectedTransactionIDs: string[];
     selectedAccountID: string;
+    balance: number;
     transactionModal: {
         show: boolean;
         mode: string;
@@ -70,6 +72,8 @@ const reducer = (state: ReducerState, action: Actions) => {
             return { ...state, selectedTransactionIDs: action.ids };
         case 'SET_SELECTED_ACCOUNT_ID':
             return { ...state, selectedAccountID: action.id };
+        case 'SET_BALANCE':
+            return { ...state, balance: action.balance };
         case 'SHOW_TRANSACTION_ADD_MODAL':
             return { ...state, transactionModal: { show: true, mode: 'add' } };
         case 'SHOW_TRANSACTION_EDIT_MODAL':
@@ -129,6 +133,7 @@ const Transactions: React.FC = () => {
         loading: false,
         selectedTransactionIDs: [],
         selectedAccountID: 'All Accounts',
+        balance: 0,
         transactionModal: {
             show: false,
             mode: 'add',
@@ -161,9 +166,19 @@ const Transactions: React.FC = () => {
         }
     }, [state.selectedAccountID]);
 
+    useEffect(() => {
+        const balance = transactions.filter(transaction => transaction.selected).length
+            ? transactions
+                  .filter(transaction => transaction.selected)
+                  .map(transaction => transaction.amount)
+                  .reduce((total, amount) => total + amount)
+            : 0;
+        dispatch({ type: 'SET_BALANCE', balance });
+    }, [transactions]);
+
     const handleCreateTransaction = async (newTransaction: Transaction) => {
         dispatch({ type: 'SET_LOADING', loading: true });
-        const createdTransaction = await createTransaction(newTransaction);
+        const createdTransaction = await createTransaction(newTransaction, state.selectedAccountID);
         const newTransactions = [...transactions, createdTransaction];
         setTransactions(newTransactions);
         dispatch({ type: 'SET_LOADING', loading: false });
@@ -229,7 +244,11 @@ const Transactions: React.FC = () => {
             />
             <SubWrapper>
                 {accounts.length ? (
-                    <AccountInfo accounts={accounts} selectedAccountID={state.selectedAccountID} />
+                    <AccountInfo
+                        accounts={accounts}
+                        selectedAccountID={state.selectedAccountID}
+                        balance={state.balance}
+                    />
                 ) : null}
                 <Buttons
                     showModal={() => dispatch({ type: 'SHOW_TRANSACTION_ADD_MODAL' })}

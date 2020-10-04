@@ -21,9 +21,10 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
     try {
         if (req.user) {
-            const { description, amount, category, date } = req.body;
+            const { accountID, description, amount, category, date } = req.body;
             const newCategory = new Transaction({
                 userID: req.user._id,
+                accountID: accountID,
                 description: description,
                 amount: amount,
                 category: category,

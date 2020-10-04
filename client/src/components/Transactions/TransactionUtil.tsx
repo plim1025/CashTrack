@@ -1,6 +1,9 @@
 import { Transaction, Account } from '../../types';
 
-export const createTransaction = async (transaction: Transaction): Promise<Transaction> => {
+export const createTransaction = async (
+    transaction: Transaction,
+    accountID: string
+): Promise<Transaction> => {
     try {
         const response = await fetch('/api/transaction', {
             method: 'POST',
@@ -9,6 +12,7 @@ export const createTransaction = async (transaction: Transaction): Promise<Trans
             },
             credentials: 'include',
             body: JSON.stringify({
+                accountID: accountID,
                 description: transaction.description,
                 amount: transaction.amount,
                 category: transaction.category,
@@ -74,28 +78,16 @@ export const updateTransactions = async (
     }
 };
 
-export const parseAccountInfo = (accounts: Account[], selectedAccountID: string): Account => {
+export const parseAccountInfo = (
+    accounts: Account[],
+    selectedAccountID: string,
+    balance: number
+): Account => {
     if (selectedAccountID === 'All Accounts') {
-        const totalBalance = accounts
-            .map((account: Account) =>
-                account.type === 'investment' ||
-                account.type === 'depository' ||
-                account.type === 'other'
-                    ? account.balance
-                    : 0
-            )
-            .reduce((total: number, balance: number) => total + balance);
-        const totalDebt = accounts
-            .map((account: Account) =>
-                account.type === 'credit' || account.type === 'loan' ? account.balance : 0
-            )
-            .reduce((total: number, debt: number) => total + debt);
         return {
             id: 'All Accounts',
             institution: 'All Accounts',
             name: `${accounts.length} accounts`,
-            balance: totalBalance,
-            debt: totalDebt,
             available: null,
             creditLimit: null,
             type: null,
@@ -109,7 +101,7 @@ export const parseAccountInfo = (accounts: Account[], selectedAccountID: string)
     const selectedAccount = accounts.find((account: Account) => account.id === selectedAccountID);
     let available = null;
     if (selectedAccount.type === 'credit') {
-        available = selectedAccount.creditLimit - selectedAccount.balance;
+        available = selectedAccount.creditLimit - balance;
     } else if (selectedAccount.available) {
         available = selectedAccount.available;
     }
@@ -118,8 +110,6 @@ export const parseAccountInfo = (accounts: Account[], selectedAccountID: string)
         batchID: selectedAccount.batchID,
         institution: selectedAccount.institution,
         name: selectedAccount.name,
-        balance: selectedAccount.balance,
-        debt: null,
         available: available,
         creditLimit: selectedAccount.creditLimit || null,
         type: selectedAccount.type,

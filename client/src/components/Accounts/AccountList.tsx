@@ -95,7 +95,17 @@ const AccountList: React.FC<Props> = props => {
                                             <AccountName>
                                                 {account.name} (...{account.mask})
                                             </AccountName>
-                                            <Money>{moneyFormat(account.balance)}</Money>
+                                            <Money>
+                                                {moneyFormat(
+                                                    transactions
+                                                        .filter(
+                                                            transaction =>
+                                                                transaction.accountID === account.id
+                                                        )
+                                                        .map(transaction => transaction.amount)
+                                                        .reduce((total, amount) => total + amount)
+                                                )}
+                                            </Money>
                                         </AccounTextSubWrapper>
                                         <AccountType subtype={account.subtype}>
                                             {parseSubtype(account.subtype)}

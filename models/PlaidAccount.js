@@ -16,10 +16,6 @@ const PlaidAccountSchema = new Schema({
     type: requiredString,
     subtype: requiredString,
     mask: requiredString,
-    balance: {
-        type: Number,
-        required: true,
-    },
     available: Number,
     creditLimit: Number,
     lastUpdated: {

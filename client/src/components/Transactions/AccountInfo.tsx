@@ -15,15 +15,20 @@ import { parseAccountInfo } from './TransactionUtil';
 interface Props {
     accounts: Account[];
     selectedAccountID: string;
+    balance: number;
 }
 
 const AccountInfo: React.FC<Props> = props => {
     const [curAccount, setCurAccount] = useState<Account>(null);
 
     useEffect(() => {
-        const accountInfo = parseAccountInfo(props.accounts, props.selectedAccountID);
+        const accountInfo = parseAccountInfo(
+            props.accounts,
+            props.selectedAccountID,
+            props.balance
+        );
         setCurAccount(accountInfo);
-    }, [props.selectedAccountID, props.accounts]);
+    }, [props.selectedAccountID, props.accounts, props.balance]);
 
     return (
         <Card>
@@ -32,14 +37,14 @@ const AccountInfo: React.FC<Props> = props => {
                 <CardSubtitleWrapper>{curAccount ? curAccount.name : null}</CardSubtitleWrapper>
             </Card.Body>
             <Wrapper>
-                {curAccount && curAccount.balance !== null ? (
+                {curAccount && props.balance !== null ? (
                     <Item>
                         <Title>
                             {props.selectedAccountID === 'All Accounts'
                                 ? 'Total Balance'
                                 : 'Balance'}
                         </Title>
-                        <Money>{moneyFormat(curAccount.balance)}</Money>
+                        <Money>{moneyFormat(props.balance)}</Money>
                     </Item>
                 ) : null}
                 {curAccount && curAccount.available !== null ? (
@@ -48,12 +53,6 @@ const AccountInfo: React.FC<Props> = props => {
                             {curAccount.type === 'credit' ? 'Available Credit' : 'Available'}
                         </Title>
                         <Money>{moneyFormat(curAccount.available)}</Money>
-                    </Item>
-                ) : null}
-                {curAccount && curAccount.debt !== null ? (
-                    <Item>
-                        <Title>Total Debt</Title>
-                        <Money>{moneyFormat(curAccount.debt)}</Money>
                     </Item>
                 ) : null}
                 {curAccount && curAccount.creditLimit !== null ? (
