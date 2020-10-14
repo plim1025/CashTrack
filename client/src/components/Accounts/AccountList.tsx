@@ -102,8 +102,15 @@ const AccountList: React.FC<Props> = props => {
                                                             transaction =>
                                                                 transaction.accountID === account.id
                                                         )
-                                                        .map(transaction => transaction.amount)
-                                                        .reduce((total, amount) => total + amount)
+                                                        .map(transaction => transaction.amount).length ? 
+                                                        transactions
+                                                            .filter(
+                                                                transaction =>
+                                                                    transaction.accountID === account.id
+                                                            )
+                                                            .map(transaction => transaction.amount)
+                                                            .reduce((total, amount) => total + amount)
+                                                        : 0
                                                 )}
                                             </Money>
                                         </AccounTextSubWrapper>
