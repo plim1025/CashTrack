@@ -17,6 +17,7 @@ export const DateString = (date?: Date): string => {
 };
 
 export const moneyFormat = (money: number | string | Date): string => {
+    console.log(money, typeof money);
     if (typeof money === 'number') {
         if (money < 0) {
             return `-$${Math.abs(money)

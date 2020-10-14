@@ -102,14 +102,20 @@ const AccountList: React.FC<Props> = props => {
                                                             transaction =>
                                                                 transaction.accountID === account.id
                                                         )
-                                                        .map(transaction => transaction.amount).length ? 
-                                                        transactions
-                                                            .filter(
-                                                                transaction =>
-                                                                    transaction.accountID === account.id
-                                                            )
-                                                            .map(transaction => transaction.amount)
-                                                            .reduce((total, amount) => total + amount)
+                                                        .map(transaction => transaction.amount)
+                                                        .length
+                                                        ? transactions
+                                                              .filter(
+                                                                  transaction =>
+                                                                      transaction.accountID ===
+                                                                      account.id
+                                                              )
+                                                              .map(
+                                                                  transaction => transaction.amount
+                                                              )
+                                                              .reduce(
+                                                                  (total, amount) => total + amount
+                                                              )
                                                         : 0
                                                 )}
                                             </Money>
@@ -249,7 +255,30 @@ const AccountType = styled(({ subtype, ...rest }) => <div {...rest} />)<{ subtyp
     opacity: 0.75;
     text-transform: ${({ subtype }) => {
         // eslint-disable-next-line prettier/prettier
-        const allCapsSubtypes = ['cd', 'hsa', 'gic', 'ira', 'isa', 'keogh', 'lif', 'lira', 'lrsp', 'prif', 'qshr', 'rdsp', 'resp', 'rlif', 'rrif', 'rrsp', 'sarsep', 'sep ira', 'sipp', 'tfsa', 'ugma', 'utma'];
+        const allCapsSubtypes = [
+            'cd',
+            'hsa',
+            'gic',
+            'ira',
+            'isa',
+            'keogh',
+            'lif',
+            'lira',
+            'lrsp',
+            'prif',
+            'qshr',
+            'rdsp',
+            'resp',
+            'rlif',
+            'rrif',
+            'rrsp',
+            'sarsep',
+            'sep ira',
+            'sipp',
+            'tfsa',
+            'ugma',
+            'utma',
+        ];
         if (allCapsSubtypes.indexOf(subtype) !== -1) {
             return 'uppercase';
         }
